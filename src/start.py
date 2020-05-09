@@ -177,9 +177,48 @@ async def weapon(message,platform,html,url,gun,update,update_msg,player_id):
         def check(m):
             return m.channel.id == message.channel.id and m.author.id == message.author.id
         gun_message = await client.wait_for("message",check=check)
-        for i in range(len())
+        gt = False
+        f = open(directory + type_software + "Data" + type_software + "gun_info.csv", 'r', encoding='utf-8')
+        gun_list = csv.reader(f)
+        for line in gun_list:
+            if str(line[0]) == gun_message.content:
+                gun_name = line[0]
+                gun_id = line[1]
+                gun_picutre = line[2]
+                gt = True
+                break
+        f.close()
+        if not gt:
+            embed = discord.Embed(title="에러",description="총을 찾지 못했습니다.", color=0xaa0000)
+            await message.channel.send(embed=embed)
+            return
     else:
         gun_id = gun
+        f = open(directory + type_software + "Data" + type_software + "gun_info.csv", 'r', encoding='utf-8')
+        gun_list = csv.reader(f)
+        for line in  gun_list:
+            if line[1] == gun_id:
+                gun_name = line[0]
+                gun_picutre = line[2]
+                break
+        f.close()
+    html_c = html.split('"' + gun_id + '":{')[1].split('}')[0].replace(" ","")
+    xp = html_c.split('"XPTotal":')[1].split(',')[0].replace(" ","")
+    kill = html_c.split('"Kills":')[1].split(',')[0].replace(" ","")
+    head = html_c.split('"HeadShots":')[1].split(',')[0].replace(" ","")
+    lose = html_c.split('"Defeats":')[1].split(',')[0].replace(" ","")
+    mhead = html_c.split('"MostHeadShotsInAGame":')[1].split(',')[0].replace(" ","")
+    mkill = html_c.split('"MostKillsInAGame":')[1].split(',')[0].replace(" ","")
+    damage = html_c.split('"DamagePlayer":')[1].split(',')[0].replace(" ","")
+    mdamage = html_c.split('"MostDamagePlayerInAGame":')[1].split(',')[0].replace(" ","")
+    icon = discord.File(directory + type_software + "Asset" + type_software + "gun" + type_software + gun_picutre)
+    embed.set_thumbnail(url="attachment://" + gun_picutre)
+    embed.add_field(name="XP:",value=xp + "점",inline=False)
+    embed.add_field(name="킬:",value=kill + "회(" + mkill + "회)",inline=True)
+    embed.add_field(name="헤드샷:",value=head + "회(" + mhead + "회)",inline=True)
+    embed.add_field(name="피해량:",value=damage + "회(" + mdamage + "회)",inline=True)
+    embed.add_field(name="패베:",value=lose + "회",inline=True)
+    msg1 = await message.channel.send(file=icon,embed=embed)
 
 async def profile_mode_status(message,platform,html_c,url,game_mode,player_id):
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
@@ -549,6 +588,16 @@ async def profile(message,platform,perfix):
             return
         elif list_message[0] == perfix + "스배스쿼드":
             await profile_mode(message,"Steam",False,None,html,url,player_id,"squad")
+            return
+        elif list_message[0] == perfix + "스배총전적":
+            url = "https://api.pubg.com/shards/steam/players/" + player_id + "/weapon_mastery"
+            response2 = await requests.get(url,headers=header)
+            if response2.status_code == 200:
+                html = response2.text
+            else:
+                await response_num(response1,message,None,False)
+                return
+            await weapon(message,platform,html,url,None,False,None,player_id)
             return
 
 
