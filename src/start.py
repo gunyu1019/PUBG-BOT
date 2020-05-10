@@ -171,12 +171,37 @@ async def response_num(response,message,update_msg,update): #에러 발생시, �
     return
 
 async def weapon(message,platform,html,url,gun,update,update_msg,player_id):
-    if not update:
+    if update == 0:
         embed = discord.Embed(title="PUBG",description="검색하실 총이름을 작성해주세요.\nex.)\"M416\" ", color=0xffd619)
         msg = await message.channel.send(embed=embed)
         def check(m):
             return m.channel.id == message.channel.id and m.author.id == message.author.id
         gun_message = await client.wait_for("message",check=check)
+        gt = False
+        f = open(directory + type_software + "Data" + type_software + "gun_info.csv", 'r', encoding='utf-8')
+        gun_list = csv.reader(f)
+        for line in gun_list:
+            if str(line[0]) == gun_message.content:
+                gun_name = line[0]
+                gun_id = line[1]
+                gun_picutre = line[2]
+                gt = True
+                break
+        f.close()
+        if not gt:
+            embed = discord.Embed(title="에러",description="총을 찾지 못했습니다.", color=0xaa0000)
+            await message.channel.send(embed=embed)
+            return
+    elif update == 2:
+        list_message  = message.content.split(" ")
+        try:
+            gun_message = list_message[2]
+        except:
+            embed = discord.Embed(title="PUBG",description="검색하실 총이름을 작성해주세요.\nex.)\"M416\" ", color=0xffd619)
+            msg = await message.channel.send(embed=embed)
+            def check(m):
+                return m.channel.id == message.channel.id and m.author.id == message.author.id
+            gun_message = await client.wait_for("message",check=check)
         gt = False
         f = open(directory + type_software + "Data" + type_software + "gun_info.csv", 'r', encoding='utf-8')
         gun_list = csv.reader(f)
@@ -454,7 +479,7 @@ async def profile_total(message,platform,update,update_msg,html,url,player_id):
         msg1 = await message.channel.send(file=file,embed=embed)
     for i in range(6):
         await msg1.add_reaction(str(i+1) + "\U0000FE0F\U000020E3")
-    msg2 = await message.channel.send("\U00000031\U0000FE0F\U000020E3 : 솔로전적 \U00000032\U0000FE0F\U000020E3 : 듀오 전적 \U00000033\U0000FE0F\U000020E3 : 스쿼드 전적\n\U00000034\U0000FE0F\U000020E3 : 매치 전적(최근 플레이 기록 5개) \U00000035\U0000FE0F\U000020E3 : 전적 정보 업데이트 \U00000036\U0000FE0F\U000020E3 : 메뉴 종료")
+    msg2 = await message.channel.send("\U00000031\U0000FE0F\U000020E3 : 솔로전적 \U00000032\U0000FE0F\U000020E3 : 듀오 전적 \U00000033\U0000FE0F\U000020E3 : 스쿼드 전적 \U00000035\U0000FE0F\U000020E3 : 전적 정보 업데이트 \U00000036\U0000FE0F\U000020E3 : 메뉴 종료")
     author = message.author
     message_id = msg1.id
     def check(reaction, user):
@@ -480,10 +505,6 @@ async def profile_total(message,platform,update,update_msg,html,url,player_id):
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
         await msg1.clear_reactions()
         await msg2.delete()
-        return
-    elif reaction.emoji == "\U00000035\U0000FE0F\U000020E3":
-        await msg1.clear_reactions()
-        await msg2.delete()
         response = await requests.get(url,headers=header)
         if response.status_code == 200:
             html = response.text
@@ -492,7 +513,7 @@ async def profile_total(message,platform,update,update_msg,html,url,player_id):
             return
         await profile_total(message,platform,True,msg1,html,url,player_id)
         return
-    elif reaction.emoji == "\U00000036\U0000FE0F\U000020E3":
+    elif reaction.emoji == "\U00000035\U0000FE0F\U000020E3":
         await msg1.clear_reactions()
         await msg2.delete()
         return
@@ -556,7 +577,10 @@ async def profile(message,platform,perfix):
             season = await top_season(message)
             if season == "False":
                 return
-    url = "https://api.pubg.com/shards/steam/players/" + player_id + "/seasons/" + season
+    if platform == "Kakao":
+        url = "https://api.pubg.com/shards/kakao/players/" + player_id + "/seasons/" + season
+    else:
+        url = "https://api.pubg.com/shards/steam/players/" + player_id + "/seasons/" + season
     response1 = await requests.get(url,headers=header)
     if response1.status_code == 200:
         html = response1.text
@@ -576,6 +600,7 @@ async def profile(message,platform,perfix):
         elif list_message[0] == perfix + "카배스쿼드":
             await profile_mode(message,"Kakao",False,None,html,url,player_id,"squad")
             return
+        return
     elif platform == "Steam":
         if list_message[0] == perfix + "스배":
             await profile_total(message,"Steam",False,None,html,url,player_id)
@@ -589,16 +614,7 @@ async def profile(message,platform,perfix):
         elif list_message[0] == perfix + "스배스쿼드":
             await profile_mode(message,"Steam",False,None,html,url,player_id,"squad")
             return
-        elif list_message[0] == perfix + "스배총전적":
-            url = "https://api.pubg.com/shards/steam/players/" + player_id + "/weapon_mastery"
-            response2 = await requests.get(url,headers=header)
-            if response2.status_code == 200:
-                html = response2.text
-            else:
-                await response_num(response1,message,None,False)
-                return
-            await weapon(message,platform,html,url,None,False,None,player_id)
-            return
+        return
 
 
 @client.event
