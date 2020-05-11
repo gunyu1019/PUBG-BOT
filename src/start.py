@@ -7,6 +7,7 @@ import pymysql
 import io
 import csv
 import requests_async as requests
+import json
 
 from matplotlib import pyplot as plt
 from pytz import timezone
@@ -169,6 +170,8 @@ async def response_num(response,message,update_msg,update): #에러 발생시, �
         embed = discord.Embed(title="에러",description="알수없는 에러가 발생하였습니다. 관리자에게 문의해주세요.", color=0xaa0000)
         await message.channel.send(embed=embed)
     return
+async def matches(message,platform,html,url,update,update_msg,player_id):
+    pass
 
 async def weapon(message,platform,html,url,gun,update,update_msg,player_id):
     if update == 0:
