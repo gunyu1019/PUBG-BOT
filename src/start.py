@@ -170,8 +170,155 @@ async def response_num(response,message,update_msg,update): #에러 발생시, �
         embed = discord.Embed(title="에러",description="알수없는 에러가 발생하였습니다. 관리자에게 문의해주세요.", color=0xaa0000)
         await message.channel.send(embed=embed)
     return
-async def matches(message,platform,html,url,update,update_msg,player_id):
-    pass
+
+async def matches(message,platform,update,update_msg,match,player_id,season):
+    if update == 1:
+         match_id = match
+    elif update == 0:
+        embed = discord.Embed(title="PUBG",description="최근 검색하실 전적을 고르시기 바랍니다.", color=0xffd619)
+        msg1 = await message.channel.send(embed=embed)
+        def check1(reaction,user):
+            for i in range(5):
+                if str(i+1) + "️⃣" == reaction.emoji:
+                    return user.id == message.author.id and msg1.id==reaction.message.id
+        for i in range(5):
+            await msg1.add_reaction(str(i+1) +  "\U0000FE0F\U000020E3")
+        reaction,user = await client.wait_for('reaction_add', check=check1)
+        count = 1
+        for i in range(5):
+            if str(i+1) + "️⃣" == reaction.emoji:
+                count = i
+                break
+        try:
+            await msg1.clear_reactions()
+        except discord.Forbidden:
+            embed = discord.Embed(title="\U000026A0경고!",description="디스코드봇에게 \"메세지 관리\"권한을 부여해주시기 바랍니다.", color=0xaa0000)
+            await message.channel.send(embed=embed)
+        if platform == "Kakao":
+            url1 = "https://api.pubg.com/shards/kakao/players/" + player_id
+        else:
+            url1 = "https://api.pubg.com/shards/steam/players/" + player_id
+        response1 = await requests.get(url1,headers=header)
+        html1 = response1.text
+        json_players = json.loads(html1)
+        match_id = json_players["data"]["relationships"]["matches"]["data"][count]["id"]
+    def player(html,return_value,find_value):
+        if type(html) == dict:
+            json_data = html
+        else:
+            json_data = json.loads(html)
+        included = json_data["included"]
+        for i in range(len(included)-1):
+            if included[i]["type"] == "participant":
+                if find_value == "id" and included[i]["id"] == return_value:
+                    return included[i]
+                elif find_value == "id":
+                    continue
+                elif included[i]["attributes"]["stats"][find_value] == return_value:
+                    return included[i]
+    if platform == "Kakao":
+        url2 = "https://api.pubg.com/shards/kakao/matches/" + match_id
+    elif platform == "Steam":
+        url2 = "https://api.pubg.com/shards/steam/matches/" + match_id
+    response2 = await requests.get(url2,headers=header)
+    html2 = response2.text
+    json_data = json.loads(html2)
+    map_cache = json_data["data"]["attributes"]["mapName"]
+    included1 = player(json_data,player_id,"playerId")
+    user_id = included1["id"]
+    timeSurvived = included1["attributes"]["stats"]["timeSurvived"]
+    deals = included1["attributes"]["stats"]["damageDealt"]
+    kills = included1["attributes"]["stats"]["kills"]
+    assists = included1["attributes"]["stats"]["assists"]
+    DBNOs = included1["attributes"]["stats"]["DBNOs"]
+    distance = round((included1["attributes"]["stats"]["walkDistance"]+included1["attributes"]["stats"]["swimDistance"]+included1["attributes"]["stats"]["rideDistance"])/1000,3)
+    deathType = included1["attributes"]["stats"]["deathType"]
+    playtime = datetime.datetime.fromtimestamp(float(timeSurvived),timezone('UTC'))
+    r_playtime = time_num(playtime)
+    deathT = ["alive", "byplayer", "byzone", "suicide", "logout"]
+    deathA = ["생존","유저","블루존","자살","로그 아웃"]
+    map_name={
+        "Desert_Main": "미라마",
+        "DihorOtok_Main": "비켄디",
+        "Erangel_Main": "에란겔",
+        "Baltic_Main": "에란겔 (리마스터)",
+        "Range_Main": "캠프 자칼",
+        "Savage_Main": "사녹",
+        "Summerland_Main": "카라킨"
+    }
+    for i in range(5):
+        if deathType == deathT[i]:
+            deathType = deathA[i]
+            break
+    included = json_data["included"]
+    for i in range(len(included)-1):
+        if included[i]["type"] == "roster":
+            party = included[i]["relationships"]["participants"]["data"]
+            a_tf = False
+            for j in range(len(party)):
+                if party[j]["id"] == user_id:
+                    a_tf = True
+                    break
+            if a_tf:
+                rank = included[i]["attributes"]["stats"]["rank"]
+                break
+    if not a_tf:
+        team_member = "멤버를 불러오지 못했습니다."
+    team_member = ""
+    for i in range(len(party)):
+        player_m = player(json_data,party[i]["id"],"id")
+        team_member = team_member + "," + str(player_m["attributes"]["stats"]["name"])
+    embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
+    if platform == "Steam":
+        icon = discord.File(directory + type_software + "Asset" + type_software + "icon" + type_software + "steam.png")
+        embed.set_author(icon_url="attachment://steam.png",name=message.content.split(" ")[1] + "님의 전적")
+    elif platform == "Kakao":
+        icon = discord.File(directory + type_software + "Asset" + type_software + "icon" + type_software + "kakao.jpg")
+        embed.set_author(icon_url="attachment://kakao.jpg",name=message.content.split(" ")[1] + "님의 전적")
+    embed.add_field(name="팀원:",value=team_member.replace(',','',1),inline=False)
+    embed.add_field(name="맵:",value=map_name[map_cache],inline=True)
+    embed.add_field(name="킬/어시:",value=str(kills) + "회/" + str(assists) + "회",inline=True)
+    embed.add_field(name="DBNOs:",value=str(DBNOs) + "회",inline=True)
+    embed.add_field(name="결과:",value=deathType + "(" + str(rank) + "위)",inline=True)
+    embed.add_field(name="이동한 거리:",value=str(distance) + "km",inline=True)
+    embed.add_field(name="딜량:",value=str(round(deals,2)),inline=True)
+    if update:
+        await update_msg.delete()
+    msg2 = await message.channel.send(embed=embed)
+    try:
+        await msg1.delete()
+    except:
+        pass
+    for i in range(2):
+        await msg2.add_reaction(str(i+1) + "\U0000FE0F\U000020E3")
+    msg3 = await message.channel.send("\U00000031\U0000FE0F\U000020E3 : 종합전적 확인하기 \U00000032\U0000FE0F\U000020E3 : 메뉴중지")
+    author = message.author
+    message_id = msg2.id
+    def check2(reaction, user):
+        for i in range(2):
+            if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
+                return user == author and message_id == reaction.message.id
+    reaction,user = await client.wait_for('reaction_add', check=check2)
+    if reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
+        await msg2.clear_reactions()
+        await msg3.delete()
+        return
+    elif reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
+        await msg2.clear_reactions()
+        await msg3.delete()
+        if platform == "Kakao":
+            url = "https://api.pubg.com/shards/kakao/players/" + player_id + "/seasons/" + season
+        else:
+            url = "https://api.pubg.com/shards/steam/players/" + player_id + "/seasons/" + season
+        response1 = await requests.get(url,headers=header)
+        if response1.status_code == 200:
+            html = response1.text
+        else:
+            await response_num(response1,message,msg2,True)
+            return
+        await profile_total(message,platform,True,msg2,html,url,player_id)
+        return
+    return
 
 async def weapon(message,platform,html,url,gun,update,update_msg,player_id):
     if update == 0:
@@ -247,7 +394,7 @@ async def weapon(message,platform,html,url,gun,update,update_msg,player_id):
     embed.add_field(name="피해량:",value=damage + "(" + mdamage + ")",inline=True)
     embed.add_field(name="패베:",value=lose + "회",inline=True)
     msg1 = await message.channel.send(file=icon,embed=embed)
-
+    
 async def profile_mode_status(message,platform,html_c,url,game_mode,player_id):
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     assists = html_c.split('"assists":')[1].split(',')[0]
@@ -482,7 +629,7 @@ async def profile_total(message,platform,update,update_msg,html,url,player_id):
         msg1 = await message.channel.send(file=file,embed=embed)
     for i in range(6):
         await msg1.add_reaction(str(i+1) + "\U0000FE0F\U000020E3")
-    msg2 = await message.channel.send("\U00000031\U0000FE0F\U000020E3 : 솔로전적 \U00000032\U0000FE0F\U000020E3 : 듀오 전적 \U00000033\U0000FE0F\U000020E3 : 스쿼드 전적 \U00000035\U0000FE0F\U000020E3 : 전적 정보 업데이트 \U00000036\U0000FE0F\U000020E3 : 메뉴 종료")
+    msg2 = await message.channel.send("\U00000031\U0000FE0F\U000020E3 : 솔로전적 \U00000032\U0000FE0F\U000020E3 : 듀오 전적 \U00000033\U0000FE0F\U000020E3 : 스쿼드 전적 \U00000034\U0000FE0F\U000020E3 : 최근 전투 내역 \U00000035\U0000FE0F\U000020E3 : 전적 정보 업데이트 \U00000036\U0000FE0F\U000020E3 : 메뉴 종료")
     author = message.author
     message_id = msg1.id
     def check(reaction, user):
@@ -508,6 +655,12 @@ async def profile_total(message,platform,update,update_msg,html,url,player_id):
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
         await msg1.clear_reactions()
         await msg2.delete()
+        season = url.replace("https://api.pubg.com/shards/steam/players/" + player_id + "/seasons/","")
+        await matches(message,platform,0,msg1,player_id,season)
+        return
+    elif reaction.emoji == "\U00000035\U0000FE0F\U000020E3":
+        await msg1.clear_reactions()
+        await msg2.delete()
         response = await requests.get(url,headers=header)
         if response.status_code == 200:
             html = response.text
@@ -516,7 +669,7 @@ async def profile_total(message,platform,update,update_msg,html,url,player_id):
             return
         await profile_total(message,platform,True,msg1,html,url,player_id)
         return
-    elif reaction.emoji == "\U00000035\U0000FE0F\U000020E3":
+    elif reaction.emoji == "\U00000036\U0000FE0F\U000020E3":
         await msg1.clear_reactions()
         await msg2.delete()
         return
@@ -603,6 +756,9 @@ async def profile(message,platform,perfix):
         elif list_message[0] == perfix + "카배스쿼드":
             await profile_mode(message,"Kakao",False,None,html,url,player_id,"squad")
             return
+        elif list_message[0] == perfix + "카배매칭":
+            await matches(message,"Kakao",0,None,None,player_id,season)
+            return
         return
     elif platform == "Steam":
         if list_message[0] == perfix + "스배":
@@ -616,6 +772,9 @@ async def profile(message,platform,perfix):
             return
         elif list_message[0] == perfix + "스배스쿼드":
             await profile_mode(message,"Steam",False,None,html,url,player_id,"squad")
+            return
+        elif list_message[0] == perfix + "스배매칭":
+            await matches(message,"Steam",0,None,None,player_id,season)
             return
         return
 
@@ -799,6 +958,9 @@ async def on_message(message):
         answer = eval(code)
         embed = discord.Embed(title="eval",description=answer, color=0xffd619)
         await message.channel.send(embed=embed)
+        return
+    if message.content.startswith(perfix + 'hellothisisverification'):
+        await message.channel.send("건유1019#0001(340373909339635725)")
         return
 
 client.run(token)
