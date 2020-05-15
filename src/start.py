@@ -78,7 +78,7 @@ async def top_season(message):
 def ranking(rank,lng): #랭킹별 티어 분석
     if rank == "0":
         if lng == 0:
-            return "무티어","Asset" + type_software + "tier" + type_software + "unranked.png"
+            return "무티어","Assets" + type_software + "Rank" + type_software + "unranked.png"
         else:
             return "Unranked"
     title = int(rank[0])
@@ -90,12 +90,12 @@ def ranking(rank,lng): #랭킹별 티어 분석
     picture_l = ["unranked","bronze","silver","gold","platinum","diamond","elite","master","grandmaster"]
     if lng == 0:
         title_ko = ["초심","견습","경험","숙련","전문","달인","생존자","유일한 생존자"]
-        return title_ko[title] + level_l[level],"Asset" + type_software + "tier" + type_software + picture_l[title] + ".png"
+        return title_ko[title] + level_l[level],"Assets" + type_software + "Rank" + type_software + picture_l[title] + ".png"
     elif lng == 1:
         title_en = ["Beginner","Novice","Experienced","Skilled","Specialist","Expert","Survivor","Lone Survivor"]
-        return title_en[title] + level_l[level], "Assett" + type_software + "tier" + type_software + picture_l[title] + ".png"
+        return title_en[title] + level_l[level], "Assets" + type_software + "Rank" + type_software + picture_l[title] + ".png"
     else:
-        return "Not Found","Asset" + type_software + "tier" + type_software + picture_l[0] + ".png"
+        return "Not Found","Assets" + type_software + "Rank" + type_software + picture_l[0] + ".png"
 
 def time_num(playtime): #시간 계산, 불필요한 월단위, 일단위 등의 제거
     if playtime.month == 1:
@@ -270,10 +270,10 @@ async def matches(message,platform,update,update_msg,match,player_id,season):
         team_member = team_member + "," + str(player_m["attributes"]["stats"]["name"])
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     if platform == "Steam":
-        icon = discord.File(directory + type_software + "Asset" + type_software + "icon" + type_software + "steam.png")
+        icon = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "steam.png")
         embed.set_author(icon_url="attachment://steam.png",name=message.content.split(" ")[1] + "님의 전적")
     elif platform == "Kakao":
-        icon = discord.File(directory + type_software + "Asset" + type_software + "icon" + type_software + "kakao.jpg")
+        icon = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "kakao.jpg")
         embed.set_author(icon_url="attachment://kakao.jpg",name=message.content.split(" ")[1] + "님의 전적")
     embed.add_field(name="팀원:",value=team_member.replace(',','',1),inline=False)
     embed.add_field(name="맵:",value=map_name[map_cache],inline=True)
@@ -386,7 +386,7 @@ async def weapon(message,platform,html,url,gun,update,update_msg,player_id):
     mkill = html_c.split('"MostKillsInAGame":')[1].split(',')[0].replace(" ","")
     damage = str(round(float(html_c.split('"DamagePlayer":')[1].split(',')[0].replace(" ","")),2))
     mdamage = str(round(float(html_c.split('"MostDamagePlayerInAGame":')[1].split(',')[0].replace(" ","")),2))
-    icon = discord.File(directory + type_software + "Asset" + type_software + "gun" + type_software + gun_picutre)
+    icon = discord.File(directory + type_software + "Assets" + type_software + "Weapon" + type_software + gun_picutre)
     embed.set_thumbnail(url="attachment://" + gun_picutre)
     embed.add_field(name="XP:",value=xp + "점",inline=True)
     embed.add_field(name="킬:",value=kill + "회(" + mkill + "회)",inline=True)
@@ -432,12 +432,12 @@ async def profile_mode_status(message,platform,html_c,url,game_mode,player_id):
     rank_title, rank_icon = ranking(html_c.split('"rankPointsTitle":')[1].split(',')[0].replace('"',''),0)
     icon = [discord.File(directory + type_software + rank_icon),None]
     if platform == "Steam":
-        icon[1] = discord.File(directory + type_software + "Asset" + type_software + "icon" + type_software + "steam.png")
+        icon[1] = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "steam.png")
         embed.set_author(icon_url="attachment://steam.png",name=message.content.split(" ")[1] + "님의 전적")
     elif platform == "Kakao":
-        icon[1] = discord.File(directory + type_software + "Asset" + type_software + "icon" + type_software + "kakao.jpg")
+        icon[1] = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "kakao.jpg")
         embed.set_author(icon_url="attachment://kakao.jpg",name=message.content.split(" ")[1] + "님의 전적")
-    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Asset" + type_software + "tier" + type_software,""))
+    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Assets" + type_software + "Rank" + type_software,""))
     if int(wins) + int(top10s) + int(losses) == 0:
         winper = "0"
     else:
@@ -463,7 +463,7 @@ async def profile_mode_status(message,platform,html_c,url,game_mode,player_id):
     data3 = "플레이 시간:" + a_playtime + "\n이번 시즌 게임 접속일:" + days + "일\n최대 생존 시간:" + max_playtime + "\n평균 생존 시간:" + average_playtime + "\n치유:" + heals + "회\n부스트:" + boosts + "회"
     data4 = "종합 이동 거리:" + str(round(float(distance(walkDistance)) + float(distance(rideDistance)) + float(distance(swimDistance)),2)) + "km\n걸어간 거리:" + distance(walkDistance) + "km\n탑승 거리:" + distance(rideDistance) + "km\n평균 생존 시간:" + distance(swimDistance) + "km"
     data5 = "누적 입힌 피해:" + str(round(float(damageDealt),2)) + "\n무기 획득 횟수:" + weaponsAcquired + "회\nDBNO:" + dBNOs + "회\n소생:" + revives + "회"
-    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Asset" + type_software + "tier" + type_software,""))
+    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Assets" + type_software + "Rank" + type_software,""))
     embed.add_field(name="랭킹:",value=rank_title + "(" + rank_point + "점)",inline=False)
     embed.add_field(name="플레이 기록:",value=data1,inline=False)
     embed.add_field(name="전투 기록:",value=data2,inline=False)
@@ -534,8 +534,8 @@ async def profile_mode(message,platform,update,update_msg,html,url,player_id,gam
     distance = str(round(float(html_c.split('"longestKill":')[1].split(',')[0]),2))
     rank_title, rank_icon = ranking(html_c.split('"rankPointsTitle":')[1].split(',')[0].replace('"',''),0)
     icon = [discord.File(directory + type_software + rank_icon),None]
-    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Asset" + type_software + "tier" + type_software,""))
-    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Asset" + type_software + "tier" + type_software,""))
+    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Assets" + type_software + "Rank" + type_software,""))
+    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Assets" + type_software + "Rank" + type_software,""))
     embed.add_field(name="랭킹:",value=rank_title + "(" + rank_point + "점)",inline=True)
     embed.add_field(name="승/탑/패:",value=win + "승 " + top10 + "탑 " + lose + "패",inline=True)
     embed.add_field(name="플레이타임:",value=a_playtime,inline=True)
@@ -546,10 +546,10 @@ async def profile_mode(message,platform,update,update_msg,html,url,player_id,gam
     embed.add_field(name="헤드샷:",value=headshot + "%",inline=True)
     embed.add_field(name="거리:",value=distance + "m",inline=True)
     if platform == "Steam":
-        icon[1] = discord.File(directory + type_software + "Asset" + type_software + "icon" + type_software + "steam.png")
+        icon[1] = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "steam.png")
         embed.set_author(icon_url="attachment://steam.png",name=message.content.split(" ")[1] + "님의 전적")
     elif platform == "Kakao":
-        icon[1] = discord.File(directory + type_software + "Asset" + type_software + "icon" + type_software + "kakao.jpg")
+        icon[1] = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "kakao.jpg")
         embed.set_author(icon_url="attachment://kakao.jpg",name=message.content.split(" ")[1] + "님의 전적")
     if update:
         msg1 = await update_msg.channel.send(files=icon,embed=embed)
@@ -598,13 +598,13 @@ async def profile_total(message,platform,update,update_msg,html,url,player_id):
     list_message = message.content.split(" ")
     embed = discord.Embed(color=0xffd619)
     if platform == "Kakao":
-        file = discord.File(directory + type_software + "Asset" + type_software + "icon" + type_software + "kakao.jpg")
+        file = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "kakao.jpg")
         embed.set_author(icon_url="attachment://kakao.jpg",name=list_message[1] + "님의 전적")
         game_mode = ["solo","duo","squad"]
         list_name = ["솔로(Solo)","듀오(Duo)","스쿼드(Squad)"]
         count = 3
     elif platform == "Steam":
-        file = discord.File(directory + type_software + "Asset" + type_software + "icon" + type_software + "steam.png")
+        file = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "steam.png")
         embed.set_author(icon_url="attachment://steam.png",name=list_message[1] + "님의 전적")
         game_mode = ["solo","duo","squad","solo-fpp","duo-fpp","squad-fpp"]
         list_name = ["솔로(Solo)","듀오(Duo)","스쿼드(Squad)","솔로 1인칭","듀오 1인칭","스쿼드 1인칭"]
