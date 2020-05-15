@@ -56,6 +56,36 @@ def is_admin(message):
             break
     return False    
 
+def log_info(message):
+    connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8')
+    cur = connect .cursor()
+    rtime = time.strftime('%Y-%m-%d %p %I:%M:%S', time.localtime(time.time()))
+    sql = "insert into customer(datetime,guild,channel,author,message) values (%s, %s, %s, %s, %s)"
+    print("[시간: " + str(rtime) + " | " + str(message.guild) + " | " + str(message.channel) + " | " + str(message.author) + "]: " + str(message.connect))
+    curs.execute(sql, (rtime,message.guild,message.channel,message.author,message.connect))
+    connect.commit()
+    connect.close()
+    return
+
+def is_banned(user_id,message):
+    connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8')
+    cur = connect .cursor()
+    sql_prefix = "select * from BLACKLIST"
+    cur.execute(sql_prefix)
+    banned_list = cur.fetchall()
+    connect.close()
+    for i in range(len(banned_list)):
+        print(banned_list[i][0])
+        if banned_list[i][0] == int(user_id):
+            if message.content[1:].startswith("블랙리스트 여부"):
+                log_info(message.guild,message.channel,'Blacklist-BOT',str(message.author) + '잘못된 유저가 접근하고 있습니다!(' + message.content + ')')
+                embed = discord.Embed(title="권한 거부(403)", color=0x00aaaa)
+                embed.add_field(name="권한이 거부되었습니다.", value="당신은 블랙리스트로 등록되어 있습니다.", inline=False)
+                coro = message.channel.send(embed=embed)
+                asyncio.run_coroutine_threadsafe(coro, client.loop)
+            return True
+    return False
+
 async def player(nickname,message):
     response2 = await requests.get("https://api.pubg.com/shards/steam/players?filter[playerNames]=" + nickname, headers=header)
     if response2.status_code == 200:
@@ -812,14 +842,23 @@ async def on_message(message):
         perfix = "!="
     connect.close()
     if message.content.startswith(perfix + "카배"):
+        log_info(message)
+        if is_banned(author_id,message):
+            return
         await profile(message,"Kakao",perfix)
         return
     if message.content.startswith(perfix + "스배"):
+        log_info(message)
+        if is_banned(author_id,message):
+            return
         await profile(message,"Steam",perfix)
         return
     if message.content.startswith(perfix + '접두어') or message.content.startswith('!=접두어') :
+        log_info(message)
+        if is_banned(author_id,message):
+            return
         if message.guild == None:
-            embed = discord.Embed(title="접두어",description=message.guild.name + "DM에서는 접두어 기능을 사용하실수 없습니다.", color=0xffd619)
+            embed = discord.Embed(title="접두어",description="DM에서는 접두어 기능을 사용하실수 없습니다.", color=0xffd619)
             await message.channel.send(embed=embed)
             return
         try:
@@ -910,6 +949,9 @@ async def on_message(message):
                 await message.channel.send(embed=embed)
                 return
     if message.content == perfix + "도움" or message.content == perfix + "help":
+        log_info(message)
+        if is_banned(author_id,message):
+            return
         embed = discord.Embed(title="도움말",color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
         embed.add_field(name="=스배 [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 종합 전적을 검색해 줍니다.",inline=False)
         embed.add_field(name="=스배솔로 [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 솔로 전적을 검색해 줍니다.",inline=False)
@@ -926,6 +968,9 @@ async def on_message(message):
         await message.channel.send(embed=embed)
         return
     if message.content == perfix + "서버상태":
+        log_info(message)
+        if is_banned(author_id,message):
+            return
         response = await requests.get("https://steamcommunity.com/app/578080")
         if response.status_code == 200:
             html = response.text
@@ -950,6 +995,9 @@ async def on_message(message):
         await message.channel.send(file=file,embed=embed)
         return
     if message.content.startswith(perfix + 'eval') and is_manager(author_id):
+        log_info(message)
+        if is_banned(author_id,message):
+            return
         code =  message.content.replace(perfix + 'eval ','')
         if code == "" or code == perfix + "eval":
             embed = discord.Embed(title="에러!",description="내용을 적어주세요!", color=0xffd619)
@@ -960,7 +1008,25 @@ async def on_message(message):
         await message.channel.send(embed=embed)
         return
     if message.content.startswith(perfix + 'hellothisisverification'):
+        log_info(message)
+        if is_banned(author_id,message):
+            return
         await message.channel.send("건유1019#0001(340373909339635725)")
+        return
+   if message.content == perfix + 'ping':
+        log_info(message)
+        if is_banned(author_id,message):
+            return
+        now = datetime.datetime.utcnow()
+        response_ping_c = now - message.created_at
+        reading_ping = float(str(response_ping_c.seconds) + "." +  str(response_ping_c.microseconds))
+        embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms", color=0x00aaaa)
+        msg = await message.channel.send(embed=embed)
+        now = datetime.datetime.utcnow()
+        response_ping_a = msg.created_at - now
+        response_ping = float(str(response_ping_a.seconds) + "." +  str(response_ping_a.microseconds))
+        embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms\n출력 속도: " str(round(response_ping * 1000,2)) + "ms", color=0x00aaaa)
+        await msg.edit(embed=embed)
         return
 
 client.run(token)
