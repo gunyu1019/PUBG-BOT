@@ -1013,7 +1013,7 @@ async def on_message(message):
             return
         await message.channel.send("건유1019#0001(340373909339635725)")
         return
-   if message.content == perfix + 'ping':
+    if message.content == perfix + "ping":
         log_info(message)
         if is_banned(author_id,message):
             return
@@ -1027,6 +1027,93 @@ async def on_message(message):
         response_ping = float(str(response_ping_a.seconds) + "." +  str(response_ping_a.microseconds))
         embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms\n출력 속도: " str(round(response_ping * 1000,2)) + "ms", color=0x00aaaa)
         await msg.edit(embed=embed)
+        return
+    if message.content == perfix + '시스템':
+        log_info(message)
+        if is_banned(author_id,message):
+            return
+        data1 = str(psutil.cpu_percent(interval=None, percpu=False))
+        data2 = str(psutil.virtual_memory().percent)
+        data3 = str(psutil.disk_usage('/').percent)
+        data4 = platform.system() + str(platform.release())
+        data5 = psutil.virtual_memory()
+        data6 = psutil.disk_usage('/')
+        if platform.system() == "Linux":
+            data7 = str(round(float(str(psutil.sensors_temperatures()).split('current=')[1].split(',')[0]),2))
+        data8 = datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
+        total_RAM,total_type_RAM = change_data(psutil.virtual_memory()[0])
+        used_RAM,used_type_RAM = change_data(psutil.virtual_memory()[3])
+        total_SSD,total_type_SSD = change_data(psutil.disk_usage('/')[0])
+        used_SSD,used_type_SSD = change_data(psutil.disk_usage('/')[1])
+        embed = discord.Embed(title="[시스템 정보]", color=0x00aaaa)
+        embed.add_field(name="CPU:", value=data1 + "%", inline=True)
+        embed.add_field(name="부팅시간:", value=data8, inline=True)
+        embed.add_field(name="메모리:", value=data2 + "%(" + str(used_RAM) + str(used_type_RAM) + '/' + str(total_RAM) + str(total_type_RAM) + ')', inline=False)
+        embed.add_field(name="저장공간:", value=data3 +"%(" + str(used_SSD) + str(used_type_SSD) + '/' + str(total_SSD) + str(total_type_SSD) + ')' , inline=False)
+        embed.add_field(name="소프트웨어:", value=data4, inline=False)
+        await message.channel.send(embed=embed)
+        return
+    if message.content.startswith(perfix + '블랙리스트 추가') and is_manager(author_id):
+        log_info(message.guild,message.channel,message.author,message.content)
+        try:
+            mention_id = list_message[2]
+        except:
+            embed = discord.Embed(title="에러!",description="닉네임을 기재해주세요!", color=0x00aaaa)
+            await message.channel.send(embed=embed)
+            return
+        cache_data = mention_id.replace("<@","",).replace(">","").replace("!","")
+        if is_manager(cache_data):
+            embed = discord.Embed(title="에러!",description="관리자는 블랙리스트에 추가할수 없습니다!", color=0x00aaaa)
+            await message.channel.send(embed=embed)
+            return
+        connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8') 
+        cur = connect .cursor()
+        sql_Black = "insert into BLACKLIST(ID) value(%s)"
+        cur.execute(sql_Black,cache_data)
+        connect.commit()
+        connect.close()
+        embed = discord.Embed(title="Blacklist!",description=mention_id + "가 블랙리스트에 추가되었습니다!", color=0xaa0000)
+        await message.channel.send(embed=embed)
+        return
+    if message.content.startswith(perfix + '블랙리스트 여부'):
+        log_info(message.guild,message.channel,message.author,message.content)
+        try:
+            tester_id = list_message[2].replace("<@","",).replace(">","").replace("!","")
+        except:
+            tester_id = author_id
+        embed = discord.Embed(title="Blacklist!",description="해당 유저가 밴당했는지 확인하는 중입니다.", color=0xaa0000)
+        msg = await message.channel.send(embed=embed)
+        cache = is_banned(tester_id,message)
+        if cache:
+            embed = discord.Embed(title="Blacklist!",description="이 사람은 블랙리스트에 등재되어 있습니다.", color=0xaa0000)
+        else:
+            embed = discord.Embed(title="Blacklist!",description="이 사람은 블랙리스트에 등재되어 있지 않습니다.", color=0xaa0000)
+        await message.channel.send(embed=embed)
+        await msg.delete()
+    if message.content.startswith(perfix + '블랙리스트 제거') and is_manager(author_id):
+        log_info(message)
+        try:
+            mention_id = list_message[2]
+        except:
+            embed = discord.Embed(title="에러!",description="닉네임을 기재해주세요!", color=0x00aaaa)
+            await message.channel.send(embed=embed)
+            return
+        cache_data1 = mention_id.replace("<@","",).replace(">","").replace("!","")
+        connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8') 
+        cur = connect .cursor()
+        sql_delete = "delete from BLACKLIST where ID=%s"
+        try:
+            cur.execute(sql_delete,cache_data1)
+        except:
+            embed = discord.Embed(title="Blacklist!",description=mention_id + "는, 블랙리스트에 추가되어 있지 않습니다.", color=0xaa0000)
+            await message.channel.send(embed=embed)
+            connect.commit()
+            connect.close()
+            return
+        connect.commit()
+        connect.close()
+        embed = discord.Embed(title="Blacklist!",description=mention_id + "가 블랙리스트에서 제거되었습니다!", color=0xaa0000)
+        await message.channel.send(embed=embed)
         return
 
 client.run(token)
