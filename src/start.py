@@ -1025,7 +1025,7 @@ async def on_message(message):
         now = datetime.datetime.utcnow()
         response_ping_a = msg.created_at - now
         response_ping = float(str(response_ping_a.seconds) + "." +  str(response_ping_a.microseconds))
-        embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms\n출력 속도: " str(round(response_ping * 1000,2)) + "ms", color=0x00aaaa)
+        embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms\n출력 속도: " + str(round(response_ping * 1000,2)) + "ms", color=0x00aaaa)
         await msg.edit(embed=embed)
         return
     if message.content == perfix + '시스템':
@@ -1115,5 +1115,5 @@ async def on_message(message):
         embed = discord.Embed(title="Blacklist!",description=mention_id + "가 블랙리스트에서 제거되었습니다!", color=0xaa0000)
         await message.channel.send(embed=embed)
         return
-
+    
 client.run(token)
