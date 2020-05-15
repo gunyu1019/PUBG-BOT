@@ -9,6 +9,7 @@ import io
 import csv
 import requests_async as requests
 import json
+import psutil
 
 from matplotlib import pyplot as plt
 from pytz import timezone
@@ -57,16 +58,28 @@ def is_admin(message):
             break
     return False    
 
-def log_info(message):
-    connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8')
-    curs = connect .cursor()
-    rtime = time.strftime('%Y-%m-%d %p %I:%M:%S', time.localtime(time.time()))
-    sql = "insert into customer(datetime,guild,channel,author,message) values (%s, %s, %s, %s, %s)"
-    print("[시간: " + str(rtime) + " | " + str(message.guild) + " | " + str(message.channel) + " | " + str(message.author) + "]: " + str(message.content))
-    curs.execute(sql, (rtime,message.guild,message.channel,message.author,message.content))
-    connect.commit()
-    connect.close()
-    return
+def log_info(guild, channel, user, message):
+    Ftime = time.strftime('%Y-%m-%d %p %I:%M:%S', time.localtime(time.time()))
+    print("[시간: " + str(Ftime) + " | " + str(guild) + " | " + str(channel) + " | " + str(user) + "]: " + str(message))
+    log = open("log.txt","a",encoding = 'utf-8')
+    log.write("[시간: " + str(Ftime) + " | " + str(guild) + " | " + str(channel) + " | " + str(user) + "]: " + str(message) + "\n")
+    log.close()
+    #log_info(message.guild,message.channel,message.author,message.content)
+
+def change_data(B):
+    B_lens = len(str(B))
+    if B_lens >= 17:
+        return round(B/1000000000000000,2), "PB"
+    elif B_lens  >= 13:
+        return round(B/1000000000000,2), "TB"
+    elif B_lens >= 10:
+        return round(B/1000000000,2), "GB"
+    elif B_lens >= 7:
+        return round(B/1000000,2), "MB"
+    elif B_lens >= 4:
+        return round(B/1000,2), "KB"
+    else:
+        return round(B,2), "B"
 
 def is_banned(user_id,message):
     connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8')
@@ -79,7 +92,7 @@ def is_banned(user_id,message):
         print(banned_list[i][0])
         if banned_list[i][0] == int(user_id):
             if message.content[1:].startswith("블랙리스트 여부"):
-                log_info(message.guild,message.channel,'Blacklist-BOT',str(message.author) + '잘못된 유저가 접근하고 있습니다!(' + message.content + ')')
+                print(str(message.author) + '잘못된 유저가 접근하고 있습니다!(' + message.content + ')')
                 embed = discord.Embed(title="권한 거부(403)", color=0x00aaaa)
                 embed.add_field(name="권한이 거부되었습니다.", value="당신은 블랙리스트로 등록되어 있습니다.", inline=False)
                 coro = message.channel.send(embed=embed)
@@ -687,7 +700,7 @@ async def profile_total(message,platform,update,update_msg,html,url,player_id):
         await msg1.clear_reactions()
         await msg2.delete()
         season = url.replace("https://api.pubg.com/shards/steam/players/" + player_id + "/seasons/","")
-        await matches(message,platform,0,msg1,player_id,season)
+        await matches(message,platform,0,msg1,None,player_id,season)
         return
     elif reaction.emoji == "\U00000035\U0000FE0F\U000020E3":
         await msg1.clear_reactions()
@@ -811,20 +824,31 @@ async def profile(message,platform,perfix):
 
 
 @client.event
-async def on_ready(): 
-    print("디스코드 봇 로그인이 완료되었습니다.")
-    print("디스코드봇 이름:" + client.user.name)
-    print("디스코드봇 ID:" + str(client.user.id))
-    print("디스코드봇 버전:" + str(discord.__version__))
-    print('------')
-    await autopost(30)
-    await client.change_presence(status=discord.Status.online)
+async def on_ready():
+    log_info('Discord API','system-log','PUBG_BOT','디스코드 봇 로그인이 완료되었습니다.')
+    log_info('Discord API','system-log','PUBG_BOT',"디스코드봇 이름:" + client.user.name)
+    log_info('Discord API','system-log','PUBG_BOT',"디스코드봇 ID:" + str(client.user.id))
+    log_info('Discord API','system-log','PUBG_BOT',"디스코드봇 버전:" + str(discord.__version__))
+    print('------------')
     answer = ""
     total = 0
     for i in range(len(client.guilds)):
         answer = answer + str(i+1) + "번째: " + str(client.guilds[i]) + "(" + str(client.guilds[i].id) + "):"+ str(len(client.guilds[i].members)) +"명\n"
         total += len(client.guilds[i].members)
-    print("방목록: \n" + answer + "방의 종합 멤버:" + str(total) + "명")
+    log_info('Discord API','guilds-log','PUBG_BOT',"방목록: \n" + answer + "방의 종합 멤버:" + str(total) + "명")
+    await client.wait_until_ready() 
+    while not client.is_closed():
+        await client.change_presence(status=discord.Status.online, activity=discord.Game("[접두어]help, [접두어]도움말 를 이용하여, 명령어를 알아보세요!"))
+        await asyncio.sleep(3.0)
+        total = 0
+        for i in range(len(client.guilds)):
+            total += len(client.guilds[i].members)
+        await client.change_presence(status=discord.Status.online, activity=discord.Game("활동중인 서버갯수: " + str(len(client.guilds)) + "개, 유저수" + str(total) + "명"))
+        await asyncio.sleep(3.0)
+        await client.change_presence(status=discord.Status.online, activity=discord.Game("PUBG봇은 현재 OBT를 시행중입니다. 오류 발생시 신고해주시기 바랍니다."))
+        await asyncio.sleep(3.0)
+        await client.change_presence(status=discord.Status.online, activity=discord.Game("접두어를 잊어먹을 경우 !=접두어 정보를 통하여 얻을수 있습니다!"))
+        await asyncio.sleep(3.0)
 
 @client.event
 async def on_message(message):
@@ -843,19 +867,19 @@ async def on_message(message):
         perfix = "!="
     connect.close()
     if message.content.startswith(perfix + "카배"):
-        log_info(message)
+        log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
         await profile(message,"Kakao",perfix)
         return
     if message.content.startswith(perfix + "스배"):
-        log_info(message)
+        log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
         await profile(message,"Steam",perfix)
         return
     if message.content.startswith(perfix + '접두어') or message.content.startswith('!=접두어') :
-        log_info(message)
+        log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
         if message.guild == None:
@@ -950,22 +974,24 @@ async def on_message(message):
                 await message.channel.send(embed=embed)
                 return
     if message.content == perfix + "도움" or message.content == perfix + "help":
-        log_info(message)
+        log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
         embed = discord.Embed(title="도움말",color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
-        embed.add_field(name="=스배 [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 종합 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=스배솔로 [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 솔로 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=스배듀오 [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 듀오 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=스배스쿼드 [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 스쿼드 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=스배솔로(1인칭) [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 1인칭 솔로 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=스배듀오(1인칭) [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 1인칭 듀오 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=스배스쿼드(1인칭) [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 1인칭 스쿼드 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=카배 [닉네임] [시즌(선택)]:",value="카카오 배틀그라운드 종합 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=카배솔로 [닉네임] [시즌(선택)]:",value="카카오 배틀그라운드 솔로 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=카배듀오 [닉네임] [시즌(선택)]:",value="카카오 배틀그라운드 듀오 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=카배스쿼드 [닉네임] [시즌(선택)]:",value="카카오 배틀그라운드 스쿼드 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name="=서버상태:",value="배틀그라운드 서버 상태를 알려줍니다.",inline=False)
+        embed.add_field(name=perfix + "스배 [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 종합 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "스배솔로 [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 솔로 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "스배듀오 [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 듀오 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "스배스쿼드 [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 스쿼드 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "스배솔로(1인칭) [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 1인칭 솔로 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "스배듀오(1인칭) [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 1인칭 듀오 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "스배스쿼드(1인칭) [닉네임] [시즌(선택)]:",value="스팀 배틀그라운드 1인칭 스쿼드 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "카배 [닉네임] [시즌(선택)]:",value="카카오 배틀그라운드 종합 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "카배솔로 [닉네임] [시즌(선택)]:",value="카카오 배틀그라운드 솔로 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "카배듀오 [닉네임] [시즌(선택)]:",value="카카오 배틀그라운드 듀오 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "카배스쿼드 [닉네임] [시즌(선택)]:",value="카카오 배틀그라운드 스쿼드 전적을 검색해 줍니다.",inline=False)
+        embed.add_field(name=perfix + "서버상태:",value="배틀그라운드 서버 상태를 알려줍니다.",inline=False)
+        embed.add_field(name=perfix + "ping:",value="디스코드봇의 ping을 알려줍니다.",inline=False)
+        embed.add_field(name=perfix + "접두어 [설정/초기화/정보] [(설정 사용시)설정할 접두어]:",value="접두어를 설정합니다.",inline=False)
         await message.channel.send(embed=embed)
         return
     if message.content == perfix + "서버상태":
@@ -996,7 +1022,7 @@ async def on_message(message):
         await message.channel.send(file=file,embed=embed)
         return
     if message.content.startswith(perfix + 'eval') and is_manager(author_id):
-        log_info(message)
+        log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
         code =  message.content.replace(perfix + 'eval ','')
@@ -1009,13 +1035,13 @@ async def on_message(message):
         await message.channel.send(embed=embed)
         return
     if message.content.startswith(perfix + 'hellothisisverification'):
-        log_info(message)
+        log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
         await message.channel.send("건유1019#0001(340373909339635725)")
         return
     if message.content == perfix + "ping":
-        log_info(message)
+        log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
         now = datetime.datetime.utcnow()
@@ -1055,7 +1081,7 @@ async def on_message(message):
         await message.channel.send(embed=embed)
         return
     if message.content.startswith(perfix + '블랙리스트 추가') and is_manager(author_id):
-        log_info(message.guild,message.channel,message.author,message.content)
+        log_info(message)
         try:
             mention_id = list_message[2]
         except:
@@ -1092,7 +1118,7 @@ async def on_message(message):
         await message.channel.send(embed=embed)
         await msg.delete()
     if message.content.startswith(perfix + '블랙리스트 제거') and is_manager(author_id):
-        log_info(message)
+        log_info(message.guild,message.channel,message.author,message.content)
         try:
             mention_id = list_message[2]
         except:
