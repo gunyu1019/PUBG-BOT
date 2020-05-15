@@ -2,6 +2,7 @@ import discord
 import asyncio
 import os
 import datetime
+import time
 import platform
 import pymysql
 import io
@@ -58,11 +59,11 @@ def is_admin(message):
 
 def log_info(message):
     connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8')
-    cur = connect .cursor()
+    curs = connect .cursor()
     rtime = time.strftime('%Y-%m-%d %p %I:%M:%S', time.localtime(time.time()))
     sql = "insert into customer(datetime,guild,channel,author,message) values (%s, %s, %s, %s, %s)"
-    print("[시간: " + str(rtime) + " | " + str(message.guild) + " | " + str(message.channel) + " | " + str(message.author) + "]: " + str(message.connect))
-    curs.execute(sql, (rtime,message.guild,message.channel,message.author,message.connect))
+    print("[시간: " + str(rtime) + " | " + str(message.guild) + " | " + str(message.channel) + " | " + str(message.author) + "]: " + str(message.content))
+    curs.execute(sql, (rtime,message.guild,message.channel,message.author,message.content))
     connect.commit()
     connect.close()
     return
@@ -1020,12 +1021,12 @@ async def on_message(message):
         now = datetime.datetime.utcnow()
         response_ping_c = now - message.created_at
         reading_ping = float(str(response_ping_c.seconds) + "." +  str(response_ping_c.microseconds))
-        embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms", color=0x00aaaa)
+        embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms", color=0xffd619)
         msg = await message.channel.send(embed=embed)
         now = datetime.datetime.utcnow()
         response_ping_a = msg.created_at - now
         response_ping = float(str(response_ping_a.seconds) + "." +  str(response_ping_a.microseconds))
-        embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms\n출력 속도: " + str(round(response_ping * 1000,2)) + "ms", color=0x00aaaa)
+        embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms\n출력 속도: " + str(round(response_ping * 1000,2)) + "ms", color=0xffd619)
         await msg.edit(embed=embed)
         return
     if message.content == perfix + '시스템':
@@ -1045,7 +1046,7 @@ async def on_message(message):
         used_RAM,used_type_RAM = change_data(psutil.virtual_memory()[3])
         total_SSD,total_type_SSD = change_data(psutil.disk_usage('/')[0])
         used_SSD,used_type_SSD = change_data(psutil.disk_usage('/')[1])
-        embed = discord.Embed(title="[시스템 정보]", color=0x00aaaa)
+        embed = discord.Embed(title="[시스템 정보]", color=0xffd619)
         embed.add_field(name="CPU:", value=data1 + "%", inline=True)
         embed.add_field(name="부팅시간:", value=data8, inline=True)
         embed.add_field(name="메모리:", value=data2 + "%(" + str(used_RAM) + str(used_type_RAM) + '/' + str(total_RAM) + str(total_type_RAM) + ')', inline=False)
@@ -1058,12 +1059,12 @@ async def on_message(message):
         try:
             mention_id = list_message[2]
         except:
-            embed = discord.Embed(title="에러!",description="닉네임을 기재해주세요!", color=0x00aaaa)
+            embed = discord.Embed(title="에러!",description="닉네임을 기재해주세요!", color=0xffd619)
             await message.channel.send(embed=embed)
             return
         cache_data = mention_id.replace("<@","",).replace(">","").replace("!","")
         if is_manager(cache_data):
-            embed = discord.Embed(title="에러!",description="관리자는 블랙리스트에 추가할수 없습니다!", color=0x00aaaa)
+            embed = discord.Embed(title="에러!",description="관리자는 블랙리스트에 추가할수 없습니다!", color=0xffd619)
             await message.channel.send(embed=embed)
             return
         connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8') 
@@ -1095,7 +1096,7 @@ async def on_message(message):
         try:
             mention_id = list_message[2]
         except:
-            embed = discord.Embed(title="에러!",description="닉네임을 기재해주세요!", color=0x00aaaa)
+            embed = discord.Embed(title="에러!",description="닉네임을 기재해주세요!", color=0xffd619)
             await message.channel.send(embed=embed)
             return
         cache_data1 = mention_id.replace("<@","",).replace(">","").replace("!","")
@@ -1115,5 +1116,5 @@ async def on_message(message):
         embed = discord.Embed(title="Blacklist!",description=mention_id + "가 블랙리스트에서 제거되었습니다!", color=0xaa0000)
         await message.channel.send(embed=embed)
         return
-    
+
 client.run(token)
