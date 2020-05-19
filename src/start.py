@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 from pytz import timezone
 
 connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8') #클라이언트 API키 불러오기.
-cur = connect .cursor()
+cur = connect.cursor()
 cur.execute("SELECT * from PUBG_BOT")
 client_list = cur.fetchall()
 token = client_list[0][0]
@@ -33,8 +33,8 @@ if platform.system() == "Windows":
 elif platform.system() == "Linux":
     type_software = '/'
 i_date = "starting"
-DB_players = [0,0,0,0,0,0,0,0,0,0,0,0]
-DB_datetime = [i_date,i_date,i_date,i_date,i_date,i_date,i_date,i_date,i_date,i_date,i_date,i_date]
+DB_players = [0] * 12
+DB_datetime = [i_date] * 12
 
 def is_manager(user_id):
     if platform.system() == "Windows":
@@ -45,14 +45,13 @@ def is_manager(user_id):
         return False
     cache1 = file.readlines()
     file.close()
-    for i in range(len(cache1)):
-        if user_id == cache1[i]:
-            return True
+    if user_id in cache1:
+    	return True
     return False
 
 def is_admin(message):
-    for i in range(len(message.author.roles)):
-        cache2 = message.author.roles[i].permissions.administrator
+    for role in message.author.roles:
+        cache2 = role.permissions.administrator
         if cache2:
             return True
             break
@@ -88,9 +87,9 @@ def is_banned(user_id,message):
     cur.execute(sql_prefix)
     banned_list = cur.fetchall()
     connect.close()
-    for i in range(len(banned_list)):
-        print(banned_list[i][0])
-        if banned_list[i][0] == int(user_id):
+    for banned in banned_list:
+        print(banned[0])
+        if banned[0] == int(user_id):
             if message.content[1:].startswith("블랙리스트 여부"):
                 print(str(message.author) + '잘못된 유저가 접근하고 있습니다!(' + message.content + ')')
                 embed = discord.Embed(title="권한 거부(403)", color=0x00aaaa)
