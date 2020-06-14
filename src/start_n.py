@@ -466,6 +466,7 @@ async def season_status(player_id,season):
         cur.execute(sql, (player_id,return_value,season))
         connect.commit()
         return return_value
+        
 
 async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id):
     list_message = message.content.split(" ")
