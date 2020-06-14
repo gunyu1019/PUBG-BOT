@@ -16,6 +16,15 @@ import psutil
 from matplotlib import pyplot as plt
 from pytz import timezone
 
+def image(pubg_platform):
+    kakao = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "kakao.png")
+    steam = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "steam.png")
+    xbox = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "xbox.png")
+    playstation = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "playstation.png")
+    stadia = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "stadia.png")
+    image = [steam,kakao,xbox,playstation,stadia]
+    return image[pubg_platform]
+
 def is_manager(user_id):
     if platform.system() == "Windows":
         file = open(directory + "\\user_info\\Manager.txt",mode='r')
@@ -152,37 +161,27 @@ def time_num(playtime): #시간 계산, 불필요한 월단위, 일단위 등의
     else:
         return str(playtime.month-1)  + "일 " + str(playtime.day-1)  + "일 " + str(playtime.hour)  + "시간 " + str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
 
-async def response_num(response,message,update_msg,update): #에러 발생시, 코드를 통하여 분석
+async def response_num(response,message): #에러 발생시, 코드를 통하여 분석
     a_num = int(response.status_code)
     if a_num == 200:
         return
     elif a_num == 400:
-        if update:
-            await update_msg.delete()
         embed = discord.Embed(title="에러",description="닉네임을 입력해주시기 바랍니다.", color=0xaa0000)
         await message.channel.send(embed=embed)
         return
     elif a_num == 401:
-        if update:
-            await update_msg.delete()
         embed = discord.Embed(title="에러",description="DB 불러오는것을 실패하였습니다. 잠시후 다시시도 해주시기 바랍니다.", color=0xaa0000)
         await message.channel.send(embed=embed)
         return
     elif a_num == 404:
-        if update:
-            await update_msg.delete()
         embed = discord.Embed(title="에러",description="해당 유저를 찾을수 없습니다.", color=0xaa0000)
         await message.channel.send(embed=embed)
         return
     elif a_num == 415:
-        if update:
-            await update_msg.delete()
         embed = discord.Embed(title="에러",description="콘텐츠 지정이 잘못되었습니다. 봇 제작자에게 문의해주시기 바랍니다.", color=0xaa0000)
         await message.channel.send(embed=embed)
         return
     elif a_num == 429:
-        if update:
-            await update_msg.delete()
         embed = discord.Embed(title="에러",description="너무 많은 요청이 들어왔습니다. 잠시후 다시시도해주세요.", color=0xaa0000)
         await message.channel.send(embed=embed)
         return
@@ -407,8 +406,8 @@ async def player_info(message,nickname):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect.cursor()
     try:
-        sql = "select id,platform from player where name=" + str(nickname)
-        cur.execute(sql)
+        sql = "select id,platform from player where name=%s"
+        cur.execute(sql,(str(nickname)))
         cache = cur.fetchall()
         pubg_id = cache[0][0]
         pubg_platform = cache[0][1]
@@ -420,12 +419,12 @@ async def player_info(message,nickname):
         steam = "<:Steam:698454004656504852>"
         kakao = "<:kakao:718482204103278622>"
         stadia = "<:Stadia:718482205575348264>"
-        await msg.add_reaction(xbox)
-        await msg.add_reaction(playstation)
         await msg.add_reaction(steam)
         await msg.add_reaction(kakao)
+        await msg.add_reaction(xbox)
+        await msg.add_reaction(playstation)
         await msg.add_reaction(stadia)
-        emoji = [xbox,playstation,steam,kakao,stadia]
+        emoji = [steam,kakao,xbox,playstation,stadia]
         def check2(reaction,user):
             for i in range(5):
                 if str(reaction.emoji)==str(emoji[i]):
@@ -453,27 +452,110 @@ async def season_status(player_id,season):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect.cursor()
     try:
-        sql = "select html from NORMAL_STATUS where id=" + str(player_id) + "and season=" + str(season)
-        cur.execute(sql)
-        cache = cur.fetchone()
-        return cache[0]
+        sql = "select html from NORMAL_STATUS where id=%s and season=%s"
+        cur.execute(sql,(str(player_id),str(season)))
+        cache = cur.fetchall()
+        return_value = cache[0][0]
     except:
         url = "https://api.pubg.com/shards/steam/players/" + str(player_id) + "/seasons/" + str(season)
         response = await requests.get(url,headers=header)
-        return_value = response.json()
-        sql = """insert into NORMAL_STATUS(id,html)
+        if response.status_code == 200:
+            return_value = response.json()
+        else:
+            response_num(response,message)
+            return "Failed_Response"
+        sql = """insert into NORMAL_STATUS(id,html,season)
                 values (%s, %s, %s)"""
-        cur.execute(sql, (player_id,return_value,season))
+        cur.execute(sql, (player_id,json.dumps(return_value),season))
         connect.commit()
-        return return_value
-        
+    finally:
+        connect.close()
+    return return_value
+
+async def season_status_update(player_id,season):
+    connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
+    cur = connect.cursor()
+    try:
+        url = "https://api.pubg.com/shards/steam/players/" + str(player_id) + "/seasons/" + str(season)
+        response = await requests.get(url,headers=header)
+        if response.status_code == 200:
+            return_value = response.json()
+        else:
+            response_num(response,message)
+            return "Failed_Response"
+        sql = """insert into NORMAL_STATUS(id,html,season)
+            values (%s, %s, %s)"""
+        cur.execute(sql, (player_id,json.dumps(return_value),season))
+        connect.commit()
+    except:
+        connect.close()
+    return return_value
+#async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,player_id):
 
 async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id):
     list_message = message.content.split(" ")
     embed = discord.Embed(color=0xffd619)
-    game_mode = ["solo","duo","squad"]
-    list_name = ["솔로(Solo)","듀오(Duo)","스쿼드(Squad)"]
+    if pubg_type == "tpp":
+        game_mode = ["solo","duo","squad"]
+        list_name = ["솔로(Solo)","듀오(Duo)","스쿼드(Squad)"]
+    else:
+        game_mode = ["solo-fpp","duo-fpp","squad-fpp"]
+        list_name = ["솔로 1인칭(Solo)","듀오 1인칭(Duo)","스쿼드 1인칭(Squad)"]
     count = 3
+    json_data = json.loads(pubg_json)
+    for i in range(count):
+        json_c = json_data["data"]["attributes"]["gameModeStats"][game_mode[i]]
+        win = str(json_c["wins"])
+        top10 = str(json_c["top10s"])
+        lose = str(json_c["losses"])
+        kills = str(json_c["kills"])
+        f_playtime = float(json_c["timeSurvived"])
+        playtime = datetime.datetime.fromtimestamp(f_playtime,timezone('UTC'))
+        a_playtime = time_num(playtime)
+        if int(lose) != 0:
+            KD = str(round(int(kills) / int(lose),2))
+        else:
+            KD = str(round(int(kills) / 1,2))
+        print(win,top10,lose,a_playtime,kills,KD)
+        embed.add_field(name=list_name[i] + ":",value=win + "승 " + top10 + "탑 " + lose + "패\n" + a_playtime + "\n킬: " + kills + "회(" + KD + "점)",inline=True)
+    msg1 = await message.channel.send(file=image[pubg_platform],embed=embed)
+    for i in range(6):
+        await msg1.add_reaction(str(i+1) + "\U0000FE0F\U000020E3")
+    msg2 = await message.channel.send("\U00000031\U0000FE0F\U000020E3 : 솔로전적 \U00000032\U0000FE0F\U000020E3 : 듀오 전적 \U00000033\U0000FE0F\U000020E3 : 스쿼드 전적 \U00000034\U0000FE0F\U000020E3 : 전적 업데이트\U00000035\U0000FE0F\U000020E3 : 메뉴 종료")
+    author = message.author
+    message_id = msg1.id
+    def check(reaction, user):
+        for i in range(6):
+            if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
+                return user == author and message_id == reaction.message.id
+    reaction,user = await client.wait_for('reaction_add', check=check)
+    if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        #await profile_mode(message,platform,True,msg1,html,url,player_id,"solo")
+        return
+    elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        #await profile_mode(message,platform,True,msg1,html,url,player_id,"duo")
+        return
+    elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        #await profile_mode(message,platform,True,msg1,html,url,player_id,"squad")
+        return
+    elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
+        await msg1.delete()
+        update_json = await season_status_update(player_id,season)
+        await profile_total(message,pubg_platform,pubg_type,update_json,season,pubg_id)
+        if pubg_json == "Failed_Response":
+            return
+        return
+    elif reaction.emoji == "\U00000035\U0000FE0F\U000020E3":
+        await msg1.clear_reactions()
+        await msg2.delete()
+        return
+    return
 
 async def profile(message,perfix):
     list_message = message.content.split(" ")
@@ -501,29 +583,38 @@ async def profile(message,perfix):
             embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다!", color=0xaa0000)
             await message.channel.send(embed=embed)
     pubg_id, pubg_platform = await player_info(message,nickname)
+    season = "division.bro.official.pc-2018-07"
     if pubg_type == "랭크":
-        if list_message[0] == "전적":
-        elif list_message[0] == "전적1인칭":
-        elif list_message[0] == "전적3인칭":
+        if list_message[0] == perfix + "전적":
+            pass
+        elif list_message[0] == perfix + "전적1인칭":
+            pass
+        elif list_message[0] == perfix + "전적3인칭":
+            pass
     elif pubg_type == "1인칭":
-        pubg_json = season_status(player_id,season)
-        if list_message[0] == "전적":
-            profile_total(message,pubg_platform,"fpp",pubg_json,season,player_id)
-        elif list_message[0] == "전적솔로":
-            profile_mode(message,pubg_platform,"solo-fpp",pubg_json,season,player_id)
-        elif list_message[0] == "전적듀오":
-            profile_mode(message,pubg_platform,"duo-fpp",pubg_json,season,player_id)
-        elif list_message[0] == "전적스쿼드":
-            profile_mode(message,pubg_platform,"squad-fpp",pubg_json,season,player_id)
+        pubg_json = await season_status(pubg_id,season)
+        if pubg_json == "Failed_Response":
+            return
+        if list_message[0] == perfix + "전적":
+            await profile_total(message,pubg_platform,"fpp",pubg_json,season,pubg_id)
+        elif list_message[0] == perfix + "전적솔로":
+            #await profile_total(message,pubg_platform,"fpp","solo-fpp",pubg_json,season,pubg_id)
+        elif list_message[0] == perfix + "전적듀오":
+            #await profile_total(message,pubg_platform,"fpp","duo-fpp",pubg_json,season,pubg_id)
+        elif list_message[0] == perfix + "전적스쿼드":
+            #await profile_total(message,pubg_platform,"fpp","squad-fpp",pubg_json,season,pubg_id)
     elif pubg_type == "일반" or pubg_type == "3인칭":
-        if list_message[0] == "전적":
-            profile_total(message,pubg_platform,"tpp",pubg_json,season,player_id)
-        elif list_message[0] == "전적솔로":
-            profile_mode(message,pubg_platform,"solo",pubg_json,season,player_id)
-        elif list_message[0] == "전적듀오":
-            profile_mode(message,pubg_platform,"duo",pubg_json,season,player_id)
-        elif list_message[0] == "전적스쿼드":
-            profile_mode(message,pubg_platform,"squad",pubg_json,season,player_id)
+        pubg_json = await season_status(pubg_id,season)
+        if pubg_json == "Failed_Response":
+            return
+        if list_message[0] == perfix + "전적":
+            await profile_total(message,pubg_platform,"tpp",pubg_json,season,pubg_id)
+        elif list_message[0] == perfix + "전적솔로":
+            #await profile_total(message,pubg_platform,"tpp","solo",pubg_json,season,pubg_id)
+        elif list_message[0] == perfix + "전적듀오":
+            #await profile_total(message,pubg_platform,"tpp","duo",pubg_json,season,pubg_id)
+        elif list_message[0] == perfix + "전적스쿼드":
+            #await profile_total(message,pubg_platform,"tpp","squad",pubg_json,season,pubg_id)
     else:
         embed = discord.Embed(title="에러",description=helper + " 1인칭,3인칭,일반,랭크 중에서 골라주세요. 일반 그리고 3인칭과는 같은 기능입니다.", color=0xaa0000)
         await message.channel.send(embed=embed)
