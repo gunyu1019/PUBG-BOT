@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 src/log.txt
 src/USER_setting/
+src/Data/bot_info.json
+log.txt

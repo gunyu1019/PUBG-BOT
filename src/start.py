@@ -14,19 +14,7 @@ import psutil
 from matplotlib import pyplot as plt
 from pytz import timezone
 
-connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8') #클라이언트 API키 불러오기.
-cur = connect.cursor()
-cur.execute("SELECT * from PUBG_BOT")
-client_list = cur.fetchall()
-token = client_list[0][0]
-pubg_token = client_list[0][2]
-connect.close()
-
 client = discord.Client()
-header = {
-  "Authorization": "Bearer " + pubg_token,
-  "Accept": "application/vnd.api+json"
-}
 directory = os.path.dirname(os.path.abspath(__file__))
 if platform.system() == "Windows":
     type_software = '\\'
@@ -35,12 +23,33 @@ elif platform.system() == "Linux":
 i_date = "starting"
 DB_players = [0] * 12
 DB_datetime = [i_date] * 12
+db_f = open(directory + type_software + "data" + type_software + "bot_info.json",mode='r')
+db = db_f.read()
+db_f.close()
+db_json = json.loads(db)
+
+ip = db_json["mysql"]["ip"]
+user = db_json["mysql"]["user"]
+pw = db_json["mysql"]["password"]
+
+connect = pymysql.connect(host=ip, user=user, password=pw,db='PUBG_BOT', charset='utf8') #클라이언트 API키 불러오기.
+cur = connect.cursor()
+cur.execute("SELECT * from PUBG_BOT")
+client_list = cur.fetchall()
+token = client_list[0][0]
+pubg_token = client_list[0][2]
+connect.close()
+
+header = {
+  "Authorization": "Bearer " + pubg_token,
+  "Accept": "application/vnd.api+json"
+}
 
 def is_manager(user_id):
     if platform.system() == "Windows":
-        file = open(directory + "\\USER_setting\\Manager.txt",mode='r')
+        file = open(directory + "\\user_info\\Manager.txt",mode='r')
     elif platform.system() == "Linux":
-        file = open(directory + "/USER_setting/Manager.txt",mode='r')
+        file = open(directory + "/user_info/Manager.txt",mode='r')
     else:
         return False
     cache1 = file.readlines()
@@ -60,7 +69,7 @@ def is_admin(message):
 def log_info(guild, channel, user, message):
     Ftime = time.strftime('%Y-%m-%d %p %I:%M:%S', time.localtime(time.time()))
     print("[시간: " + str(Ftime) + " | " + str(guild) + " | " + str(channel) + " | " + str(user) + "]: " + str(message))
-    log = open("log.txt","a",encoding = 'utf-8')
+    log = open(directory + type_software + "log.txt","a",encoding = 'utf-8')
     log.write("[시간: " + str(Ftime) + " | " + str(guild) + " | " + str(channel) + " | " + str(user) + "]: " + str(message) + "\n")
     log.close()
     #log_info(message.guild,message.channel,message.author,message.content)
@@ -81,17 +90,16 @@ def change_data(B):
         return round(B,2), "B"
 
 def is_banned(user_id,message):
-    connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8')
+    connect = pymysql.connect(host=ip, user=user, password=pw,db='PUBG_BOT', charset='utf8')
     cur = connect .cursor()
     sql_prefix = "select * from BLACKLIST"
     cur.execute(sql_prefix)
     banned_list = cur.fetchall()
     connect.close()
     for banned in banned_list:
-        print(banned[0])
         if banned[0] == int(user_id):
             if message.content[1:].startswith("블랙리스트 여부"):
-                print(str(message.author) + '잘못된 유저가 접근하고 있습니다!(' + message.content + ')')
+                log_info(message.guild,message.channel,'Blacklist-log',str(message.author) + '잘못된 유저가 접근하고 있습니다!(' + message.content + ')')
                 embed = discord.Embed(title="권한 거부(403)", color=0x00aaaa)
                 embed.add_field(name="권한이 거부되었습니다.", value="당신은 블랙리스트로 등록되어 있습니다.", inline=False)
                 coro = message.channel.send(embed=embed)
@@ -121,7 +129,7 @@ async def top_season(message):
 def ranking(rank,lng): #랭킹별 티어 분석
     if rank == "0":
         if lng == 0:
-            return "무티어","Assets" + type_software + "Rank" + type_software + "unranked.png"
+            return "무티어","assets" + type_software + "Ranks" + type_software + "unranked.png"
         else:
             return "Unranked"
     title = int(rank[0])
@@ -133,12 +141,12 @@ def ranking(rank,lng): #랭킹별 티어 분석
     picture_l = ["unranked","bronze","silver","gold","platinum","diamond","elite","master","grandmaster"]
     if lng == 0:
         title_ko = ["초심","견습","경험","숙련","전문","달인","생존자","유일한 생존자"]
-        return title_ko[title] + level_l[level],"Assets" + type_software + "Rank" + type_software + picture_l[title] + ".png"
+        return title_ko[title] + level_l[level],"assets" + type_software + "Ranks" + type_software + picture_l[title] + ".png"
     elif lng == 1:
         title_en = ["Beginner","Novice","Experienced","Skilled","Specialist","Expert","Survivor","Lone Survivor"]
-        return title_en[title] + level_l[level], "Assets" + type_software + "Rank" + type_software + picture_l[title] + ".png"
+        return title_en[title] + level_l[level], "assets" + type_software + "Ranks" + type_software + picture_l[title] + ".png"
     else:
-        return "Not Found","Assets" + type_software + "Rank" + type_software + picture_l[0] + ".png"
+        return "Not Found","assets" + type_software + "Ranks" + type_software + picture_l[0] + ".png"
 
 def time_num(playtime): #시간 계산, 불필요한 월단위, 일단위 등의 제거
     if playtime.month == 1:
@@ -313,10 +321,10 @@ async def matches(message,platform,update,update_msg,match,player_id,season):
         team_member = team_member + "," + str(player_m["attributes"]["stats"]["name"])
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     if platform == "Steam":
-        icon = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "steam.png")
+        icon = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "steam.png")
         embed.set_author(icon_url="attachment://steam.png",name=message.content.split(" ")[1] + "님의 전적")
     elif platform == "Kakao":
-        icon = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "kakao.jpg")
+        icon = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "kakao.jpg")
         embed.set_author(icon_url="attachment://kakao.jpg",name=message.content.split(" ")[1] + "님의 전적")
     embed.add_field(name="팀원:",value=team_member.replace(',','',1),inline=False)
     embed.add_field(name="맵:",value=map_name[map_cache],inline=True)
@@ -371,7 +379,7 @@ async def weapon(message,platform,html,url,gun,update,update_msg,player_id):
             return m.channel.id == message.channel.id and m.author.id == message.author.id
         gun_message = await client.wait_for("message",check=check)
         gt = False
-        f = open(directory + type_software + "Data" + type_software + "gun_info.csv", 'r', encoding='utf-8')
+        f = open(directory + type_software + "data" + type_software + "gun_info.csv", 'r', encoding='utf-8')
         gun_list = csv.reader(f)
         for line in gun_list:
             if str(line[0]) == gun_message.content:
@@ -396,7 +404,7 @@ async def weapon(message,platform,html,url,gun,update,update_msg,player_id):
                 return m.channel.id == message.channel.id and m.author.id == message.author.id
             gun_message = await client.wait_for("message",check=check)
         gt = False
-        f = open(directory + type_software + "Data" + type_software + "gun_info.csv", 'r', encoding='utf-8')
+        f = open(directory + type_software + "data" + type_software + "gun_info.csv", 'r', encoding='utf-8')
         gun_list = csv.reader(f)
         for line in gun_list:
             if str(line[0]) == gun_message.content:
@@ -429,7 +437,7 @@ async def weapon(message,platform,html,url,gun,update,update_msg,player_id):
     mkill = html_c.split('"MostKillsInAGame":')[1].split(',')[0].replace(" ","")
     damage = str(round(float(html_c.split('"DamagePlayer":')[1].split(',')[0].replace(" ","")),2))
     mdamage = str(round(float(html_c.split('"MostDamagePlayerInAGame":')[1].split(',')[0].replace(" ","")),2))
-    icon = discord.File(directory + type_software + "Assets" + type_software + "Weapon" + type_software + gun_picutre)
+    icon = discord.File(directory + type_software + "assets" + type_software + "Weapon" + type_software + gun_picutre)
     embed.set_thumbnail(url="attachment://" + gun_picutre)
     embed.add_field(name="XP:",value=xp + "점",inline=True)
     embed.add_field(name="킬:",value=kill + "회(" + mkill + "회)",inline=True)
@@ -475,12 +483,12 @@ async def profile_mode_status(message,platform,html_c,url,game_mode,player_id):
     rank_title, rank_icon = ranking(html_c.split('"rankPointsTitle":')[1].split(',')[0].replace('"',''),0)
     icon = [discord.File(directory + type_software + rank_icon),None]
     if platform == "Steam":
-        icon[1] = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "steam.png")
+        icon[1] = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "steam.png")
         embed.set_author(icon_url="attachment://steam.png",name=message.content.split(" ")[1] + "님의 전적")
     elif platform == "Kakao":
-        icon[1] = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "kakao.jpg")
+        icon[1] = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "kakao.jpg")
         embed.set_author(icon_url="attachment://kakao.jpg",name=message.content.split(" ")[1] + "님의 전적")
-    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Assets" + type_software + "Rank" + type_software,""))
+    embed.set_thumbnail(url="attachment://" + rank_icon.replace("assets" + type_software + "Ranks" + type_software,""))
     if int(wins) + int(top10s) + int(losses) == 0:
         winper = "0"
     else:
@@ -506,7 +514,7 @@ async def profile_mode_status(message,platform,html_c,url,game_mode,player_id):
     data3 = "플레이 시간:" + a_playtime + "\n이번 시즌 게임 접속일:" + days + "일\n최대 생존 시간:" + max_playtime + "\n평균 생존 시간:" + average_playtime + "\n치유:" + heals + "회\n부스트:" + boosts + "회"
     data4 = "종합 이동 거리:" + str(round(float(distance(walkDistance)) + float(distance(rideDistance)) + float(distance(swimDistance)),2)) + "km\n걸어간 거리:" + distance(walkDistance) + "km\n탑승 거리:" + distance(rideDistance) + "km\n평균 생존 시간:" + distance(swimDistance) + "km"
     data5 = "누적 입힌 피해:" + str(round(float(damageDealt),2)) + "\n무기 획득 횟수:" + weaponsAcquired + "회\nDBNO:" + dBNOs + "회\n소생:" + revives + "회"
-    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Assets" + type_software + "Rank" + type_software,""))
+    embed.set_thumbnail(url="attachment://" + rank_icon.replace("assets" + type_software + "Ranks" + type_software,""))
     embed.add_field(name="랭킹:",value=rank_title + "(" + rank_point + "점)",inline=False)
     embed.add_field(name="플레이 기록:",value=data1,inline=False)
     embed.add_field(name="전투 기록:",value=data2,inline=False)
@@ -577,8 +585,8 @@ async def profile_mode(message,platform,update,update_msg,html,url,player_id,gam
     distance = str(round(float(html_c.split('"longestKill":')[1].split(',')[0]),2))
     rank_title, rank_icon = ranking(html_c.split('"rankPointsTitle":')[1].split(',')[0].replace('"',''),0)
     icon = [discord.File(directory + type_software + rank_icon),None]
-    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Assets" + type_software + "Rank" + type_software,""))
-    embed.set_thumbnail(url="attachment://" + rank_icon.replace("Assets" + type_software + "Rank" + type_software,""))
+    embed.set_thumbnail(url="attachment://" + rank_icon.replace("assets" + type_software + "Ranks" + type_software,""))
+    embed.set_thumbnail(url="attachment://" + rank_icon.replace("assets" + type_software + "Ranks" + type_software,""))
     embed.add_field(name="랭킹:",value=rank_title + "(" + rank_point + "점)",inline=True)
     embed.add_field(name="승/탑/패:",value=win + "승 " + top10 + "탑 " + lose + "패",inline=True)
     embed.add_field(name="플레이타임:",value=a_playtime,inline=True)
@@ -589,10 +597,10 @@ async def profile_mode(message,platform,update,update_msg,html,url,player_id,gam
     embed.add_field(name="헤드샷:",value=headshot + "%",inline=True)
     embed.add_field(name="거리:",value=distance + "m",inline=True)
     if platform == "Steam":
-        icon[1] = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "steam.png")
+        icon[1] = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "steam.png")
         embed.set_author(icon_url="attachment://steam.png",name=message.content.split(" ")[1] + "님의 전적")
     elif platform == "Kakao":
-        icon[1] = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "kakao.jpg")
+        icon[1] = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "kakao.jpg")
         embed.set_author(icon_url="attachment://kakao.jpg",name=message.content.split(" ")[1] + "님의 전적")
     if update:
         msg1 = await update_msg.channel.send(files=icon,embed=embed)
@@ -641,13 +649,13 @@ async def profile_total(message,platform,update,update_msg,html,url,player_id):
     list_message = message.content.split(" ")
     embed = discord.Embed(color=0xffd619)
     if platform == "Kakao":
-        file = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "kakao.jpg")
+        file = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "kakao.jpg")
         embed.set_author(icon_url="attachment://kakao.jpg",name=list_message[1] + "님의 전적")
         game_mode = ["solo","duo","squad"]
         list_name = ["솔로(Solo)","듀오(Duo)","스쿼드(Squad)"]
         count = 3
     elif platform == "Steam":
-        file = discord.File(directory + type_software + "Assets" + type_software + "Icon" + type_software + "steam.png")
+        file = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "steam.png")
         embed.set_author(icon_url="attachment://steam.png",name=list_message[1] + "님의 전적")
         game_mode = ["solo","duo","squad","solo-fpp","duo-fpp","squad-fpp"]
         list_name = ["솔로(Solo)","듀오(Duo)","스쿼드(Squad)","솔로 1인칭","듀오 1인칭","스쿼드 1인칭"]
@@ -831,6 +839,8 @@ async def on_ready():
     print('------------')
     answer = ""
     total = 0
+    a= await client.get_guild(692074042974273598).fetch_emoji(693782986176594010)
+    print(a.name)
     for i in range(len(client.guilds)):
         answer = answer + str(i+1) + "번째: " + str(client.guilds[i]) + "(" + str(client.guilds[i].id) + "):"+ str(len(client.guilds[i].members)) +"명\n"
         total += len(client.guilds[i].members)
@@ -855,7 +865,7 @@ async def on_message(message):
     list_message = message.content.split(' ')
     if message.author == client.user or message.author.bot:
         return
-    connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8')
+    connect = pymysql.connect(host=ip, user=user, password=pw,db='PUBG_BOT', charset='utf8')
     try:
         cur = connect .cursor()
         sql_prefix = "select * from SERVER_INFO where ID=" + str(message.guild.id)
@@ -895,7 +905,7 @@ async def on_message(message):
             await message.channel.send(embed=embed)
             return
         else:
-            connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8')
+            connect = pymysql.connect(host=ip, user=user, password=pw,db='PUBG_BOT', charset='utf8')
             cur = connect .cursor()
             if mode == "설정":
                 if not(is_admin(message) or is_manager(author_id)):
@@ -1042,7 +1052,7 @@ async def on_message(message):
     if message.content == perfix + "ping":
         log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
-            return
+            return 
         now = datetime.datetime.utcnow()
         response_ping_c = now - message.created_at
         reading_ping = float(str(response_ping_c.seconds) + "." +  str(response_ping_c.microseconds))
@@ -1092,7 +1102,7 @@ async def on_message(message):
             embed = discord.Embed(title="에러!",description="관리자는 블랙리스트에 추가할수 없습니다!", color=0xffd619)
             await message.channel.send(embed=embed)
             return
-        connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8') 
+        connect = pymysql.connect(host=ip, user=user, password=pw,db='PUBG_BOT', charset='utf8')
         cur = connect .cursor()
         sql_Black = "insert into BLACKLIST(ID) value(%s)"
         cur.execute(sql_Black,cache_data)
@@ -1125,7 +1135,7 @@ async def on_message(message):
             await message.channel.send(embed=embed)
             return
         cache_data1 = mention_id.replace("<@","",).replace(">","").replace("!","")
-        connect = pymysql.connect(host='192.168.0.10', user='PUBG_BOT', password='PASSW@RD!',db='PUBG_BOT', charset='utf8') 
+        connect = pymysql.connect(host=ip, user=user, password=pw,db='PUBG_BOT', charset='utf8')
         cur = connect .cursor()
         sql_delete = "delete from BLACKLIST where ID=%s"
         try:
