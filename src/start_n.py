@@ -224,23 +224,23 @@ header = {
 
 sample1 = { #마지막업데이트값의 샘플값입니다.
   "matches":{
-    "years":0,
-    "months":0,
-    "days":0,
+    "years":1,
+    "months":1,
+    "days":1,
     "hours":0,
     "minutes":0
   },
   "normal":{
-    "years":0,
-    "months":0,
-    "days":0,
+    "years":1,
+    "months":1,
+    "days":1,
     "hours":0,
     "minutes":0
   },
   "ranked":{
-    "years":0,
-    "months":0,
-    "days":0,
+    "years":1,
+    "months":1,
+    "days":1,
     "hours":0,
     "minutes":0
   }
@@ -405,6 +405,49 @@ async def player(nickname,message):
         return "False"
     return json_data["data"][0]["id"]
 
+async def player_lastupdate(player_id,pubg_type):
+    connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
+    cur = connect.cursor()
+    sql = "select last_update from player where id=%s"
+    cur.execute(sql,(str(player_id)))
+    cache = cur.fetchall()
+    time = cache[0][0]
+    connect.close()
+    date_json = json.loads(time)[str(pubg_type)]
+    return datetime.datetime(date_json["years"],date_json["months"],date_json["days"],hour=date_json["hours"],minute=date_json["minutes"])
+
+async def player_autopost(player_id,pubg_type):
+    first = await player_lastupdate(player_id,pubg_type)
+    second = datetime.datetime.now(timezone('UTC'))
+    delta = second - first
+    if delta.days >= 2:
+        return True
+    return False
+    
+async def player_lastupdate_insert(player_id,pubg_type,player_datetime):
+    years = player_datetime.year #분별
+    months = player_datetime.month
+    days = player_datetime.day
+    hours = player_datetime.hour
+    minutes = player_datetime.minute
+    connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8') #업데이트값 가져오기
+    cur = connect.cursor()
+    sql = "select last_update from player where id=%s"
+    cur.execute(sql,(str(player_id)))
+    cache = cur.fetchall()
+    date = cache[0][0]
+    date_json = json.loads(date)
+    date_json[pubg_type]["years"] = years #값 반영파트
+    date_json[pubg_type]["months"] = months
+    date_json[pubg_type]["days"] = days
+    date_json[pubg_type]["hours"] = hours
+    date_json[pubg_type]["minutes"] = minutes
+    sql = "UPDATE player SET last_update=%s WHERE id=%s"
+    cur.execute(sql,(json.dumps(date_json),str(player_id)))
+    connect.commit()
+    connect.close()
+    return
+
 async def player_name(player_id):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect.cursor()
@@ -469,6 +512,19 @@ async def season_status(player_id,season,message):
         cur.execute(sql,(str(player_id),str(season)))
         cache = cur.fetchall()
         return_value = json.loads(cache[0][0])
+        if await player_autopost(player_id,"normal"):
+            url = "https://api.pubg.com/shards/steam/players/" + str(player_id) + "/seasons/" + str(season)
+            response = await requests.get(url,headers=header)
+            if response.status_code == 200:
+                return_value = response.json()
+            else:
+                response_num(response,message)
+                return "Failed_Response"
+            sql = """insert into NORMAL_STATUS(id,html,season)
+                    values (%s, %s, %s)"""
+            cur.execute(sql, (player_id,json.dumps(return_value),season))
+            connect.commit()
+            await player_lastupdate_insert(player_id,"normal",datetime.datetime.now())
     except:
         url = "https://api.pubg.com/shards/steam/players/" + str(player_id) + "/seasons/" + str(season)
         response = await requests.get(url,headers=header)
@@ -481,6 +537,7 @@ async def season_status(player_id,season,message):
                 values (%s, %s, %s)"""
         cur.execute(sql, (player_id,json.dumps(return_value),season))
         connect.commit()
+        await player_lastupdate_insert(player_id,"normal",datetime.datetime.now())
     finally:
         connect.close()
     return return_value
@@ -500,6 +557,7 @@ async def season_status_update(player_id,season,message):
             values (%s, %s, %s)"""
         cur.execute(sql, (player_id,json.dumps(return_value),season))
         connect.commit()
+        await player_lastupdate_insert(player_id,"normal",datetime.datetime.now())
     except:
         connect.close()
     return return_value
@@ -552,6 +610,42 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
         msg1 = await message.channel.send(files=icons,embed=embed)
     else:
         msg1 = await message.channel.send(file=image(pubg_platform),embed=embed)
+    for i in range(4):
+        await msg1.add_reaction(str(i+1) + "\U0000FE0F\U000020E3")
+    msg2 = await message.channel.send("\U00000031\U0000FE0F\U000020E3 : 상세정보 \U00000032\U0000FE0F\U000020E3 : 전적 정보 업데이트 \U00000033\U0000FE0F\U000020E3 :  종합 전적 \U00000034\U0000FE0F\U000020E3 : 메뉴중지")
+    author = message.author
+    message_id = msg1.id
+    def check(reaction, user):
+        for i in range(4):
+            if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
+                return user == author and message_id == reaction.message.id
+    reaction,user = await client.wait_for('reaction_add', check=check)
+    if pubg_type == "fpp":
+        add_type = "-fpp"
+    else:
+        add_type = ""
+    if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        return
+    elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        update_json = await season_status_update(player_id,season,message)
+        if update_json == "Failed_Response":
+            return
+        await profile_mode(message,pubg_platform,pubg_type,mode,update_json,season,player_id)
+        return
+    elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        await profile_total(message,pubg_platform,pubg_type,update_json,season,player_id)
+        return
+    elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
+        await msg1.clear_reactions()
+        await msg2.delete()
+        return
+    return
 
 async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id):
     list_message = message.content.split(" ")
