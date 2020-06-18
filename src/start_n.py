@@ -224,6 +224,13 @@ header = {
 }
 
 sample1 = { #마지막업데이트값의 샘플값입니다.
+  "weapon":{
+    "years":1,
+    "months":1,
+    "days":1,
+    "hours":0,
+    "minutes":0
+  },
   "matches":{
     "years":1,
     "months":1,
@@ -262,7 +269,7 @@ async def matches(message,platform,update,update_msg,match,player_id,season):
                     return user.id == message.author.id and msg1.id==reaction.message.id
         for i in range(5):
             await msg1.add_reaction(str(i+1) +  "\U0000FE0F\U000020E3")
-        reaction, user = await client.wait_for('reaction_add', check=check1)
+        reaction, _ = await client.wait_for('reaction_add', check=check1)
         count = 1
         for i in range(5):
             if str(i+1) + "️⃣" == reaction.emoji:
@@ -403,7 +410,7 @@ async def player(nickname,message,pubg_platform):
         json_data = response.json()
     else:
         await response_num(response, message)
-        return "False"
+        return "Failed_Response"
     return json_data["data"][0]["id"]
 
 async def player_lastupdate(player_id,pubg_type):
@@ -497,6 +504,8 @@ async def player_info(message,nickname):
                 count = i
         pubg_platform = count
         pubg_id = await player(nickname,message,count)
+        if pubg_id == "Failed_Response":
+            return "Failed_Response", pubg_platform
         sql = """insert into player(id,name,last_update,platform)
                 values (%s, %s, %s, %s)"""
         cur.execute(sql, (pubg_id,nickname,json.dumps(sample1),count))
@@ -811,6 +820,76 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
         return
     return
 
+async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
+    list_message = message.content.split(" ")
+    icon = [image(pubg_platform),None]
+    embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
+    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_name(player_id) + "님의 전적")
+    json_c = pubg_json["data"]["attributes"]["rankedGameModeStats"][mode]
+    currentTier1 = json_c["currentTier"]["tier"]
+    currentTier2 = json_c["currentTier"]["subTier"]
+    bestTier1 = json_c["bestTier"]["tier"]
+    bestTier2 = json_c["bestTier"]["subTier"]
+    if currentTier1 == "Unranked" or currentTier1 == "Master":
+        tier_name1 = currentTier1
+    else:
+        tier_name1 = currentTier1 + " " + str(currentTier2)
+    if bestTier1 == "Unranked" or bestTier1 == "Master":
+        tier_name2 = bestTier1
+    else:
+        tier_name2 = bestTier1 + " " + str(bestTier2)
+    point1 = json_c["currentRankPoint"]
+    point2 = json_c["bestRankPoint"]
+    assists = json_c["assists"]
+    avgRank = json_c["avgRank"]
+    damageDealt = json_c["damageDealt"]
+    dBNOs = json_c["dBNOs"]
+    wins = json_c["wins"]
+    losses = json_c["deaths"]
+    total = json_c["roundsPlayed"]
+    top10 = str(round((total * json_c["top10Ratio"]) - wins,0))
+    kills = json_c["kills"]
+    kda = json_c["kda"]
+    embed.add_field(name="현재 점수:",value=tier_name1 + "(" + str(point1) + "점)",inline=True)
+    embed.add_field(name="최고 점수:",value=tier_name2 + "(" + str(point2) + "점)",inline=True)
+    embed.add_field(name="승/탑/패:",value=str(wins) + "승 " + top10 + "탑 " + str(losses) + "패",inline=True)
+    embed.add_field(name="킬(K/D/A):",value=str(kills) + "회(" + str(round(kda,1)) + "점)",inline=True)
+    embed.add_field(name="어시:",value=str(assists) + "회",inline=True)
+    embed.add_field(name="dBNOs:",value=str(dBNOs) + "회",inline=True)
+    embed.add_field(name="평균 등수:",value=str(round(avgRank,1)),inline=True)
+    embed.add_field(name="딜량:",value=str(round(damageDealt,2)),inline=True)
+    last_update = await player_lastupdate(player_id,"ranked")
+    embed.set_footer(text="최근 업데이트: " + last_update.strftime('%Y년 %m월 %d일 %p %I:%M'))
+    msg1 = await message.channel.send(file=image(pubg_platform),embed=embed)
+    for i in range(3):
+        await msg1.add_reaction(str(i+1) + "\U0000FE0F\U000020E3")
+    msg2 = await message.channel.send("\U00000031\U0000FE0F\U000020E3 : 개요 \U00000032\U0000FE0F\U000020E3 : 전적 업데이트 \U00000033\U0000FE0F\U000020E3 : 메뉴 종료")
+    author = message.author
+    message_id = msg1.id
+    def check(reaction, user):
+        for i in range(3):
+            if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
+                return user == author and message_id == reaction.message.id 
+    reaction,user = await client.wait_for('reaction_add', check=check)
+    if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        await ranked_total(message,pubg_platform,pubg_json,season,player_id)
+        return
+    elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        update_json = await ranked_status_update(player_id,season,message,pubg_platform)
+        if update_json == "Failed_Response":
+            return
+        await ranked_mode(message,pubg_platform,mode,update_json,season,player_id)
+        return
+    elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
+        await msg1.clear_reactions()
+        await msg2.delete()
+        return
+    return
+
 async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id):
     list_message = message.content.split(" ")
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
@@ -882,6 +961,72 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
         return
     return
 
+async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
+    list_message = message.content.split(" ")
+    embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
+    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_name(player_id) + "님의 전적")
+    game_mode = ["squad","squad-fpp"]
+    list_name = ["스쿼드(Squad)","스쿼드 1인칭(Squad)"]
+    count = 2
+    for i in range(count):
+        try:
+            json_c = pubg_json["data"]["attributes"]["rankedGameModeStats"][game_mode[i]]
+            currentTier1 = json_c["currentTier"]["tier"]
+            currentTier2 = json_c["currentTier"]["subTier"]
+            if currentTier1 == "Unranked" or currentTier1 == "Master":
+                tier_name = currentTier1
+            else:
+                tier_name = currentTier1 + " " + str(currentTier2)
+            #bestTier1 = json_c["bestTier"]["tier"]
+            #bestTier2 = json_c["bestTier"]["subTier"]
+            point = json_c["currentRankPoint"]
+            #point2 = json_c["bestRankPoint"]
+            wins = json_c["wins"]
+            losses = json_c["deaths"]
+            total = json_c["roundsPlayed"]
+            top10 = str(round((total * json_c["top10Ratio"]) - wins,0))
+            kills = json_c["kills"]
+            kda = json_c["kda"]
+            embed.add_field(name=list_name[i] + ":",value="티어: " + tier_name + "(" + str(point) + "점)"+ "\n" + str(wins) + "승" + top10 + "탑" + str(losses) + "패\n킬:" + str(kills) + "(KDA: " + str(round(kda,1)) + "점)",inline=True)
+        except:
+            embed.add_field(name=list_name[i] + ":",value="기록 없음",inline=True)
+    last_update = await player_lastupdate(player_id,"ranked")
+    embed.set_footer(text="최근 업데이트: " + last_update.strftime('%Y년 %m월 %d일 %p %I:%M'))
+    msg1 = await message.channel.send(file=image(pubg_platform),embed=embed)
+    for i in range(4):
+        await msg1.add_reaction(str(i+1) + "\U0000FE0F\U000020E3")
+    msg2 = await message.channel.send("\U00000031\U0000FE0F\U000020E3 : 3인칭(경쟁전) 전적 \U00000032\U0000FE0F\U000020E3 : 1인칭(경쟁전) 전적 \U00000033\U0000FE0F\U000020E3 : 전적 업데이트\U00000034\U0000FE0F\U000020E3 : 메뉴 종료")
+    author = message.author
+    message_id = msg1.id
+    def check(reaction, user):
+        for i in range(4):
+            if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
+                return user == author and message_id == reaction.message.id 
+    reaction,user = await client.wait_for('reaction_add', check=check)
+    if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        await ranked_mode(message,pubg_platform,"squad",pubg_json,season,player_id)
+        return
+    elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        await ranked_mode(message,pubg_platform,"squad-fpp",pubg_json,season,player_id)
+        return
+    elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
+        await msg1.delete()
+        await msg2.delete()
+        update_json = await ranked_status_update(player_id,season,message,pubg_platform)
+        if update_json == "Failed_Response":
+            return
+        await ranked_total(message,pubg_platform,update_json,season,player_id)
+        return
+    elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
+        await msg1.clear_reactions()
+        await msg2.delete()
+        return
+    return
+
 async def profile(message,perfix):
     list_message = message.content.split(" ")
     nickname = ""
@@ -903,11 +1048,17 @@ async def profile(message,perfix):
             a_nickname = await client.wait_for('message',check=check1,timeout=20)
             nickname = a_nickname.content
             if nickname == perfix + "취소":
+                await msg1.delete()
                 return
+            await msg1.delete()
         except asyncio.TimeoutError:
+            await msg1.delete()
             embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다!", color=0xaa0000)
             await message.channel.send(embed=embed)
-    pubg_id, pubg_platform = await player_info(message,nickname)
+            return
+    pubg_id,pubg_platform = await player_info(message,nickname)
+    if pubg_id == "Failed_Response":
+        return
     try:
         s_count = list_message[3]
         if len(s_count) < 2:
@@ -919,11 +1070,11 @@ async def profile(message,perfix):
     if pubg_type == "랭크":
         pubg_json = await ranked_status(pubg_id,season,message,pubg_platform)
         if list_message[0] == perfix + "전적":
-            pass
+            await ranked_total(message,pubg_platform,pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적1인칭":
-            pass
+            await ranked_mode(message,pubg_platform,"squad-fpp",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적3인칭":
-            pass
+            await ranked_mode(message,pubg_platform,"squad",pubg_json,season,pubg_id)
     elif pubg_type == "1인칭":
         pubg_json = await season_status(pubg_id,season,message,pubg_platform)
         if pubg_json == "Failed_Response":
@@ -1170,21 +1321,21 @@ async def on_message(message):
         log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
+        embed = discord.Embed(title="[시스템 정보]", color=0xffd619)
         data1 = str(psutil.cpu_percent(interval=None, percpu=False))
         data2 = str(psutil.virtual_memory().percent)
         data3 = str(psutil.disk_usage('/').percent)
         data4 = platform.system() + str(platform.release())
-        data5 = psutil.virtual_memory()
-        data6 = psutil.disk_usage('/')
         if platform.system() == "Linux":
             data7 = str(round(float(str(psutil.sensors_temperatures()).split('current=')[1].split(',')[0]),2))
+            embed.add_field(name="CPU:", value=data1 + "% (온도:" + data7 + "℃)", inline=True)
+        else:
+            embed.add_field(name="CPU:", value=data1 + "%", inline=True)
         data8 = datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
         total_RAM,total_type_RAM = change_data(psutil.virtual_memory()[0])
         used_RAM,used_type_RAM = change_data(psutil.virtual_memory()[3])
         total_SSD,total_type_SSD = change_data(psutil.disk_usage('/')[0])
         used_SSD,used_type_SSD = change_data(psutil.disk_usage('/')[1])
-        embed = discord.Embed(title="[시스템 정보]", color=0xffd619)
-        embed.add_field(name="CPU:", value=data1 + "%", inline=True)
         embed.add_field(name="부팅시간:", value=data8, inline=True)
         embed.add_field(name="메모리:", value=data2 + "%(" + str(used_RAM) + str(used_type_RAM) + '/' + str(total_RAM) + str(total_type_RAM) + ')', inline=False)
         embed.add_field(name="저장공간:", value=data3 +"%(" + str(used_SSD) + str(used_type_SSD) + '/' + str(total_SSD) + str(total_type_SSD) + ')' , inline=False)
