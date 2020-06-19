@@ -209,6 +209,11 @@ db_user = db_json["mysql"]["user"]
 db_pw = db_json["mysql"]["password"]
 db_name = db_json["mysql"]["database"]
 
+map_link_f = open(directory + type_software + "data" + type_software + "map_link.json",mode='r')
+map_link_r = map_link_f.read()
+map_link_f.close()
+map_link = json.loads(map_link_r)
+
 connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8') #클라이언트 API키 불러오기.
 cur = connect.cursor()
 cur.execute("SELECT * from PUBG_BOT")
@@ -728,7 +733,11 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
         await profile_mode_status(message,pubg_platform,pubg_type,mode,update_json,season,player_id)
         return
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
-        await msg1.clear_reactions()
+        try:
+            await msg1.clear_reactions()
+        except discord.Forbidden:
+            embed_waring = discord.Embed(title="\U000026A0경고!",description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.", color=0xffd619)
+            await message.channel.send(embed=embed_waring)
         await msg2.delete()
         return
 
@@ -815,7 +824,11 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
         await profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id)
         return
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
-        await msg1.clear_reactions()
+        try:
+            await msg1.clear_reactions()
+        except discord.Forbidden:
+            embed_waring = discord.Embed(title="\U000026A0경고!",description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.", color=0xffd619)
+            await message.channel.send(embed=embed_waring)
         await msg2.delete()
         return
     return
@@ -832,8 +845,10 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
     bestTier2 = json_c["bestTier"]["subTier"]
     if currentTier1 == "Unranked" or currentTier1 == "Master":
         tier_name1 = currentTier1
+        rank_icon = currentTier1 + ".png"
     else:
         tier_name1 = currentTier1 + " " + str(currentTier2)
+        rank_icon = currentTier1 + "-" + str(currentTier2) + ".png"
     if bestTier1 == "Unranked" or bestTier1 == "Master":
         tier_name2 = bestTier1
     else:
@@ -850,6 +865,8 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
     top10 = str(round((total * json_c["top10Ratio"]) - wins,0))
     kills = json_c["kills"]
     kda = json_c["kda"]
+    embed.set_thumbnail(url="attachment://" + rank_icon)
+    icon[1] = discord.File(directory + type_software + "assets" + type_software + "Insignias" + type_software + rank_icon)
     embed.add_field(name="현재 점수:",value=tier_name1 + "(" + str(point1) + "점)",inline=True)
     embed.add_field(name="최고 점수:",value=tier_name2 + "(" + str(point2) + "점)",inline=True)
     embed.add_field(name="승/탑/패:",value=str(wins) + "승 " + top10 + "탑 " + str(losses) + "패",inline=True)
@@ -860,7 +877,7 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
     embed.add_field(name="딜량:",value=str(round(damageDealt,2)),inline=True)
     last_update = await player_lastupdate(player_id,"ranked")
     embed.set_footer(text="최근 업데이트: " + last_update.strftime('%Y년 %m월 %d일 %p %I:%M'))
-    msg1 = await message.channel.send(file=image(pubg_platform),embed=embed)
+    msg1 = await message.channel.send(files=icon,embed=embed)
     for i in range(3):
         await msg1.add_reaction(str(i+1) + "\U0000FE0F\U000020E3")
     msg2 = await message.channel.send("\U00000031\U0000FE0F\U000020E3 : 개요 \U00000032\U0000FE0F\U000020E3 : 전적 업데이트 \U00000033\U0000FE0F\U000020E3 : 메뉴 종료")
@@ -885,7 +902,11 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
         await ranked_mode(message,pubg_platform,mode,update_json,season,player_id)
         return
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
-        await msg1.clear_reactions()
+        try:
+            await msg1.clear_reactions()
+        except discord.Forbidden:
+            embed_waring = discord.Embed(title="\U000026A0경고!",description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.", color=0xffd619)
+            await message.channel.send(embed=embed_waring)
         await msg2.delete()
         return
     return
@@ -956,7 +977,11 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
         await profile_total(message,pubg_platform,pubg_type,update_json,season,player_id)
         return
     elif reaction.emoji == "\U00000035\U0000FE0F\U000020E3":
-        await msg1.clear_reactions()
+        try:
+            await msg1.clear_reactions()
+        except discord.Forbidden:
+            embed_waring = discord.Embed(title="\U000026A0경고!",description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.", color=0xffd619)
+            await message.channel.send(embed=embed_waring)
         await msg2.delete()
         return
     return
@@ -1022,7 +1047,11 @@ async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
         await ranked_total(message,pubg_platform,update_json,season,player_id)
         return
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
-        await msg1.clear_reactions()
+        try:
+            await msg1.clear_reactions()
+        except discord.Forbidden:
+            embed_waring = discord.Embed(title="\U000026A0경고!",description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.", color=0xffd619)
+            await message.channel.send(embed=embed_waring)
         await msg2.delete()
         return
     return
@@ -1267,6 +1296,7 @@ async def on_message(message):
             embed = discord.Embed(title="에러",description=message.guild.name + "정보를 불러오기에 실패했습니다..", color=0xffd619)
             await message.channel.send(embed=embed)
             return
+        plt.clf()
         plt.title('Max Players')
         plt.plot(DB_datetime,DB_players,color='blue', marker='o',label = 'Max Players')
         plt.xlabel('time')
@@ -1403,6 +1433,66 @@ async def on_message(message):
         connect.close()
         embed = discord.Embed(title="Blacklist!",description=mention_id + "가 블랙리스트에서 제거되었습니다!", color=0xaa0000)
         await message.channel.send(embed=embed)
+        return
+    if message.content == perfix + '에란겔':
+        log_info(message.guild,message.channel,message.author,message.content)
+        if is_banned(author_id,message):
+            return
+        embed = discord.Embed(title="지도", color=0xffd619)
+        map_picture = discord.File(directory + type_software + "assets" + type_software + "Maps" + type_software + "Erangel_Remastered_Main_Low_Res.png")
+        embed.add_field(name="원본(텍스트 삭제)",value="[링크](" + map_link["Erangel"]["No_Text_Low_Res"] + ")",inline=True)
+        embed.add_field(name="고화질",value="[링크](" + map_link["Erangel"]["High_Res"] + ")",inline=True)
+        embed.add_field(name="고화질(텍스트 삭제)",value="[링크](" + map_link["Erangel"]["No_Text_High_Res"] + ")",inline=True)
+        embed.set_image(url="attachment://Erangel_Remastered_Main_Low_Res.png")
+        await message.channel.send(file=map_picture,embed=embed)
+        return
+    if message.content == perfix + '미라마':
+        log_info(message.guild,message.channel,message.author,message.content)
+        if is_banned(author_id,message):
+            return
+        embed = discord.Embed(title="지도", color=0xffd619)
+        map_picture = discord.File(directory + type_software + "assets" + type_software + "Maps" + type_software + "Miramar_Main_Low_Res.png")
+        embed.add_field(name="원본(텍스트 삭제)",value="[링크](" + map_link["Miramar"]["No_Text_Low_Res"] + ")",inline=True)
+        embed.add_field(name="고화질",value="[링크](" + map_link["Miramar"]["High_Res"] + ")",inline=True)
+        embed.add_field(name="고화질(텍스트 삭제)",value="[링크](" + map_link["Miramar"]["No_Text_High_Res"] + ")",inline=True)
+        embed.set_image(url="attachment://Miramar_Main_Low_Res.png")
+        await message.channel.send(file=map_picture,embed=embed)
+        return
+    if message.content == perfix + '사녹':
+        log_info(message.guild,message.channel,message.author,message.content)
+        if is_banned(author_id,message):
+            return
+        embed = discord.Embed(title="지도", color=0xffd619)
+        map_picture = discord.File(directory + type_software + "assets" + type_software + "Maps" + type_software + "Sanhok_Main_Low_Res.png")
+        embed.add_field(name="원본(텍스트 삭제)",value="[링크](" + map_link["Sanhok"]["No_Text_Low_Res"] + ")",inline=True)
+        embed.add_field(name="고화질",value="[링크](" + map_link["Sanhok"]["High_Res"] + ")",inline=True)
+        embed.add_field(name="고화질(텍스트 삭제)",value="[링크](" + map_link["Sanhok"]["No_Text_High_Res"] + ")",inline=True)
+        embed.set_image(url="attachment://Sanhok_Main_Low_Res.png")
+        await message.channel.send(file=map_picture,embed=embed)
+        return
+    if message.content == perfix + '비켄디':
+        log_info(message.guild,message.channel,message.author,message.content)
+        if is_banned(author_id,message):
+            return
+        embed = discord.Embed(title="지도", color=0xffd619)
+        map_picture = discord.File(directory + type_software + "assets" + type_software + "Maps" + type_software + "Vikendi_Main_Low_Res.png")
+        embed.add_field(name="원본(텍스트 삭제)",value="[링크](" + map_link["Vikendi"]["No_Text_Low_Res"] + ")",inline=True)
+        embed.add_field(name="고화질",value="[링크](" + map_link["Vikendi"]["High_Res"] + ")",inline=True)
+        embed.add_field(name="고화질(텍스트 삭제)",value="[링크](" + map_link["Vikendi"]["No_Text_High_Res"] + ")",inline=True)
+        embed.set_image(url="attachment://Vikendi_Main_Low_Res.png")
+        await message.channel.send(file=map_picture,embed=embed)
+        return
+    if message.content == perfix + '캠프자칼' or message.content == '훈련장':
+        log_info(message.guild,message.channel,message.author,message.content)
+        if is_banned(author_id,message):
+            return
+        embed = discord.Embed(title="지도", color=0xffd619)
+        map_picture = discord.File(directory + type_software + "assets" + type_software + "Maps" + type_software + "Camp_Jackal_Main_Low_Res.png")
+        embed.add_field(name="원본(텍스트 삭제)",value="[링크](" + map_link["Camp_Jackal"]["No_Text_Low_Res"] + ")",inline=True)
+        embed.add_field(name="고화질",value="[링크](" + map_link["Camp_Jackal"]["High_Res"] + ")",inline=True)
+        embed.add_field(name="고화질(텍스트 삭제)",value="[링크](" + map_link["Camp_Jackal"]["No_Text_High_Res"] + ")",inline=True)
+        embed.set_image(url="attachment://Camp_Jackal_Main_Low_Res.png")
+        await message.channel.send(file=map_picture,embed=embed)
         return
 
 @client.event
