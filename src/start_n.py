@@ -209,6 +209,9 @@ db_user = db_json["mysql"]["user"]
 db_pw = db_json["mysql"]["password"]
 db_name = db_json["mysql"]["database"]
 
+sys.path.append(directory + type_software + "modules") #다른 파일내 함수추가
+import player as p_info
+
 map_link_f = open(directory + type_software + "data" + type_software + "map_link.json",mode='r')
 map_link_r = map_link_f.read()
 map_link_f.close()
@@ -418,7 +421,7 @@ async def player(nickname,message,pubg_platform):
         return "Failed_Response"
     return json_data["data"][0]["id"]
 
-async def player_lastupdate(player_id,pubg_type):
+"""async def player_lastupdate(player_id,pubg_type):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect.cursor()
     sql = "select last_update from player where id=%s"
@@ -469,7 +472,7 @@ async def player_name(player_id):
     cache = cur.fetchall()
     player_name = cache[0][0]
     connect.close()
-    return player_name
+    return player_name"""
 
 async def player_info(message,nickname):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
@@ -522,12 +525,13 @@ async def player_info(message,nickname):
 async def season_status(player_id,season,message,pubg_platform):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect.cursor()
+    player_module = p_info.player(player_id)
     try:
         sql = "select html from NORMAL_STATUS where id=%s and season=%s"
         cur.execute(sql,(str(player_id),str(season)))
         cache = cur.fetchall()
         return_value = json.loads(cache[0][0])
-        if await player_autopost(player_id,"normal"):
+        if await player_module.autopost("normal"):
             url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season)
             response = await requests.get(url,headers=header)
             if response.status_code == 200:
@@ -538,8 +542,10 @@ async def season_status(player_id,season,message,pubg_platform):
             sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s"
             cur.execute(sql, (json.dumps(return_value),player_id))
             connect.commit()
-            await player_lastupdate_insert(player_id,"normal",datetime.datetime.now())
+            await player_module.lastupdate_insert("normal",datetime.datetime.now())
     except:
+        raise
+    else:
         url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season)
         response = await requests.get(url,headers=header)
         if response.status_code == 200:
@@ -551,7 +557,7 @@ async def season_status(player_id,season,message,pubg_platform):
                 values (%s, %s, %s)"""
         cur.execute(sql, (player_id,json.dumps(return_value),season))
         connect.commit()
-        await player_lastupdate_insert(player_id,"normal",datetime.datetime.now())
+        await player_module.lastupdate_insert("normal",datetime.datetime.now())
     finally:
         connect.close()
     return return_value
@@ -559,6 +565,7 @@ async def season_status(player_id,season,message,pubg_platform):
 async def season_status_update(player_id,season,message,pubg_platform):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect.cursor()
+    player_module = p_info.player(player_id)
     try:
         url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season)
         response = await requests.get(url,headers=header)
@@ -570,7 +577,7 @@ async def season_status_update(player_id,season,message,pubg_platform):
         sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s"
         cur.execute(sql, (json.dumps(return_value),player_id))
         connect.commit()
-        await player_lastupdate_insert(player_id,"normal",datetime.datetime.now())
+        await player_module.lastupdate_insert("normal",datetime.datetime.now())
     except:
         connect.close()
     return return_value
@@ -579,12 +586,13 @@ async def season_status_update(player_id,season,message,pubg_platform):
 async def ranked_status(player_id,season,message,pubg_platform):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect.cursor()
+    player_module = p_info.player(player_id)
     try:
         sql = "select html from RANKED_STATUS where id=%s and season=%s"
         cur.execute(sql,(str(player_id),str(season)))
         cache = cur.fetchall()
         return_value = json.loads(cache[0][0])
-        if await player_autopost(player_id,"ranked"):
+        if await player_module.autopost("ranked"):
             url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season) + "/ranked"
             response = await requests.get(url,headers=header)
             if response.status_code == 200:
@@ -595,7 +603,7 @@ async def ranked_status(player_id,season,message,pubg_platform):
             sql = "UPDATE RANKED_STATUS SET html=%s WHERE id=%s"
             cur.execute(sql, (json.dumps(return_value),player_id))
             connect.commit()
-            await player_lastupdate_insert(player_id,"ranked",datetime.datetime.now())
+            await player_module.lastupdate_insert("ranked",datetime.datetime.now())
     except:
         url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season) + "/ranked"
         response = await requests.get(url,headers=header)
@@ -608,7 +616,7 @@ async def ranked_status(player_id,season,message,pubg_platform):
                 values (%s, %s, %s)"""
         cur.execute(sql, (player_id,json.dumps(return_value),season))
         connect.commit()
-        await player_lastupdate_insert(player_id,"ranked",datetime.datetime.now())
+        await player_module.lastupdate_insert("ranked",datetime.datetime.now())
     finally:
         connect.close()
     return return_value
@@ -616,6 +624,7 @@ async def ranked_status(player_id,season,message,pubg_platform):
 async def ranked_status_update(player_id,season,message,pubg_platform):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect.cursor()
+    player_module = p_info.player(player_id)
     try:
         url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season) + "/ranked"
         response = await requests.get(url,headers=header)
@@ -627,14 +636,15 @@ async def ranked_status_update(player_id,season,message,pubg_platform):
         sql = "UPDATE RANKED_STATUS SET id=%s WHERE html=%s"
         cur.execute(sql, (json.dumps(return_value),player_id))
         connect.commit()
-        await player_lastupdate_insert(player_id,"ranked",datetime.datetime.now())
+        await player_module.lastupdate_insert("ranked",datetime.datetime.now())
     except:
         connect.close()
     return return_value
 
 async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,season,player_id):
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
-    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_name(player_id) + "님의 전적")
+    player_module = p_info.player(player_id)
+    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
     json_c = pubg_json["data"]["attributes"]["gameModeStats"][mode]
     assists = json_c["assists"]
     boosts = json_c["boosts"]
@@ -702,7 +712,7 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
     embed.add_field(name="게임 플레이:",value=data3,inline=False)
     embed.add_field(name="이동 거리:",value=data4,inline=False)
     embed.add_field(name="기타:",value=data5,inline=False)
-    last_update = await player_lastupdate(player_id,"normal")
+    last_update = await player_module.lastupdate("normal")
     embed.set_footer(text="최근 업데이트: " + last_update.strftime('%Y년 %m월 %d일 %p %I:%M'))
     if int(season_count) < 7:
         icons = [image(pubg_platform),icon]
@@ -745,7 +755,8 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
     list_message = message.content.split(" ")
     icon = [image(pubg_platform),None]
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
-    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_name(player_id) + "님의 전적")
+    player_module = p_info.player(player_id)
+    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
     json_c = pubg_json["data"]["attributes"]["gameModeStats"][mode]
     win = str(json_c["wins"])
     top10 = str(json_c["top10s"])
@@ -784,7 +795,7 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
     embed.add_field(name="헤드샷:",value=headshot + "%",inline=True)
     embed.add_field(name="딜량:",value=deals,inline=True)
     embed.add_field(name="거리:",value=distance + "m",inline=True)
-    last_update = await player_lastupdate(player_id,"normal")
+    last_update = await player_module.lastupdate("normal")
     embed.set_footer(text="최근 업데이트: " + last_update.strftime('%Y년 %m월 %d일 %p %I:%M'))
     if int(season_count) < 7:
         icons = [image(pubg_platform),icon]
@@ -837,7 +848,8 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
     list_message = message.content.split(" ")
     icon = [image(pubg_platform),None]
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
-    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_name(player_id) + "님의 전적")
+    player_module = p_info.player(player_id)
+    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
     json_c = pubg_json["data"]["attributes"]["rankedGameModeStats"][mode]
     currentTier1 = json_c["currentTier"]["tier"]
     currentTier2 = json_c["currentTier"]["subTier"]
@@ -875,7 +887,7 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
     embed.add_field(name="dBNOs:",value=str(dBNOs) + "회",inline=True)
     embed.add_field(name="평균 등수:",value=str(round(avgRank,1)),inline=True)
     embed.add_field(name="딜량:",value=str(round(damageDealt,2)),inline=True)
-    last_update = await player_lastupdate(player_id,"ranked")
+    last_update = await player_module.lastupdate("ranked")
     embed.set_footer(text="최근 업데이트: " + last_update.strftime('%Y년 %m월 %d일 %p %I:%M'))
     msg1 = await message.channel.send(files=icon,embed=embed)
     for i in range(3):
@@ -914,7 +926,8 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
 async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id):
     list_message = message.content.split(" ")
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
-    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_name(player_id) + "님의 전적")
+    player_module = p_info.player(player_id)
+    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
     if pubg_type == "tpp":
         game_mode = ["solo","duo","squad"]
         list_name = ["솔로(Solo)","듀오(Duo)","스쿼드(Squad)"]
@@ -936,7 +949,7 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
         else:
             KD = str(round(int(kills) / 1,2))
         embed.add_field(name=list_name[i] + ":",value=win + "승 " + top10 + "탑 " + lose + "패\n" + a_playtime + "\n킬: " + kills + "회(" + KD + "점)",inline=True)
-    last_update = await player_lastupdate(player_id,"normal")
+    last_update = await player_module.lastupdate("normal")
     embed.set_footer(text="최근 업데이트: " + last_update.strftime('%Y년 %m월 %d일 %p %I:%M'))
     msg1 = await message.channel.send(file=image(pubg_platform),embed=embed)
     for i in range(5):
@@ -989,7 +1002,8 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
 async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
     list_message = message.content.split(" ")
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
-    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_name(player_id) + "님의 전적")
+    player_module = p_info.player(player_id)
+    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
     game_mode = ["squad","squad-fpp"]
     list_name = ["스쿼드(Squad)","스쿼드 1인칭(Squad)"]
     count = 2
@@ -1015,7 +1029,7 @@ async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
             embed.add_field(name=list_name[i] + ":",value="티어: " + tier_name + "(" + str(point) + "점)"+ "\n" + str(wins) + "승" + top10 + "탑" + str(losses) + "패\n킬:" + str(kills) + "(KDA: " + str(round(kda,1)) + "점)",inline=True)
         except:
             embed.add_field(name=list_name[i] + ":",value="기록 없음",inline=True)
-    last_update = await player_lastupdate(player_id,"ranked")
+    last_update = await player_module.lastupdate("ranked")
     embed.set_footer(text="최근 업데이트: " + last_update.strftime('%Y년 %m월 %d일 %p %I:%M'))
     msg1 = await message.channel.send(file=image(pubg_platform),embed=embed)
     for i in range(4):
