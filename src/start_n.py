@@ -544,8 +544,6 @@ async def season_status(player_id,season,message,pubg_platform):
             connect.commit()
             await player_module.lastupdate_insert("normal",datetime.datetime.now())
     except:
-        raise
-    else:
         url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season)
         response = await requests.get(url,headers=header)
         if response.status_code == 200:
