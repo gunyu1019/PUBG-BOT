@@ -154,12 +154,9 @@ def time_num(playtime): #시간 계산, 불필요한 월단위, 일단위 등의
                 if  playtime.minute == 0:
                     return str(playtime.second)  + "초"
                 return str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
-            else:
-                return str(playtime.hour)  + "시간 " + str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
-        else:
-            return str(playtime.day-1)  + "일 " + str(playtime.hour)  + "시간 " + str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
-    else:
-        return str(playtime.month-1)  + "일 " + str(playtime.day-1)  + "일 " + str(playtime.hour)  + "시간 " + str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
+            return str(playtime.hour)  + "시간 " + str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
+        return str(playtime.day-1)  + "일 " + str(playtime.hour)  + "시간 " + str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
+    return str(playtime.month-1)  + "일 " + str(playtime.day-1)  + "일 " + str(playtime.hour)  + "시간 " + str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
 
 async def response_num(response,message): #에러 발생시, 코드를 통하여 분석
     a_num = int(response.status_code)
