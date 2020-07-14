@@ -256,7 +256,7 @@ sample1 = { #마지막업데이트값의 샘플값입니다.
 
 DB_players = [0] * 12
 DB_datetime = ["starting"] * 12
-
+"""
 async def matches(message,platform,update,update_msg,match,player_id,season):
     if update == 1:
          match_id = match
@@ -399,7 +399,7 @@ async def matches(message,platform,update,update_msg,match,player_id,season):
         else:
             await response_num(response1,message)
     return
-
+"""
 async def player(nickname,message,pubg_platform):
     response = await requests.get("https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players?filter[playerNames]=" + nickname, headers=header)
     if response.status_code == 200:
@@ -409,7 +409,8 @@ async def player(nickname,message,pubg_platform):
         return "Failed_Response"
     return json_data["data"][0]["id"]
 
-"""async def player_lastupdate(player_id,pubg_type):
+"""
+async def player_lastupdate(player_id,pubg_type):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect.cursor()
     sql = "select last_update from player where id=%s"
@@ -460,7 +461,8 @@ async def player_name(player_id):
     cache = cur.fetchall()
     player_name = cache[0][0]
     connect.close()
-    return player_name"""
+    return player_name
+"""
 
 async def player_info(message,nickname):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
