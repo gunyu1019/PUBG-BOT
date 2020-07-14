@@ -52,7 +52,7 @@ def is_banned(user_id,message):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect .cursor()
     sql_prefix = "select * from BLACKLIST"
-    cur.execute(pymysql.escape_string(sql_prefix))
+    cur.execute(sql_prefix)
     banned_list = cur.fetchall()
     connect.close()
     for banned in banned_list:
@@ -469,7 +469,7 @@ async def player_info(message,nickname):
     cur = connect.cursor()
     try:
         sql = "select id,platform from player where name=%s"
-        cur.execute(pymysql.escape_string(sql),(str(nickname)))
+        cur.execute(sql,(str(nickname)))
         cache = cur.fetchall()
         pubg_id = cache[0][0]
         pubg_platform = cache[0][1]
@@ -506,7 +506,7 @@ async def player_info(message,nickname):
             return "Failed_Response", pubg_platform
         sql = """insert into player(id,name,last_update,platform)
                 values (%s, %s, %s, %s)"""
-        cur.execute(pymysql.escape_string(sql), (pubg_id,nickname,json.dumps(sample1),count))
+        cur.execute(sql, (pubg_id,nickname,json.dumps(sample1),count))
         connect.commit()
     finally:
         connect.close()
@@ -518,7 +518,7 @@ async def season_status(player_id,season,message,pubg_platform):
     player_module = p_info.player(player_id)
     try:
         sql = "select html from NORMAL_STATUS where id=%s and season=%s"
-        cur.execute(pymysql.escape_string(sql),(str(player_id),str(season)))
+        cur.execute(sql,(str(player_id),str(season)))
         cache = cur.fetchall()
         return_value = json.loads(cache[0][0])
         if await player_module.autopost("normal"):
@@ -530,7 +530,7 @@ async def season_status(player_id,season,message,pubg_platform):
                 response_num(response,message)
                 return "Failed_Response"
             sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s"
-            cur.execute(pymysql.escape_string(sql), (json.dumps(return_value),player_id))
+            cur.execute(sql, (json.dumps(return_value),player_id))
             connect.commit()
             await player_module.lastupdate_insert("normal",datetime.datetime.now())
     except:
@@ -543,7 +543,7 @@ async def season_status(player_id,season,message,pubg_platform):
             return "Failed_Response"
         sql = """insert into NORMAL_STATUS(id,html,season)
                 values (%s, %s, %s)"""
-        cur.execute(pymysql.escape_string(sql), (player_id,json.dumps(return_value),season))
+        cur.execute(sql, (player_id,json.dumps(return_value),season))
         connect.commit()
         await player_module.lastupdate_insert("normal",datetime.datetime.now())
     finally:
@@ -563,7 +563,7 @@ async def season_status_update(player_id,season,message,pubg_platform):
             response_num(response,message)
             return "Failed_Response"
         sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s"
-        cur.execute(pymysql.escape_string(sql), (json.dumps(return_value),player_id))
+        cur.execute(sql, (json.dumps(return_value),player_id))
         connect.commit()
         await player_module.lastupdate_insert("normal",datetime.datetime.now())
     except:
@@ -577,7 +577,7 @@ async def ranked_status(player_id,season,message,pubg_platform):
     player_module = p_info.player(player_id)
     try:
         sql = "select html from RANKED_STATUS where id=%s and season=%s"
-        cur.execute(pymysql.escape_string(sql),(str(player_id),str(season)))
+        cur.execute(sql,(str(player_id),str(season)))
         cache = cur.fetchall()
         return_value = json.loads(cache[0][0])
         if await player_module.autopost("ranked"):
@@ -589,7 +589,7 @@ async def ranked_status(player_id,season,message,pubg_platform):
                 response_num(response,message)
                 return "Failed_Response"
             sql = "UPDATE RANKED_STATUS SET html=%s WHERE id=%s"
-            cur.execute(pymysql.escape_string (sql), (json.dumps(return_value),player_id))
+            cur.execute(sql, (json.dumps(return_value),player_id))
             connect.commit()
             await player_module.lastupdate_insert("ranked",datetime.datetime.now())
     except:
@@ -602,7 +602,7 @@ async def ranked_status(player_id,season,message,pubg_platform):
             return "Failed_Response"
         sql = """insert into RANKED_STATUS(id,html,season)
                 values (%s, %s, %s)"""
-        cur.execute(pymysql.escape_string(sql), (player_id,json.dumps(return_value),season))
+        cur.execute(sql, (player_id,json.dumps(return_value),season))
         connect.commit()
         await player_module.lastupdate_insert("ranked",datetime.datetime.now())
     finally:
@@ -622,7 +622,7 @@ async def ranked_status_update(player_id,season,message,pubg_platform):
             response_num(response,message)
             return "Failed_Response"
         sql = "UPDATE RANKED_STATUS SET id=%s WHERE html=%s"
-        cur.execute(pymysql.escape_string(sql), (json.dumps(return_value),player_id))
+        cur.execute(sql, (json.dumps(return_value),player_id))
         connect.commit()
         await player_module.lastupdate_insert("ranked",datetime.datetime.now())
     except:
@@ -1141,7 +1141,7 @@ async def on_message(message):
     try:
         cur = connect .cursor()
         sql_prefix = "select * from SERVER_INFO where ID=" + str(message.guild.id)
-        cur.execute(pymysql.escape_string (sql_prefix))
+        cur.execute(sql_prefix)
         cache = cur.fetchall()
         perfix = cache[0][1]
     except:
@@ -1199,14 +1199,14 @@ async def on_message(message):
                     connect.close()
                     return
                 sql_T = "select EXISTS (select * from SERVER_INFO where ID=" + str(message.guild.id) + ") as success"
-                cur.execute(pymysql.escape_string (sql_T))
+                cur.execute(sql_T)
                 c_TF = cur.fetchall()[0][0]
                 if c_TF == 0:
                     sql = "insert into SERVER_INFO(ID,PERFIX) values (%s, %s)"
-                    cur.execute(pymysql.escape_string(sql),(message.guild.id,n_perfix))
+                    cur.execute(sql,(message.guild.id,n_perfix))
                 else:
                     sql = "update SERVER_INFO set PERFIX='" + n_perfix + "' where ID=" + str(message.guild.id)
-                    cur.execute(pymysql.escape_string(sql))
+                    cur.execute(sql)
                 embed = discord.Embed(title="접두어",description=message.guild.name + "서버의 접두어는 " + n_perfix + "(명령어)으로 성공적으로 설정되었습니다.", color=0xffd619)
                 await message.channel.send(embed=embed)
                 connect.commit()
@@ -1218,13 +1218,13 @@ async def on_message(message):
                     connect.close()
                     return
                 sql_T = "select EXISTS (select * from SERVER_INFO where ID=" + str(message.guild.id) + ") as success"
-                cur.execute(pymysql.escape_string(sql_T))
+                cur.execute(sql_T)
                 c_TF = cur.fetchall()[0][0]
                 if c_TF == 0:
                     embed = discord.Embed(title="접두어",description="접두어가 이미 기본설정(!=)으로 되어 있습니다...", color=0xffd619)
                 else:
                     sql = "update SERVER_INFO set PERFIX='!=' where ID=" + str(message.guild.id)
-                    cur.execute(pymysql.escape_string(sql))
+                    cur.execute(sql)
                     embed = discord.Embed(title="접두어",description=message.guild.name + "서버의 접두어는 !=(명령어)으로 성공적으로 초기화가 완료되었습니다.", color=0xffd619)
                     connect.commit()
                 connect.close()
@@ -1232,7 +1232,7 @@ async def on_message(message):
             elif mode == "정보":
                 try:
                     sql_perfix = "select * from SERVER_INFO where ID=" + str(message.guild.id)
-                    cur.execute(pymysql.escape_string(sql_perfix))
+                    cur.execute(sql_perfix)
                     c_perfix = cur.fetchall()
                     embed = discord.Embed(title="접두어",description=message.guild.name + "서버의 접두어는 " + str(c_perfix[0][1]) + "(명령어)입니다.", color=0xffd619)
                 except:
@@ -1372,7 +1372,7 @@ async def on_message(message):
         connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
         cur = connect .cursor()
         sql_Black = "insert into BLACKLIST(ID) value(%s)"
-        cur.execute(pymysql.escape_string(sql_Black),cache_data)
+        cur.execute(sql_Black,cache_data)
         connect.commit()
         connect.close()
         embed = discord.Embed(title="Blacklist!",description=mention_id + "가 블랙리스트에 추가되었습니다!", color=0xaa0000)
@@ -1406,7 +1406,7 @@ async def on_message(message):
         cur = connect .cursor()
         sql_delete = "delete from BLACKLIST where ID=%s"
         try:
-            cur.execute(pymysql.escape_string(sql_delete),cache_data1)
+            cur.execute(sql_delete,cache_data1)
         except:
             embed = discord.Embed(title="Blacklist!",description=mention_id + "는, 블랙리스트에 추가되어 있지 않습니다.", color=0xaa0000)
             await message.channel.send(embed=embed)
