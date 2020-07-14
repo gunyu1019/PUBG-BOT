@@ -727,7 +727,6 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
         if update_json == "Failed_Response":
             return
         await profile_mode_status(message,pubg_platform,pubg_type,mode,update_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         try:
             await msg1.clear_reactions()
@@ -735,7 +734,7 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
             embed_waring = discord.Embed(title="\U000026A0경고!",description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.", color=0xffd619)
             await message.channel.send(embed=embed_waring)
         await msg2.delete()
-        return
+    return
 
 async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,player_id):
     list_message = message.content.split(" ")
@@ -806,7 +805,6 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
         await msg1.delete()
         await msg2.delete()
         await profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
@@ -814,12 +812,10 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
         if update_json == "Failed_Response":
             return
         await profile_mode(message,pubg_platform,pubg_type,mode,update_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
         await profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
         try:
             await msg1.clear_reactions()
@@ -827,7 +823,6 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
             embed_waring = discord.Embed(title="\U000026A0경고!",description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.", color=0xffd619)
             await message.channel.send(embed=embed_waring)
         await msg2.delete()
-        return
     return
 
 async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
@@ -890,7 +885,6 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
         await msg1.delete()
         await msg2.delete()
         await ranked_total(message,pubg_platform,pubg_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
@@ -898,7 +892,6 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
         if update_json == "Failed_Response":
             return
         await ranked_mode(message,pubg_platform,mode,update_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         try:
             await msg1.clear_reactions()
@@ -906,7 +899,6 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
             embed_waring = discord.Embed(title="\U000026A0경고!",description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.", color=0xffd619)
             await message.channel.send(embed=embed_waring)
         await msg2.delete()
-        return
     return
 
 async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id):
@@ -956,17 +948,14 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
         await msg1.delete()
         await msg2.delete()
         await profile_mode(message,pubg_platform,"fpp","solo" + add_type,pubg_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
         await profile_mode(message,pubg_platform,"fpp","duo" + add_type,pubg_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
         await profile_mode(message,pubg_platform,"fpp","squad" + add_type,pubg_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
@@ -974,7 +963,6 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
         if update_json == "Failed_Response":
             return
         await profile_total(message,pubg_platform,pubg_type,update_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000035\U0000FE0F\U000020E3":
         try:
             await msg1.clear_reactions()
@@ -982,7 +970,6 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
             embed_waring = discord.Embed(title="\U000026A0경고!",description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.", color=0xffd619)
             await message.channel.send(embed=embed_waring)
         await msg2.delete()
-        return
     return
 
 async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
@@ -1032,12 +1019,10 @@ async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
         await msg1.delete()
         await msg2.delete()
         await ranked_mode(message,pubg_platform,"squad",pubg_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
         await ranked_mode(message,pubg_platform,"squad-fpp",pubg_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
@@ -1045,7 +1030,6 @@ async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
         if update_json == "Failed_Response":
             return
         await ranked_total(message,pubg_platform,update_json,season,player_id)
-        return
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
         try:
             await msg1.clear_reactions()
@@ -1053,7 +1037,6 @@ async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
             embed_waring = discord.Embed(title="\U000026A0경고!",description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.", color=0xffd619)
             await message.channel.send(embed=embed_waring)
         await msg2.delete()
-        return
     return
 
 async def profile(message,perfix):
