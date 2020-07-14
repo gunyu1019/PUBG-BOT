@@ -88,8 +88,7 @@ def change_data(B):
         return round(B/1000000,2), "MB"
     elif B_lens >= 4:
         return round(B/1000,2), "KB"
-    else:
-        return round(B,2), "B"
+    return round(B,2), "B"
 
 #자동업데이트가 필요한 함수들입니다. autopost1, autopost2
 async def autopost1():
@@ -132,8 +131,7 @@ def ranking(rank,lng): #랭킹별 티어 분석
     if rank == "0":
         if lng == 0:
             return "무티어","assets" + type_software + "Ranks" + type_software + "unranked.png"
-        else:
-            return "Unranked"
+        return "Unranked"
     title = int(rank[0])
     if len(rank.replace('-','')) == 2:
         level = int(rank.replace('-','')[1])
@@ -147,8 +145,7 @@ def ranking(rank,lng): #랭킹별 티어 분석
     elif lng == 1:
         title_en = ["Beginner","Novice","Experienced","Skilled","Specialist","Expert","Survivor","Lone Survivor"]
         return title_en[title] + level_l[level], "assets" + type_software + "Ranks" + type_software + picture_l[title] + ".png"
-    else:
-        return "Not Found","assets" + type_software + "Ranks" + type_software + picture_l[0] + ".png"
+    return "Not Found","assets" + type_software + "Ranks" + type_software + picture_l[0] + ".png"
 
 def time_num(playtime): #시간 계산, 불필요한 월단위, 일단위 등의 제거
     if playtime.month == 1:
@@ -156,8 +153,7 @@ def time_num(playtime): #시간 계산, 불필요한 월단위, 일단위 등의
             if playtime.hour == 0:
                 if  playtime.minute == 0:
                     return str(playtime.second)  + "초"
-                else:
-                    return str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
+                return str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
             else:
                 return str(playtime.hour)  + "시간 " + str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
         else:
@@ -189,9 +185,8 @@ async def response_num(response,message): #에러 발생시, 코드를 통하여
         embed = discord.Embed(title="에러",description="너무 많은 요청이 들어왔습니다. 잠시후 다시시도해주세요.", color=0xaa0000)
         await message.channel.send(embed=embed)
         return
-    else:
-        embed = discord.Embed(title="에러",description="알수없는 에러가 발생하였습니다. 관리자에게 문의해주세요.", color=0xaa0000)
-        await message.channel.send(embed=embed)
+    embed = discord.Embed(title="에러",description="알수없는 에러가 발생하였습니다. 관리자에게 문의해주세요.", color=0xaa0000)
+    await message.channel.send(embed=embed)
     return
 
 if platform.system() == "Windows":
@@ -394,7 +389,6 @@ async def matches(message,platform,update,update_msg,match,player_id,season):
     if reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg2.clear_reactions()
         await msg3.delete()
-        return
     elif reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
         await msg2.clear_reactions()
         await msg3.delete()
@@ -407,9 +401,6 @@ async def matches(message,platform,update,update_msg,match,player_id,season):
             html = response1.text
         else:
             await response_num(response1,message)
-            return
-        #종합 전적 검색 함수
-        return
     return
 
 async def player(nickname,message,pubg_platform):
@@ -875,7 +866,7 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
     top10 = str(round((total * json_c["top10Ratio"]) - wins,0))
     kills = json_c["kills"]
     kda = json_c["kda"]
-    embed.set_thumbnail(url="attachment://" + rank_icon)
+    #embed.set_thumbnail(url="attachment://" + rank_icon)
     icon[1] = discord.File(directory + type_software + "assets" + type_software + "Insignias" + type_software + rank_icon)
     embed.add_field(name="현재 점수:",value=tier_name1 + "(" + str(point1) + "점)",inline=True)
     embed.add_field(name="최고 점수:",value=tier_name2 + "(" + str(point2) + "점)",inline=True)
@@ -1140,10 +1131,9 @@ async def profile(message,perfix):
             await profile_mode(message,pubg_platform,"tpp","duo",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적스쿼드":
             await profile_mode(message,pubg_platform,"tpp","squad",pubg_json,season,pubg_id)
-    else:
-        embed = discord.Embed(title="에러",description=helper + " 1인칭,3인칭,일반,랭크 중에서 골라주세요. 일반 그리고 3인칭과는 같은 기능입니다.", color=0xaa0000)
-        await message.channel.send(embed=embed)
-        return
+    embed = discord.Embed(title="에러",description=helper + " 1인칭,3인칭,일반,랭크 중에서 골라주세요. 일반 그리고 3인칭과는 같은 기능입니다.", color=0xaa0000)
+    await message.channel.send(embed=embed)
+    return
 
 @client.event
 async def on_ready():
