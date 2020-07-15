@@ -1091,6 +1091,7 @@ async def profile(message,perfix):
             await profile_mode(message,pubg_platform,"fpp","duo-fpp",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적스쿼드":
             await profile_mode(message,pubg_platform,"fpp","squad-fpp",pubg_json,season,pubg_id)
+        return
     elif pubg_type == "일반" or pubg_type == "3인칭":
         pubg_json = await season_status(pubg_id,season,message,pubg_platform)
         if pubg_json == "Failed_Response":
@@ -1103,6 +1104,7 @@ async def profile(message,perfix):
             await profile_mode(message,pubg_platform,"tpp","duo",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적스쿼드":
             await profile_mode(message,pubg_platform,"tpp","squad",pubg_json,season,pubg_id)
+        return
     embed = discord.Embed(title="에러",description=helper + " 1인칭,3인칭,일반,랭크 중에서 골라주세요. 일반 그리고 3인칭과는 같은 기능입니다.", color=0xaa0000)
     await message.channel.send(embed=embed)
     return
@@ -1130,7 +1132,7 @@ async def on_message(message):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     try:
         cur = connect .cursor()
-        sql_prefix = pymysql.escape_string(f"select * from SERVER_INFO where ID={message.guild.id}")
+        sql_prefix = pymysql.escape_string("select * from SERVER_INFO where ID=%s",message.guild.id)
         cur.execute(sql_prefix)
         cache = cur.fetchall()
         perfix = cache[0][1]
