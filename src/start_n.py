@@ -1188,7 +1188,7 @@ async def on_message(message):
                     connect.commit()
                     connect.close()
                     return
-                sql_T = pymysql.escape_string(f"select EXISTS (select * from SERVER_INFO where ID={message.guild.id)}) as success")
+                sql_T = pymysql.escape_string(f"select EXISTS (select * from SERVER_INFO where ID={message.guild.id}) as success")
                 cur.execute(sql_T)
                 c_TF = cur.fetchall()[0][0]
                 if c_TF == 0:
