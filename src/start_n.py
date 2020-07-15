@@ -471,7 +471,7 @@ async def player_info(message,nickname):
         cache = cur.fetchall()
         pubg_id = cache[0][0]
         pubg_platform = cache[0][1]
-    except Exception as e:
+    except Exception:
         embed = discord.Embed(title="플랫폼 선택!",description="해당 계정의 플랫폼을 선택해주세요.\n초기에 한번만 눌러주시면 됩니다.", color=0xffd619)
         msg = await message.channel.send(embed=embed)
         xbox = "<:XBOX:718482204035907586>"
@@ -531,7 +531,7 @@ async def season_status(player_id,season,message,pubg_platform):
             cur.execute(sql, (json.dumps(return_value),player_id))
             connect.commit()
             await player_module.lastupdate_insert("normal",datetime.datetime.now())
-    except Exception as e:
+    except Exception:
         url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season)
         response = await requests.get(url,headers=header)
         if response.status_code == 200:
@@ -564,7 +564,7 @@ async def season_status_update(player_id,season,message,pubg_platform):
         cur.execute(sql, (json.dumps(return_value),player_id))
         connect.commit()
         await player_module.lastupdate_insert("normal",datetime.datetime.now())
-    except Exception as e:
+    except Exception:
         pass
     connect.close()
     return return_value
@@ -591,7 +591,7 @@ async def ranked_status(player_id,season,message,pubg_platform):
             cur.execute(sql, (json.dumps(return_value),player_id))
             connect.commit()
             await player_module.lastupdate_insert("ranked",datetime.datetime.now())
-    except Exception as e:
+    except Exception:
         url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season) + "/ranked"
         response = await requests.get(url,headers=header)
         if response.status_code == 200:
@@ -624,7 +624,7 @@ async def ranked_status_update(player_id,season,message,pubg_platform):
         cur.execute(sql, (json.dumps(return_value),player_id))
         connect.commit()
         await player_module.lastupdate_insert("ranked",datetime.datetime.now())
-    except Exception as e:
+    except Exception:
         pass
     connect.close()
     return return_value
@@ -994,7 +994,7 @@ async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
             kills = json_c["kills"]
             kda = json_c["kda"]
             embed.add_field(name=list_name[i] + ":",value="티어: " + tier_name + "(" + str(point) + "점)"+ "\n" + str(wins) + "승" + top10 + "탑" + str(losses) + "패\n킬:" + str(kills) + "(KDA: " + str(round(kda,1)) + "점)",inline=True)
-        except Exception as e:
+        except Exception:
             embed.add_field(name=list_name[i] + ":",value="기록 없음",inline=True)
     last_update = await player_module.lastupdate("ranked")
     embed.set_footer(text="최근 업데이트: " + last_update.strftime('%Y년 %m월 %d일 %p %I:%M'))
@@ -1039,7 +1039,7 @@ async def profile(message,perfix):
     helper = "**" + perfix + "전적[솔로|듀오|스쿼드(랭크 제외,선택) 혹은 1인칭|3인칭(랭크 경우,선택)] [1인칭|3인칭 혹은 일반|랭크] [닉네임(선택)] [시즌(선택)]**:"
     try:
         pubg_type = list_message[1]
-    except:
+    except E:
         embed = discord.Embed(title="에러",description=helper + " 1인칭, 3인칭 혹은 일반, 랭크 중에서 선택하여 주세요.", color=0xaa0000)
         await message.channel.send(embed=embed)
         return
