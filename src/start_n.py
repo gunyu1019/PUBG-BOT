@@ -408,7 +408,6 @@ async def player(nickname,message,pubg_platform):
         await response_num(response, message)
         return "Failed_Response"
     return json_data["data"][0]["id"]
-
 """
 async def player_lastupdate(player_id,pubg_type):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
@@ -463,7 +462,6 @@ async def player_name(player_id):
     connect.close()
     return player_name
 """
-
 async def player_info(message,nickname):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     cur = connect.cursor()
