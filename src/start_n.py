@@ -1354,7 +1354,7 @@ async def on_message(message):
         log_info(message.guild,message.channel,message.author,message.content)
         try:
             mention_id = list_message[2]
-        except:
+        except Exception:
             embed = discord.Embed(title="에러!",description="닉네임을 기재해주세요!", color=0xffd619)
             await message.channel.send(embed=embed)
             return
@@ -1376,7 +1376,7 @@ async def on_message(message):
         log_info(message.guild,message.channel,message.author,message.content)
         try:
             tester_id = list_message[2].replace("<@","",).replace(">","").replace("!","")
-        except:
+        except Exception:
             tester_id = author_id
         embed = discord.Embed(title="Blacklist!",description="해당 유저가 밴당했는지 확인하는 중입니다.", color=0xaa0000)
         msg = await message.channel.send(embed=embed)
@@ -1391,7 +1391,7 @@ async def on_message(message):
         log_info(message.guild,message.channel,message.author,message.content)
         try:
             mention_id = list_message[2]
-        except:
+        except Exception:
             embed = discord.Embed(title="에러!",description="닉네임을 기재해주세요!", color=0xffd619)
             await message.channel.send(embed=embed)
             return
@@ -1401,7 +1401,7 @@ async def on_message(message):
         sql_delete = "delete from BLACKLIST where ID=%s"
         try:
             cur.execute(sql_delete,cache_data1)
-        except:
+        except Exception:
             embed = discord.Embed(title="Blacklist!",description=mention_id + "는, 블랙리스트에 추가되어 있지 않습니다.", color=0xaa0000)
             await message.channel.send(embed=embed)
             connect.commit()
