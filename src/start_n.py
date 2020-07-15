@@ -1132,7 +1132,7 @@ async def on_message(message):
     connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
     try:
         cur = connect .cursor()
-        sql_prefix = "select * from SERVER_INFO where ID=" + str(message.guild.id)
+        sql_prefix = pymysql.escape_string(f"select * from SERVER_INFO where ID={message.guild.id}")
         cur.execute(sql_prefix)
         cache = cur.fetchall()
         perfix = cache[0][1]
@@ -1190,14 +1190,14 @@ async def on_message(message):
                     connect.commit()
                     connect.close()
                     return
-                sql_T = "select EXISTS (select * from SERVER_INFO where ID=" + str(message.guild.id) + ") as success"
+                sql_T = pymysql.escape_string(f"select EXISTS (select * from SERVER_INFO where ID={message.guild.id)}) as success")
                 cur.execute(sql_T)
                 c_TF = cur.fetchall()[0][0]
                 if c_TF == 0:
                     sql = "insert into SERVER_INFO(ID,PERFIX) values (%s, %s)"
                     cur.execute(sql,(message.guild.id,n_perfix))
                 else:
-                    sql = "update SERVER_INFO set PERFIX='" + n_perfix + "' where ID=" + str(message.guild.id)
+                    sql = pymysql.escape_string(f"update SERVER_INFO set PERFIX='{n_perfix}' where ID={message.guild.id}")
                     cur.execute(sql)
                 embed = discord.Embed(title="접두어",description=message.guild.name + "서버의 접두어는 " + n_perfix + "(명령어)으로 성공적으로 설정되었습니다.", color=0xffd619)
                 await message.channel.send(embed=embed)
@@ -1209,13 +1209,13 @@ async def on_message(message):
                     await message.channel.send(embed=embed)
                     connect.close()
                     return
-                sql_T = "select EXISTS (select * from SERVER_INFO where ID=" + str(message.guild.id) + ") as success"
+                sql_T = pymysql.escape_string(f"select EXISTS (select * from SERVER_INFO where ID={message.guild.id}) as success")
                 cur.execute(sql_T)
                 c_TF = cur.fetchall()[0][0]
                 if c_TF == 0:
                     embed = discord.Embed(title="접두어",description="접두어가 이미 기본설정(!=)으로 되어 있습니다...", color=0xffd619)
                 else:
-                    sql = "update SERVER_INFO set PERFIX='!=' where ID=" + str(message.guild.id)
+                    sql = pymysql.escape_string(f"update SERVER_INFO set PERFIX='!=' where ID={message.guild.id}")
                     cur.execute(sql)
                     embed = discord.Embed(title="접두어",description=message.guild.name + "서버의 접두어는 !=(명령어)으로 성공적으로 초기화가 완료되었습니다.", color=0xffd619)
                     connect.commit()
