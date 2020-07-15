@@ -1,8 +1,8 @@
 import discord
 import asyncio
 import os
-#import sys
-import importlib
+import sys
+#import importlib
 import datetime
 import time
 import platform

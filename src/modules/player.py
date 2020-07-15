@@ -1,7 +1,5 @@
-import requests_async as requests
 import pymysql
 import os
-import sys
 import platform
 import json
 import datetime
