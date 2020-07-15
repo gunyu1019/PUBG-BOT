@@ -1223,7 +1223,7 @@ async def on_message(message):
                 await message.channel.send(embed=embed)
             elif mode == "정보":
                 try:
-                    sql_perfix = "select * from SERVER_INFO where ID=" + str(message.guild.id)
+                    sql_perfix = pymysql.escape_string(f"select * from SERVER_INFO where ID={message.guild.id}")
                     cur.execute(sql_perfix)
                     c_perfix = cur.fetchall()
                     embed = discord.Embed(title="접두어",description=message.guild.name + "서버의 접두어는 " + str(c_perfix[0][1]) + "(명령어)입니다.", color=0xffd619)
