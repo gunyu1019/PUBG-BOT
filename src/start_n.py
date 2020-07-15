@@ -1,14 +1,14 @@
 import discord
 import asyncio
 import os
-import sys
+#import sys
 import importlib
 import datetime
 import time
 import platform
 import pymysql
 import io
-import csv
+#import csv
 import requests_async as requests
 import json
 import psutil
@@ -105,7 +105,7 @@ async def autopost1():
         await asyncio.sleep(3.0)
         await client.change_presence(status=discord.Status.online, activity=discord.Game("접두어를 잊어먹을 경우 !=접두어 정보를 통하여 얻을수 있습니다!"))
         await asyncio.sleep(3.0)
-     
+
 async def autopost2(time):
     a_time = int(time) * 60
     await client.wait_until_ready()
@@ -492,7 +492,7 @@ async def player_info(message,nickname):
                 if str(reaction.emoji)==str(emoji[i]):
                     return user == message.author
         try:
-            reaction,user = await client.wait_for('reaction_add',check=check2,timeout=20)
+            reaction,_ = await client.wait_for('reaction_add',check=check2,timeout=20)
         except asyncio.TimeoutError:
             embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다!", color=0xaa0000)
             await message.channel.send(embed=embed)
@@ -652,8 +652,8 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
     revives = json_c["revives"]
     rideDistance = json_c["rideDistance"]
     roadKills = json_c["roadKills"]
-    roundMostKills = json_c["roundMostKills"]
-    roundsPlayed = json_c["roundsPlayed"]
+    #roundMostKills = json_c["roundMostKills"]
+    #roundsPlayed = json_c["roundsPlayed"]
     suicides = json_c["suicides"]
     swimDistance = json_c["swimDistance"]
     teamKills = json_c["teamKills"]
@@ -667,7 +667,7 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
     wins = json_c["wins"]
     season_count = season.replace("division.bro.official.pc-2018","")
     if int(season_count) < 7:
-        rank_title, rank_icon = ranking(json_c["rankPointsTitle"],0)
+        _, rank_icon = ranking(json_c["rankPointsTitle"],0)
         embed.set_thumbnail(url="attachment://" + rank_icon.replace("assets" + type_software + "Ranks" + type_software,""))
         icon = discord.File(directory + type_software + rank_icon)
     if int(wins) + int(top10s) + int(losses) == 0:
@@ -716,7 +716,7 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
         for i in range(3):
             if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
                 return user == author and message_id == reaction.message.id
-    reaction,user = await client.wait_for('reaction_add', check=check)
+    reaction,_ = await client.wait_for('reaction_add', check=check)
     if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
@@ -739,7 +739,6 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
     return
 
 async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,player_id):
-    list_message = message.content.split(" ")
     icon = [image(pubg_platform),None]
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
@@ -770,7 +769,7 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
         deals = "0"
     season_count = season.replace("division.bro.official.pc-2018","")
     if int(season_count) < 7:
-        rank_title, rank_icon = ranking(json_c["rankPointsTitle"],0)
+        _, rank_icon = ranking(json_c["rankPointsTitle"],0)
         embed.set_thumbnail(url="attachment://" + rank_icon.replace("assets" + type_software + "Ranks" + type_software,""))
         icon = discord.File(directory + type_software + rank_icon)
     embed.add_field(name="승/탑/패:",value=win + "승 " + top10 + "탑 " + lose + "패",inline=True)
@@ -798,11 +797,7 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
         for i in range(4):
             if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
                 return user == author and message_id == reaction.message.id
-    reaction,user = await client.wait_for('reaction_add', check=check)
-    if pubg_type == "fpp":
-        add_type = "-fpp"
-    else:
-        add_type = ""
+    reaction,_ = await client.wait_for('reaction_add', check=check)
     if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
@@ -828,7 +823,6 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
     return
 
 async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
-    list_message = message.content.split(" ")
     icon = [image(pubg_platform),None]
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
@@ -882,7 +876,7 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
         for i in range(3):
             if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
                 return user == author and message_id == reaction.message.id 
-    reaction,user = await client.wait_for('reaction_add', check=check)
+    reaction,_ = await client.wait_for('reaction_add', check=check)
     if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
@@ -904,7 +898,6 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
     return
 
 async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id):
-    list_message = message.content.split(" ")
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
     embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
@@ -941,7 +934,7 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
         for i in range(5):
             if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
                 return user == author and message_id == reaction.message.id
-    reaction,user = await client.wait_for('reaction_add', check=check)
+    reaction,_ = await client.wait_for('reaction_add', check=check)
     if pubg_type == "fpp":
         add_type = "-fpp"
     else:
@@ -975,7 +968,6 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
     return
 
 async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
-    list_message = message.content.split(" ")
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
     embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
@@ -1016,7 +1008,7 @@ async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
         for i in range(4):
             if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
                 return user == author and message_id == reaction.message.id 
-    reaction,user = await client.wait_for('reaction_add', check=check)
+    reaction, _ = await client.wait_for('reaction_add', check=check)
     if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
