@@ -1039,13 +1039,13 @@ async def profile(message,perfix):
     helper = "**" + perfix + "전적[솔로|듀오|스쿼드(랭크 제외,선택) 혹은 1인칭|3인칭(랭크 경우,선택)] [1인칭|3인칭 혹은 일반|랭크] [닉네임(선택)] [시즌(선택)]**:"
     try:
         pubg_type = list_message[1]
-    except E:
+    except Exception:
         embed = discord.Embed(title="에러",description=helper + " 1인칭, 3인칭 혹은 일반, 랭크 중에서 선택하여 주세요.", color=0xaa0000)
         await message.channel.send(embed=embed)
         return
     try:
         nickname = list_message[2]
-    except:
+    except Exception:
         embed = discord.Embed(title="닉네임 작성 요청!",description="닉네임을 작성해주세요!\n취소를 하고싶으시다면 \"" + perfix + "취소\"를 적어주세요.", color=0xffd619)
         msg1 = await message.channel.send(embed=embed)
         def check1(m):
@@ -1071,7 +1071,7 @@ async def profile(message,perfix):
             season = "division.bro.official.pc-2018-0" + s_count
         else:
             season = "division.bro.official.pc-2018-" + s_count
-    except:
+    except Exception:
         season = "division.bro.official.pc-2018-07"
     if pubg_type == "랭크":
         pubg_json = await ranked_status(pubg_id,season,message,pubg_platform)
@@ -1138,7 +1138,7 @@ async def on_message(message):
         cur.execute(sql_prefix)
         cache = cur.fetchall()
         perfix = cache[0][1]
-    except:
+    except Exception:
         perfix = "!="
     connect.close()
     if message.content.startswith(perfix + '전적'):
@@ -1157,7 +1157,7 @@ async def on_message(message):
             return
         try:
             mode = list_message[1]
-        except:
+        except Exception:
             if perfix == "=":
                 embed = discord.Embed(title="에러",description="!=접두어 [설정/초기화/정보] [접두어(설정시 한정)]\n위와 같이 작성해주시기 바랍니다.\n 접두어를 설정시 \\n,\\t,(공백) 를 사용하시면 안됩니다. 또한 5자 미만으로 하셔야 합니다. 이점 참조하시기 바랍니다.", color=0xffd619)
             else:
@@ -1183,7 +1183,7 @@ async def on_message(message):
                         await message.channel.send(embed=embed)
                         connect.close()
                         return
-                except:
+                except Exception:
                     if perfix == "=":
                         embed = discord.Embed(title="에러",description="!=접두어 [설정/초기화/정보] [접두어(설정시 한정)]\n위와 같이 작성해주시기 바랍니다.\n 접두어를 설정시 \\n,\\t,(공백) 를 사용하시면 안됩니다. 또한 5자 미만으로 하셔야 합니다. 이점 참조하시기 바랍니다.", color=0xffd619)
                     else:
@@ -1229,7 +1229,7 @@ async def on_message(message):
                     cur.execute(sql_perfix)
                     c_perfix = cur.fetchall()
                     embed = discord.Embed(title="접두어",description=message.guild.name + "서버의 접두어는 " + str(c_perfix[0][1]) + "(명령어)입니다.", color=0xffd619)
-                except:
+                except Exception:
                     embed = discord.Embed(title="접두어",description=message.guild.name + "서버의 접두어는 !=(명령어)입니다.", color=0xffd619)
                 await message.channel.send(embed=embed)
                 connect.close()
