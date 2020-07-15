@@ -564,9 +564,10 @@ async def season_status_update(player_id,season,message,pubg_platform):
         cur.execute(sql, (json.dumps(return_value),player_id))
         connect.commit()
         await player_module.lastupdate_insert("normal",datetime.datetime.now())
+        connect.close()
     except Exception:
-        pass
-    connect.close()
+        return_value = "Failed_Response"
+        connect.close()
     return return_value
 
 
@@ -624,9 +625,10 @@ async def ranked_status_update(player_id,season,message,pubg_platform):
         cur.execute(sql, (json.dumps(return_value),player_id))
         connect.commit()
         await player_module.lastupdate_insert("ranked",datetime.datetime.now())
+        connect.close()
     except Exception:
-        pass
-    connect.close()
+        return_value = "Failed_Response"
+        connect.close()
     return return_value
 
 async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,season,player_id):
