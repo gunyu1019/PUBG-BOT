@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/023f85dfd49d46fe99bab20f87d5a799)](https://app.codacy.com/gh/Team-Developer-Space/PUBG-BOT?utm_source=github.com&utm_medium=referral&utm_content=Team-Developer-Space/PUBG-BOT&utm_campaign=Badge_Grade_Dashboard)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/13eca7825cdf4913ab4f2448bd454745)](https://app.codacy.com/manual/gunyu1019/PUBG-BOT?utm_source=github.com&utm_medium=referral&utm_content=gunyu1019/PUBG-BOT&utm_campaign=Badge_Grade_Dashboard)
 [![CodeFactor](https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/master)](https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/overview/master)
 # PUBG_BOT
