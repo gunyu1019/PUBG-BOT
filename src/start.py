@@ -182,8 +182,10 @@ db_name = db_json["mysql"]["database"]
 sys.path.append(directory + type_software + "modules") #다른 파일내 함수추가
 import player as p_info
 import status as s_info
+import matches_status as m_info
 import normal
 import ranked
+import matches
 
 map_link_f = open(directory + type_software + "data" + type_software + "map_link.json",mode='r')
 map_link_r = map_link_f.read()
@@ -379,7 +381,28 @@ async def profile(message,perfix,command):
         await message.channel.send(embed=embed)
         return
     elif command == "Matches":
-        pass
+        embed = discord.Embed(title="PUBG",description="최근 검색하실 전적을 고르시기 바랍니다.", color=0xffd619)
+        msg1 = await message.channel.send(embed=embed)
+        def check1(reaction,user):
+            for i in range(5):
+                if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
+                    return user.id == message.author.id and msg1.id==reaction.message.id
+        for i in range(5):
+            await msg1.add_reaction(str(i+1) +  "\U0000FE0F\U000020E3")
+        reaction,_ = await client.wait_for('reaction_add', check=check1)
+        count = None
+        for i in range(5):
+            if str(i+1) + "\U0000FE0F\U000020E3" == reaction.emoji:
+                count = i
+                break
+        try:
+            await msg1.clear_reactions()
+        except discord.Forbidden:
+            embed = discord.Embed(title="\U000026A0경고!",description="디스코드봇에게 \"메세지 관리\"권한을 부여해주시기 바랍니다.", color=0xaa0000)
+            await message.channel.send(embed=embed)
+        pubg_json = await m_info.match_status(pubg_id,season,message,pubg_platform)
+        await matches.get(message,client,pubg_json,pubg_id,season,message,pubg_platform)
+        return
 
 @client.event
 async def on_ready():
