@@ -3,7 +3,6 @@ import discord
 import pymysql
 import os
 import sys
-import platform
 import json
 import datetime
 
