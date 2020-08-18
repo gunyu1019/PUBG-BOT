@@ -457,128 +457,7 @@ async def player_info(message,nickname):
         connect.close()
     return pubg_id, pubg_platform
 
-async def season_status(player_id,season,message,pubg_platform):
-    connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
-    cur = connect.cursor()
-    player_module = p_info.player(player_id)
-    try:
-        sql = "select html from NORMAL_STATUS where id=%s and season=%s"
-        cur.execute(sql,(str(player_id),str(season)))
-        cache = cur.fetchall()
-        return_value = json.loads(cache[0][0])
-        if await player_module.autopost("normal"):
-            url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season)
-            response = await requests.get(url,headers=header)
-            if response.status_code == 200:
-                return_value = response.json()
-            else:
-                response_num(response,message)
-                return "Failed_Response"
-            sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s"
-            cur.execute(sql, (json.dumps(return_value),player_id))
-            connect.commit()
-            await player_module.lastupdate_insert("normal",datetime.datetime.now())
-    except Exception:
-        url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season)
-        response = await requests.get(url,headers=header)
-        if response.status_code == 200:
-            return_value = response.json()
-        else:
-            response_num(response,message)
-            return "Failed_Response"
-        sql = """insert into NORMAL_STATUS(id,html,season)
-                values (%s, %s, %s)"""
-        cur.execute(sql, (player_id,json.dumps(return_value),season))
-        connect.commit()
-        await player_module.lastupdate_insert("normal",datetime.datetime.now())
-    finally:
-        connect.close()
-    return return_value
-
-async def season_status_update(player_id,season,message,pubg_platform):
-    connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
-    cur = connect.cursor()
-    player_module = p_info.player(player_id)
-    try:
-        url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season)
-        response = await requests.get(url,headers=header)
-        if response.status_code == 200:
-            return_value = response.json()
-        else:
-            response_num(response,message)
-            return "Failed_Response"
-        sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s"
-        cur.execute(sql, (json.dumps(return_value),player_id))
-        connect.commit()
-        await player_module.lastupdate_insert("normal",datetime.datetime.now())
-        connect.close()
-    except Exception:
-        return_value = "Failed_Response"
-        connect.close()
-    return return_value
-
-
-async def ranked_status(player_id,season,message,pubg_platform):
-    connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
-    cur = connect.cursor()
-    player_module = p_info.player(player_id)
-    try:
-        sql = "select html from RANKED_STATUS where id=%s and season=%s"
-        cur.execute(sql,(str(player_id),str(season)))
-        cache = cur.fetchall()
-        return_value = json.loads(cache[0][0])
-        if await player_module.autopost("ranked"):
-            url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season) + "/ranked"
-            response = await requests.get(url,headers=header)
-            if response.status_code == 200:
-                return_value = response.json()
-            else:
-                response_num(response,message)
-                return "Failed_Response"
-            sql = "UPDATE RANKED_STATUS SET html=%s WHERE id=%s"
-            cur.execute(sql, (json.dumps(return_value),player_id))
-            connect.commit()
-            await player_module.lastupdate_insert("ranked",datetime.datetime.now())
-    except Exception:
-        url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season) + "/ranked"
-        response = await requests.get(url,headers=header)
-        if response.status_code == 200:
-            return_value = response.json()
-        else:
-            response_num(response,message)
-            return "Failed_Response"
-        sql = """insert into RANKED_STATUS(id,html,season)
-                values (%s, %s, %s)"""
-        cur.execute(sql, (player_id,json.dumps(return_value),season))
-        connect.commit()
-        await player_module.lastupdate_insert("ranked",datetime.datetime.now())
-    finally:
-        connect.close()
-    return return_value
-
-async def ranked_status_update(player_id,season,message,pubg_platform):
-    connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
-    cur = connect.cursor()
-    player_module = p_info.player(player_id)
-    try:
-        url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players/" + str(player_id) + "/seasons/" + str(season) + "/ranked"
-        response = await requests.get(url,headers=header)
-        if response.status_code == 200:
-            return_value = response.json()
-        else:
-            response_num(response,message)
-            return "Failed_Response"
-        sql = "UPDATE RANKED_STATUS SET id=%s WHERE html=%s"
-        cur.execute(sql, (json.dumps(return_value),player_id))
-        connect.commit()
-        await player_module.lastupdate_insert("ranked",datetime.datetime.now())
-        connect.close()
-    except Exception:
-        return_value = "Failed_Response"
-        connect.close()
-    return return_value
-
-async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,season,player_id):
+async def profile_mode_status(message,client,pubg_platform,pubg_type,mode,pubg_json,season,player_id):
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
     embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
@@ -669,15 +548,15 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
     if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        await profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,player_id)
-        #await profile_mode(message,pubg_platform,pubg_type,mode,update_json,season,player_id)
+        await profile_mode(message,client,pubg_platform,pubg_type,mode,pubg_json,season,player_id)
+        #await profile_mode(message,client,pubg_platform,pubg_type,mode,update_json,season,player_id)
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
         update_json = await s_info.season_status_update(player_id,season,message,pubg_platform)
         if update_json == "Failed_Response":
             return
-        await profile_mode_status(message,pubg_platform,pubg_type,mode,update_json,season,player_id)
+        await profile_mode_status(message,client,pubg_platform,pubg_type,mode,update_json,season,player_id)
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         try:
             await msg1.clear_reactions()
@@ -687,7 +566,7 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
         await msg2.delete()
     return
 
-async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,player_id):
+async def profile_mode(message,client,pubg_platform,pubg_type,mode,pubg_json,season,player_id):
     icon = [image(pubg_platform),None]
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
@@ -750,18 +629,18 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
     if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        await profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,season,player_id)
+        await profile_mode_status(message,client,pubg_platform,pubg_type,mode,pubg_json,season,player_id)
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
         update_json = await s_info.season_status_update(player_id,season,message,pubg_platform)
         if update_json == "Failed_Response":
             return
-        await profile_mode(message,pubg_platform,pubg_type,mode,update_json,season,player_id)
+        await profile_mode(message,client,pubg_platform,pubg_type,mode,update_json,season,player_id)
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        await profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id)
+        await profile_total(message,client,pubg_platform,pubg_type,pubg_json,season,player_id)
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
         try:
             await msg1.clear_reactions()
@@ -771,7 +650,7 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
         await msg2.delete()
     return
 
-async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
+async def ranked_mode(message,client,pubg_platform,mode,pubg_json,season,player_id):
     icon = [image(pubg_platform),None]
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
@@ -829,14 +708,14 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
     if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        await ranked_total(message,pubg_platform,pubg_json,season,player_id)
+        await ranked_total(message,client,pubg_platform,pubg_json,season,player_id)
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
         update_json = await s_info.ranked_status_update(player_id,season,message,pubg_platform)
         if update_json == "Failed_Response":
             return
-        await ranked_mode(message,pubg_platform,mode,update_json,season,player_id)
+        await ranked_mode(message,clientpubg_platform,mode,update_json,season,player_id)
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         try:
             await msg1.clear_reactions()
@@ -846,7 +725,7 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
         await msg2.delete()
     return
 
-async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_id):
+async def profile_total(message,client,pubg_platform,pubg_type,pubg_json,season,player_id):
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
     embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
@@ -891,22 +770,22 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
     if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        await profile_mode(message,pubg_platform,"fpp","solo" + add_type,pubg_json,season,player_id)
+        await profile_mode(message,client,pubg_platform,"fpp","solo" + add_type,pubg_json,season,player_id)
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        await profile_mode(message,pubg_platform,"fpp","duo" + add_type,pubg_json,season,player_id)
+        await profile_mode(message,client,pubg_platform,"fpp","duo" + add_type,pubg_json,season,player_id)
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        await profile_mode(message,pubg_platform,"fpp","squad" + add_type,pubg_json,season,player_id)
+        await profile_mode(message,client,pubg_platform,"fpp","squad" + add_type,pubg_json,season,player_id)
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
         update_json = await s_info.season_status_update(player_id,season,message,pubg_platform)
         if update_json == "Failed_Response":
             return
-        await profile_total(message,pubg_platform,pubg_type,update_json,season,player_id)
+        await profile_total(message,client,pubg_platform,pubg_type,update_json,season,player_id)
     elif reaction.emoji == "\U00000035\U0000FE0F\U000020E3":
         try:
             await msg1.clear_reactions()
@@ -916,7 +795,7 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
         await msg2.delete()
     return
 
-async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
+async def ranked_total(message,client,pubg_platform,pubg_json,season,player_id):
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
     embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
@@ -961,18 +840,18 @@ async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
     if reaction.emoji == "\U00000031\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        await ranked_mode(message,pubg_platform,"squad",pubg_json,season,player_id)
+        await ranked_mode(message,clientpubg_platform,"squad",pubg_json,season,player_id)
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        await ranked_mode(message,pubg_platform,"squad-fpp",pubg_json,season,player_id)
+        await ranked_mode(message,clientpubg_platform,"squad-fpp",pubg_json,season,player_id)
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
         update_json = await s_info.ranked_status_update(player_id,season,message,pubg_platform)
         if update_json == "Failed_Response":
             return
-        await ranked_total(message,pubg_platform,update_json,season,player_id)
+        await ranked_total(message,client,pubg_platform,update_json,season,player_id)
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
         try:
             await msg1.clear_reactions()
@@ -1025,37 +904,37 @@ async def profile(message,perfix):
     if pubg_type == "랭크":
         pubg_json = await s_info.ranked_status(pubg_id,season,message,pubg_platform)
         if list_message[0] == perfix + "전적":
-            await ranked_total(message,pubg_platform,pubg_json,season,pubg_id)
+            await ranked_total(message,client,pubg_platform,pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적1인칭":
-            await ranked_mode(message,pubg_platform,"squad-fpp",pubg_json,season,pubg_id)
+            await ranked_mode(message,clientpubg_platform,"squad-fpp",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적3인칭":
-            await ranked_mode(message,pubg_platform,"squad",pubg_json,season,pubg_id)
+            await ranked_mode(message,clientpubg_platform,"squad",pubg_json,season,pubg_id)
         return
     elif pubg_type == "1인칭":
         pubg_json = await s_info.season_status(pubg_id,season,message,pubg_platform)
         if pubg_json == "Failed_Response":
             return
         if list_message[0] == perfix + "전적":
-            await profile_total(message,pubg_platform,"fpp",pubg_json,season,pubg_id)
+            await profile_total(message,client,pubg_platform,"fpp",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적솔로":
-            await profile_mode(message,pubg_platform,"fpp","solo-fpp",pubg_json,season,pubg_id)
+            await profile_mode(message,client,pubg_platform,"fpp","solo-fpp",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적듀오":
-            await profile_mode(message,pubg_platform,"fpp","duo-fpp",pubg_json,season,pubg_id)
+            await profile_mode(message,client,pubg_platform,"fpp","duo-fpp",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적스쿼드":
-            await profile_mode(message,pubg_platform,"fpp","squad-fpp",pubg_json,season,pubg_id)
+            await profile_mode(message,client,pubg_platform,"fpp","squad-fpp",pubg_json,season,pubg_id)
         return
     elif pubg_type == "일반" or pubg_type == "3인칭":
         pubg_json = await s_info.season_status(pubg_id,season,message,pubg_platform)
         if pubg_json == "Failed_Response":
             return
         if list_message[0] == perfix + "전적":
-            await profile_total(message,pubg_platform,"tpp",pubg_json,season,pubg_id)
+            await profile_total(message,client,pubg_platform,"tpp",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적솔로":
-            await profile_mode(message,pubg_platform,"tpp","solo",pubg_json,season,pubg_id)
+            await profile_mode(message,client,pubg_platform,"tpp","solo",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적듀오":
-            await profile_mode(message,pubg_platform,"tpp","duo",pubg_json,season,pubg_id)
+            await profile_mode(message,client,pubg_platform,"tpp","duo",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적스쿼드":
-            await profile_mode(message,pubg_platform,"tpp","squad",pubg_json,season,pubg_id)
+            await profile_mode(message,client,pubg_platform,"tpp","squad",pubg_json,season,pubg_id)
         return
     embed = discord.Embed(title="에러",description=helper + " 1인칭,3인칭,일반,랭크 중에서 골라주세요. 일반 그리고 3인칭과는 같은 기능입니다.", color=0xaa0000)
     await message.channel.send(embed=embed)
