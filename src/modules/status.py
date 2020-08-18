@@ -70,7 +70,7 @@ async def season_status(player_id,season,message,pubg_platform):
     player_module = p_info.player(player_id)
     try:
         sql = "select html from NORMAL_STATUS where id=%s and season=%s"
-        cur.execute(sql,(str(player_id),str(season)))
+        cur.execute(sql,(player_id,season))
         cache = cur.fetchall()
         return_value = json.loads(cache[0][0])
         if await player_module.autopost("normal"):
@@ -81,8 +81,8 @@ async def season_status(player_id,season,message,pubg_platform):
             else:
                 response_num(response,message)
                 return "Failed_Response"
-            sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s"
-            cur.execute(sql, (json.dumps(return_value),player_id))
+            sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s and season=%s"
+            cur.execute(sql, (json.dumps(return_value),player_id,season))
             connect.commit()
             await player_module.lastupdate_insert("normal",datetime.datetime.now())
     except Exception:
@@ -114,8 +114,8 @@ async def season_status_update(player_id,season,message,pubg_platform):
         else:
             response_num(response,message)
             return "Failed_Response"
-        sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s"
-        cur.execute(sql, (json.dumps(return_value),player_id))
+        sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s and season=%s"
+        cur.execute(sql, (json.dumps(return_value),player_id,season))
         connect.commit()
         await player_module.lastupdate_insert("normal",datetime.datetime.now())
         connect.close()
@@ -131,7 +131,7 @@ async def ranked_status(player_id,season,message,pubg_platform):
     player_module = p_info.player(player_id)
     try:
         sql = "select html from RANKED_STATUS where id=%s and season=%s"
-        cur.execute(sql,(str(player_id),str(season)))
+        cur.execute(sql,(player_id,season))
         cache = cur.fetchall()
         return_value = json.loads(cache[0][0])
         if await player_module.autopost("ranked"):
@@ -142,8 +142,8 @@ async def ranked_status(player_id,season,message,pubg_platform):
             else:
                 response_num(response,message)
                 return "Failed_Response"
-            sql = "UPDATE RANKED_STATUS SET html=%s WHERE id=%s"
-            cur.execute(sql, (json.dumps(return_value),player_id))
+            sql = "UPDATE RANKED_STATUS SET html=%s WHERE id=%s and season=%s"
+            cur.execute(sql, (json.dumps(return_value),player_id,season))
             connect.commit()
             await player_module.lastupdate_insert("ranked",datetime.datetime.now())
     except Exception:
@@ -175,8 +175,8 @@ async def ranked_status_update(player_id,season,message,pubg_platform):
         else:
             response_num(response,message)
             return "Failed_Response"
-        sql = "UPDATE RANKED_STATUS SET id=%s WHERE html=%s"
-        cur.execute(sql, (json.dumps(return_value),player_id))
+        sql = "UPDATE RANKED_STATUS SET html=%s WHERE id=%s and season=%s"
+        cur.execute(sql, (json.dumps(return_value),player_id,season))
         connect.commit()
         await player_module.lastupdate_insert("ranked",datetime.datetime.now())
         connect.close()

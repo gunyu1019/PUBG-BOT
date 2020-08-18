@@ -34,7 +34,7 @@ def ranking(rank,lng): #랭킹별 티어 분석
 
 def image(pubg_platform):
     kakao = discord.File(directory + "/assets/Icon/kakao.png")
-    steam = discord.File(directory + "//Icon/steam.png")
+    steam = discord.File(directory + "/assets/Icon/steam.png")
     xbox = discord.File(directory + "/assets/Icon/xbox.png")
     playstation = discord.File(directory + "/assets/Icon/playstation.png")
     stadia = discord.File(directory + "/assets/Icon/stadia.png")
