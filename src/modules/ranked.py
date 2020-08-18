@@ -78,7 +78,7 @@ async def ranked_mode(message,client,pubg_platform,mode,pubg_json,season,player_
     top10 = str(round((total * json_c["top10Ratio"]) - wins,0))
     kills = json_c["kills"]
     kda = json_c["kda"]
-    #embed.set_thumbnail(url="attachment://" + rank_icon)
+    embed.set_thumbnail(url="attachment://" + rank_icon)
     icon[1] = discord.File(directory+ "/assets/Insignias/" + rank_icon)
     embed.add_field(name="현재 점수:",value=tier_name1 + "(" + str(point1) + "점)",inline=True)
     embed.add_field(name="최고 점수:",value=tier_name2 + "(" + str(point2) + "점)",inline=True)
