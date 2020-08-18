@@ -202,6 +202,7 @@ db_name = db_json["mysql"]["database"]
 
 sys.path.append(directory + type_software + "modules") #다른 파일내 함수추가
 import player as p_info
+import status as s_info
 
 map_link_f = open(directory + type_software + "data" + type_software + "map_link.json",mode='r')
 map_link_r = map_link_f.read()
@@ -673,7 +674,7 @@ async def profile_mode_status(message,pubg_platform,pubg_type,mode,pubg_json,sea
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        update_json = await season_status_update(player_id,season,message,pubg_platform)
+        update_json = await s_info.season_status_update(player_id,season,message,pubg_platform)
         if update_json == "Failed_Response":
             return
         await profile_mode_status(message,pubg_platform,pubg_type,mode,update_json,season,player_id)
@@ -753,7 +754,7 @@ async def profile_mode(message,pubg_platform,pubg_type,mode,pubg_json,season,pla
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        update_json = await season_status_update(player_id,season,message,pubg_platform)
+        update_json = await s_info.season_status_update(player_id,season,message,pubg_platform)
         if update_json == "Failed_Response":
             return
         await profile_mode(message,pubg_platform,pubg_type,mode,update_json,season,player_id)
@@ -832,7 +833,7 @@ async def ranked_mode(message,pubg_platform,mode,pubg_json,season,player_id):
     elif reaction.emoji == "\U00000032\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        update_json = await ranked_status_update(player_id,season,message,pubg_platform)
+        update_json = await s_info.ranked_status_update(player_id,season,message,pubg_platform)
         if update_json == "Failed_Response":
             return
         await ranked_mode(message,pubg_platform,mode,update_json,season,player_id)
@@ -902,7 +903,7 @@ async def profile_total(message,pubg_platform,pubg_type,pubg_json,season,player_
     elif reaction.emoji == "\U00000034\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        update_json = await season_status_update(player_id,season,message,pubg_platform)
+        update_json = await s_info.season_status_update(player_id,season,message,pubg_platform)
         if update_json == "Failed_Response":
             return
         await profile_total(message,pubg_platform,pubg_type,update_json,season,player_id)
@@ -968,7 +969,7 @@ async def ranked_total(message,pubg_platform,pubg_json,season,player_id):
     elif reaction.emoji == "\U00000033\U0000FE0F\U000020E3":
         await msg1.delete()
         await msg2.delete()
-        update_json = await ranked_status_update(player_id,season,message,pubg_platform)
+        update_json = await s_info.ranked_status_update(player_id,season,message,pubg_platform)
         if update_json == "Failed_Response":
             return
         await ranked_total(message,pubg_platform,update_json,season,player_id)
@@ -1022,15 +1023,16 @@ async def profile(message,perfix):
     except Exception:
         season = "division.bro.official.pc-2018-07"
     if pubg_type == "랭크":
-        pubg_json = await ranked_status(pubg_id,season,message,pubg_platform)
+        pubg_json = await s_info.ranked_status(pubg_id,season,message,pubg_platform)
         if list_message[0] == perfix + "전적":
             await ranked_total(message,pubg_platform,pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적1인칭":
             await ranked_mode(message,pubg_platform,"squad-fpp",pubg_json,season,pubg_id)
         elif list_message[0] == perfix + "전적3인칭":
             await ranked_mode(message,pubg_platform,"squad",pubg_json,season,pubg_id)
+        return
     elif pubg_type == "1인칭":
-        pubg_json = await season_status(pubg_id,season,message,pubg_platform)
+        pubg_json = await s_info.season_status(pubg_id,season,message,pubg_platform)
         if pubg_json == "Failed_Response":
             return
         if list_message[0] == perfix + "전적":
@@ -1043,7 +1045,7 @@ async def profile(message,perfix):
             await profile_mode(message,pubg_platform,"fpp","squad-fpp",pubg_json,season,pubg_id)
         return
     elif pubg_type == "일반" or pubg_type == "3인칭":
-        pubg_json = await season_status(pubg_id,season,message,pubg_platform)
+        pubg_json = await s_info.season_status(pubg_id,season,message,pubg_platform)
         if pubg_json == "Failed_Response":
             return
         if list_message[0] == perfix + "전적":
