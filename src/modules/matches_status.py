@@ -73,13 +73,9 @@ async def match_status(player_id,message,pubg_platform):
         cur.execute(sql,(player_id))
         cache = cur.fetchone()
         return_value = json.loads(cache[0])
-        if await player_module.autopost("matches"):
-            response = await requests.get("https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players?filter[playerIds]=" + player_id, headers=header)
-            if response.status_code == 200:
-                return_value = response.json()
-            else:
-                await response_num(response,message)
-                return "Failed_Response"
+        response = await requests.get("https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/players?filter[playerIds]=" + player_id, headers=header)
+        if response.status_code == 200:
+            return_value = response.json()
             sql = "UPDATE MATCHES_STATUS SET html=%s WHERE id=%s"
             cur.execute(sql, (json.dumps(return_value),player_id))
             connect.commit()

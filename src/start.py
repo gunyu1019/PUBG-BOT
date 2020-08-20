@@ -401,6 +401,7 @@ async def profile(message,perfix,command):
             embed = discord.Embed(title="\U000026A0경고!",description="디스코드봇에게 \"메세지 관리\"권한을 부여해주시기 바랍니다.", color=0xaa0000)
             await message.channel.send(embed=embed)
         pubg_json = await m_info.match_status(pubg_id,message,pubg_platform)
+        await msg1.delete()
         await matches.get(message,client,pubg_json,pubg_id,count,pubg_platform)
         return
 

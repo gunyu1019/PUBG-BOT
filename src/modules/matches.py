@@ -25,6 +25,15 @@ def time_num(playtime): #시간 계산, 불필요한 월단위, 일단위 등의
         return str(playtime.day-1)  + "일 " + str(playtime.hour)  + "시간 " + str(playtime.minute)  + "분 " + str(playtime.second)  + "초"
     return str(playtime.month-1)  + "일 " + str(playtime.day-1)  + "일 " + str(playtime.hour)  + "시간 " + str(playtime.minute)  + "분 " + str(playtime.second)
 
+def image(pubg_platform):
+    kakao = discord.File(directory + "/assets/Icon/kakao.png")
+    steam = discord.File(directory + "/assets/Icon/steam.png")
+    xbox = discord.File(directory + "/assets/Icon/xbox.png")
+    playstation = discord.File(directory + "/assets/Icon/playstation.png")
+    stadia = discord.File(directory + "/assets/Icon/stadia.png")
+    image = [steam,kakao,xbox,playstation,stadia]
+    return image[pubg_platform]
+
 directory = os.path.dirname(os.path.abspath(__file__)).replace('\\','/').replace('/modules','')
 db_f = open(directory + "/data/bot_info.json",mode='r')
 db = db_f.read()
@@ -89,7 +98,7 @@ async def get(message,client,pubg_json,player_id,count,pubg_platform):
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
     embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
-    match_id = pubg_json["data"]["relationships"]["matches"]["data"][count]["id"]
+    match_id = pubg_json["data"][0]["relationships"]["matches"]["data"][count]["id"]
     url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/matches/" + match_id
     response = await requests.get(url,headers=header)
     if response.status_code == 200:
@@ -144,4 +153,4 @@ async def get(message,client,pubg_json,player_id,count,pubg_platform):
     embed.add_field(name="생존시간:",value=f"{r_playtime}",inline=True)
     embed.add_field(name="이동한 거리:",value=f"{distance} km",inline=True)
     embed.add_field(name="딜량:",value=f"{round(deals,2)}",inline=True)
-    await message.channel.send(embed=embed)
+    await message.channel.send(file=image(pubg_platform),embed=embed)
