@@ -7,8 +7,12 @@ import os
 import sys
 import json
 import datetime
+import requests_async as requests
 
 from pytz import timezone
+
+image_name = ["steam.png","kakao.png","xbox.png","playstation.png","stadia.png"]
+platform_site = ["steam","kakao","xbox","psn","stadia"]
 
 def time_num(playtime): #시간 계산, 불필요한 월단위, 일단위 등의 제거
     if playtime.month == 1:
@@ -68,44 +72,47 @@ async def response_num(response,message): #에러 발생시, 코드를 통하여
     await message.channel.send(embed=embed)
     return
 
+def player(html,t,user_name):
+    if type(html) == dict:
+        json_data = html
+    else:
+        json_data = json.loads(html)
+    included = json_data["included"]
+    for i in included:
+        if i['type'] == "participant":
+            if i['attributes']['stats']['playerId'] == user_name and t == 'player_id':
+                return i
+            elif i['id'] == user_name and t == 'id':
+                return i
+
 async def get(message,client,pubg_json,player_id,count,pubg_platform):
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
-    match_id = json_players["data"]["relationships"]["matches"]["data"][count]["id"]
+    embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=await player_module.name() + "님의 전적")
+    match_id = pubg_json["data"]["relationships"]["matches"]["data"][count]["id"]
     url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/matches/" + match_id
     response = await requests.get(url,headers=header)
     if response.status_code == 200:
-        json_data = response.json()
+        html = response.json()
     else:
         await response_num(response,message)
-    def player(html,return_value,find_value):
-        if type(html) == dict:
-            json_data = html
-        else:
-            json_data = json.loads(html)
-        included = json_data["included"]
-        for i in range(len(included)-1):
-            if included[i]["type"] == "participant":
-                if find_value == "id" and included[i]["id"] == return_value:
-                    return included[i]
-                elif find_value == "id":
-                    continue
-                elif included[i]["attributes"]["stats"][find_value] == return_value:
-                    return included[i]
-    map_cache = json_data["data"]["attributes"]["mapName"]
-    included1 = player(json_data,player_id,"playerId")
-    user_id = included1["id"]
-    timeSurvived = included1["attributes"]["stats"]["timeSurvived"]
-    deals = included1["attributes"]["stats"]["damageDealt"]
-    kills = included1["attributes"]["stats"]["kills"]
-    assists = included1["attributes"]["stats"]["assists"]
-    DBNOs = included1["attributes"]["stats"]["DBNOs"]
-    distance = round((included1["attributes"]["stats"]["walkDistance"]+included1["attributes"]["stats"]["swimDistance"]+included1["attributes"]["stats"]["rideDistance"])/1000,3)
-    deathType = included1["attributes"]["stats"]["deathType"]
+        return
+    map_cache = html["data"]["attributes"]["mapName"]
+
+    user = player(html, 'player_id', player_id)
+    match_user_id = user['id']
+    included = html["included"]
+    kill = user["attributes"]["stats"]['kills']
+    assist = user["attributes"]["stats"]['assists']
+    distance = round((user["attributes"]["stats"]["walkDistance"]+user["attributes"]["stats"]["swimDistance"]+user["attributes"]["stats"]["rideDistance"])/1000,3)
+    deathType = user["attributes"]["stats"]["deathType"]
+    deals = user["attributes"]["stats"]["damageDealt"]
+    timeSurvived = user["attributes"]["stats"]["timeSurvived"]
     playtime = datetime.datetime.fromtimestamp(float(timeSurvived),timezone('UTC'))
     r_playtime = time_num(playtime)
+
     deathT = ["alive", "byplayer", "byzone", "suicide", "logout"]
-    deathA = ["생존","유저","블루존","자살","로그 아웃"]
+    deathA = ["승리","유저","블루존","자살","로그 아웃"]
     map_name={
         "Desert_Main": "미라마",
         "DihorOtok_Main": "비켄디",
@@ -119,32 +126,22 @@ async def get(message,client,pubg_json,player_id,count,pubg_platform):
         if deathType == deathT[i]:
             deathType = deathA[i]
             break
-    included = json_data["included"]
-    for i in range(len(included)-1):
-        if included[i]["type"] == "roster":
-            party = included[i]["relationships"]["participants"]["data"]
-            a_tf = False
-            for j in range(len(party)):
-                if party[j]["id"] == user_id:
-                    a_tf = True
-                    break
-            if a_tf:
-                rank = included[i]["attributes"]["stats"]["rank"]
-                break
-    if not a_tf:
-        team_member = "멤버를 불러오지 못했습니다."
-    team_member = ""
-    for i in range(len(party)):
-        player_m = player(json_data,party[i]["id"],"id")
-        team_member = team_member + "," + str(player_m["attributes"]["stats"]["name"])
-    embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
-    embed.add_field(name="팀원:",value=team_member.replace(',','',1),inline=False)
+
+    for i in included:
+        if i['type'] == "roster":
+            for j in i['relationships']['participants']['data']:
+                if j['id'] == match_user_id:
+                    team = i
+    rank = team['attributes']['stats']['rank']
+    team_list = team["relationships"]["participants"]["data"]
+    people = []
+    for i in team_list:
+        people.append(player(html, 'id', i['id'])['attributes']['stats']['name'])
+    embed.add_field(name="팀원:",value=",".join(people),inline=False)
+    embed.add_field(name="결과:",value=f'{deathType}({rank}위)',inline=True)
     embed.add_field(name="맵:",value=map_name[map_cache],inline=True)
-    embed.add_field(name="킬/어시:",value=str(kills) + "회/" + str(assists) + "회",inline=True)
-    embed.add_field(name="DBNOs:",value=str(DBNOs) + "회",inline=True)
-    embed.add_field(name="결과:",value=deathType + "(" + str(rank) + "위)",inline=True)
-    embed.add_field(name="이동한 거리:",value=str(distance) + "km",inline=True)
-    embed.add_field(name="딜량:",value=str(round(deals,2)),inline=True)
-    if update:
-        await update_msg.delete()
-    msg2 = await message.channel.send(embed=embed)
+    embed.add_field(name="킬/어시:",value=f"{kill}회/{assist}회",inline=True)
+    embed.add_field(name="생존시간:",value=f"{r_playtime}",inline=True)
+    embed.add_field(name="이동한 거리:",value=f"{distance} km",inline=True)
+    embed.add_field(name="딜량:",value=f"{round(deals,2)}",inline=True)
+    await message.channel.send(embed=embed)
