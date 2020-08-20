@@ -79,7 +79,7 @@ async def season_status(player_id,season,message,pubg_platform):
             if response.status_code == 200:
                 return_value = response.json()
             else:
-                response_num(response,message)
+                await response_num(response,message)
                 return "Failed_Response"
             sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s and season=%s"
             cur.execute(sql, (json.dumps(return_value),player_id,season))
@@ -91,7 +91,7 @@ async def season_status(player_id,season,message,pubg_platform):
         if response.status_code == 200:
             return_value = response.json()
         else:
-            response_num(response,message)
+            await response_num(response,message)
             return "Failed_Response"
         sql = """insert into NORMAL_STATUS(id,html,season)
                 values (%s, %s, %s)"""
@@ -112,7 +112,7 @@ async def season_status_update(player_id,season,message,pubg_platform):
         if response.status_code == 200:
             return_value = response.json()
         else:
-            response_num(response,message)
+            await response_num(response,message)
             return "Failed_Response"
         sql = "UPDATE NORMAL_STATUS SET html=%s WHERE id=%s and season=%s"
         cur.execute(sql, (json.dumps(return_value),player_id,season))
@@ -140,7 +140,7 @@ async def ranked_status(player_id,season,message,pubg_platform):
             if response.status_code == 200:
                 return_value = response.json()
             else:
-                response_num(response,message)
+                await response_num(response,message)
                 return "Failed_Response"
             sql = "UPDATE RANKED_STATUS SET html=%s WHERE id=%s and season=%s"
             cur.execute(sql, (json.dumps(return_value),player_id,season))
@@ -152,7 +152,7 @@ async def ranked_status(player_id,season,message,pubg_platform):
         if response.status_code == 200:
             return_value = response.json()
         else:
-            response_num(response,message)
+            await response_num(response,message)
             return "Failed_Response"
         sql = """insert into RANKED_STATUS(id,html,season)
                 values (%s, %s, %s)"""
@@ -173,7 +173,7 @@ async def ranked_status_update(player_id,season,message,pubg_platform):
         if response.status_code == 200:
             return_value = response.json()
         else:
-            response_num(response,message)
+            await response_num(response,message)
             return "Failed_Response"
         sql = "UPDATE RANKED_STATUS SET html=%s WHERE id=%s and season=%s"
         cur.execute(sql, (json.dumps(return_value),player_id,season))
