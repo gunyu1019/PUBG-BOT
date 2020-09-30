@@ -22,7 +22,7 @@ image_name = ["steam.png","kakao.png","xbox.png","playstation.png","stadia.png"]
 platform_name = ["Steam","Kakao","XBOX","PS","Stadia"]
 platform_site = ["steam","kakao","xbox","psn","stadia"]
 
-version = "v1.0(2020-10-02)"
+version = "v1.0(2020-10-01)"
 
 def image(pubg_platform):
     kakao = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "kakao.png")
@@ -141,34 +141,34 @@ async def autopost3():
             cur.execute(sql)
             cache = cur.fetchone()
             last_update = cache[0]
-            html1 = cache[0]
+            html1 = cache[1]
         except:
             raise
         date_json1 = json.loads(last_update)
         date_json2 = json.loads(html1)
         time_last = datetime.datetime(date_json1['years'],date_json1['months'],date_json1['days'],date_json1['hours'],date_json1['minutes'])
-        if time_now > time_last:
-            time_delta = time_now - time_last
-            if time_delta.days > 2:
-                response = await requests.get("https://api.pubg.com/shards/steam/seasons",headers=header)
-                if response.status_code == 200:
-                    html2 = response.json()
-                    if date_json2 != html2:
-                        log_info('PUBG API','system-log','PUBG_BOT','시즌 정보가 변경되었습니다.')
-                        w_time = {
-                            "years":time_now.year,
-                            "months":time_now.month,
-                            "days":time_now.day,
-                            "hours":time_now.hour,
-                            "minutes":time_now.minute
-                        }
-                        sql = 'UPDATE SEASON SET html=%s,last_update=%s WHERE id=1'
-                        cur.execute(sql,(json.dumps(html2),json.dumps(w_time)))
-                else:
-                    print(response.status_code,response.json())
+        time_delta = time_now - time_last
+        if time_delta.days > 2:
+            log_info('PUBG API','system-log','PUBG_BOT','시즌정보를 체크합니다.')
+            response = await requests.get("https://api.pubg.com/shards/steam/seasons",headers=header)
+            if response.status_code == 200:
+                html2 = response.json()
+                if date_json2 != html2:
+                    log_info('PUBG API','system-log','PUBG_BOT','시즌 정보가 변경되었습니다.')
+                    w_time = {
+                        "years":time_now.year,
+                        "months":time_now.month,
+                        "days":time_now.day,
+                        "hours":time_now.hour,
+                        "minutes":time_now.minute
+                    }
+                    sql = 'UPDATE SEASON SET html=%s,last_update=%s WHERE id=1'
+                    cur.execute(sql,(json.dumps(html2),json.dumps(w_time)))
+            else:
+                print(response.status_code,response.json())
         connect.commit()
         connect.close()
-        await asyncio.sleep(60.0)
+        await asyncio.sleep(120.0)
 
 def time_num(playtime): #시간 계산, 불필요한 월단위, 일단위 등의 제거
     if playtime.month == 1:
@@ -351,9 +351,14 @@ async def profile(message,prefix,command):
     list_message = message.content.split(" ")
     nickname = ""
     if command == "Information":
+        pubg_type_all = ['1인칭','3인칭','일반','랭크']
         helper = "**" + prefix + "전적[솔로|듀오|스쿼드(랭크 제외,선택) 혹은 1인칭|3인칭(랭크 경우,선택)] [1인칭|3인칭 혹은 일반|랭크] [닉네임(선택)] [시즌(선택)]**:"
         try:
             pubg_type = list_message[1]
+            if not pubg_type in pubg_type_all:
+                embed = discord.Embed(title="에러",description=helper + " 1인칭, 3인칭 혹은 일반, 랭크 중에서만 선택하여 주세요.", color=0xaa0000)
+                await message.channel.send(embed=embed)
+                return
         except Exception:
             embed = discord.Embed(title="에러",description=helper + " 1인칭, 3인칭 혹은 일반, 랭크 중에서 선택하여 주세요.", color=0xaa0000)
             await message.channel.send(embed=embed)
@@ -391,7 +396,18 @@ async def profile(message,prefix,command):
             else:
                 season = "division.bro.official.pc-2018-" + s_count
         except Exception:
-            season = "division.bro.official.pc-2018-08"
+            connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db='PUBG_BOT', charset='utf8')
+            try:
+                cur = connect.cursor()
+                sql = f"SELECT html FROM SEASON"
+                cur.execute(sql)
+                cache = cur.fetchone()
+                html = cache[0]
+            except:
+                raise
+            data_json = json.loads(html)['data']
+            least_season = data_json[len(data_json)-1]
+            season = least_season['id']
         if pubg_type == "랭크":
             pubg_json = await s_info.ranked_status(pubg_id,season,message,pubg_platform)
             if list_message[0] == prefix + "전적":
