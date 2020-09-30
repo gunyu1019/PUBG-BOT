@@ -863,12 +863,12 @@ async def on_guild_join(guild):
         if i.name == guild.name:
             server_number = client.guilds.index(i)+1
     if not server_number == None:
-        log_system(guild.name + '에 가입이 확인되었습니다. 서버번호: ' + str(server_number) + '번, 서버멤버' + str(len(guild.members)) + '명')
+       log_info('Discord API','system-log','PUBG_BOT',guild.name + '에 가입이 확인되었습니다. 서버번호: ' + str(server_number) + '번, 서버멤버' + str(len(guild.members)) + '명')
     return
 
 @client.event
 async def on_guild_remove(guild):
-    log_system(guild.name + '로 부터 추방 혹은 차단되었습니다.')
+    log_info('Discord API','system-log','PUBG_BOT',guild.name + '로 부터 추방 혹은 차단되었습니다.')
     return
 
 client.loop.create_task(autopost1())
