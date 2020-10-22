@@ -22,7 +22,7 @@ image_name = ["steam.png","kakao.png","xbox.png","playstation.png","stadia.png"]
 platform_name = ["Steam","Kakao","XBOX","PS","Stadia"]
 platform_site = ["steam","kakao","xbox","psn","stadia"]
 
-version = "v1.0(2020-10-01)"
+version = "v1.1(2020-10-01)"
 
 def image(pubg_platform):
     kakao = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "kakao.png")
@@ -74,10 +74,24 @@ def is_banned(user_id,message):
 def log_info(guild, channel, user, message):
     Ftime = time.strftime('%Y-%m-%d %p %I:%M:%S', time.localtime(time.time()))
     print("[시간: " + str(Ftime) + " | " + str(guild) + " | " + str(channel) + " | " + str(user) + "]: " + str(message))
-    log = open("log.txt","a",encoding = 'utf-8')
+    log = open(f"{directory}/log/message.txt","a",encoding = 'utf-8')
     log.write("[시간: " + str(Ftime) + " | " + str(guild) + " | " + str(channel) + " | " + str(user) + "]: " + str(message) + "\n")
     log.close()
     #log_info(message.guild,message.channel,message.author,message.content)
+
+def log_system(message):
+    r_time = time.strftime('%Y-%m-%d %p %I:%M:%S', time.localtime(time.time()))
+    print(f"[{r_time}]: {message}")
+    log = open(f"{directory}/log/system.txt","a",encoding = 'utf-8')
+    log.write(f"[{r_time}]: {message}\n")
+    log.close()
+
+def log_error(message):
+    r_time = time.strftime('%Y-%m-%d %p %I:%M:%S', time.localtime(time.time()))
+    print(f"[{r_time}]: {message}")
+    log = open(f"{directory}/log/error.txt","a",encoding = 'utf-8')
+    log.write(f"[{r_time}]: {message}\n")
+    log.close()
 
 #쓸때없는거(?)같은 괜찮은거
 def change_data(B):
@@ -149,12 +163,12 @@ async def autopost3():
         time_last = datetime.datetime(date_json1['years'],date_json1['months'],date_json1['days'],date_json1['hours'],date_json1['minutes'])
         time_delta = time_now - time_last
         if time_delta.days > 2:
-            log_info('PUBG API','system-log','PUBG_BOT','시즌정보를 체크합니다.')
+            log_system('시즌정보를 체크합니다.')
             response = await requests.get("https://api.pubg.com/shards/steam/seasons",headers=header)
             if response.status_code == 200:
                 html2 = response.json()
                 if date_json2 != html2:
-                    log_info('PUBG API','system-log','PUBG_BOT','시즌 정보가 변경되었습니다.')
+                    log_system('시즌 정보가 변경되었습니다.')
                     w_time = {
                         "years":time_now.year,
                         "months":time_now.month,
@@ -321,7 +335,8 @@ async def player_info(message,nickname):
         await msg.add_reaction(xbox)
         await msg.add_reaction(playstation)
         await msg.add_reaction(stadia)
-        emoji = [steam,kakao,xbox,playstation,stadia]
+        await msg.add_reaction("\U0000274C")
+        emoji = [steam,kakao,xbox,playstation,stadia,"\U0000274C"]
         def check2(reaction,user):
             for i in range(5):
                 if str(reaction.emoji)==str(emoji[i]):
@@ -329,9 +344,13 @@ async def player_info(message,nickname):
         try:
             reaction,_ = await client.wait_for('reaction_add',check=check2,timeout=20)
         except asyncio.TimeoutError:
+            await msg.delete()
             embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다!", color=0xaa0000)
             await message.channel.send(embed=embed)
+        await msg.delete()
         count = 0
+        if reaction.emoji == "\U0000274C":
+            return "Failed_Response", 0
         for i in range(5):
             if str(reaction.emoji)==str(emoji[i]):
                 count = i
@@ -352,7 +371,7 @@ async def profile(message,prefix,command):
     nickname = ""
     if command == "Information":
         pubg_type_all = ['1인칭','3인칭','일반','랭크']
-        helper = "**" + prefix + "전적[솔로|듀오|스쿼드(랭크 제외,선택) 혹은 1인칭|3인칭(랭크 경우,선택)] [1인칭|3인칭 혹은 일반|랭크] [닉네임(선택)] [시즌(선택)]**:"
+        helper = "**" + prefix + "전적[솔로|듀오(경쟁 X)|스쿼드] [1인칭|3인칭 혹은 일반|3인칭경쟁 혹은 경쟁, 랭크|1인칭경쟁] [닉네임(선택)] [시즌(선택)]**:"
         try:
             pubg_type = list_message[1]
             if not pubg_type in pubg_type_all:
@@ -408,14 +427,23 @@ async def profile(message,prefix,command):
             data_json = json.loads(html)['data']
             least_season = data_json[len(data_json)-1]
             season = least_season['id']
-        if pubg_type == "랭크":
+        if pubg_type == "랭크" or pubg_type == "3인칭경쟁" or pubg_type == "경쟁":
             pubg_json = await s_info.ranked_status(pubg_id,season,message,pubg_platform)
             if list_message[0] == prefix + "전적":
-                await ranked.ranked_total(message,client,pubg_platform,pubg_json,season,pubg_id)
-            elif list_message[0] == prefix + "전적1인칭":
-                await ranked.ranked_mode(message,client,pubg_platform,"squad-fpp",pubg_json,season,pubg_id)
-            elif list_message[0] == prefix + "전적3인칭":
-                await ranked.ranked_mode(message,client,pubg_platform,"squad",pubg_json,season,pubg_id)
+                await ranked.ranked_total(message,client,pubg_platform,"tpp",pubg_json,season,pubg_id)
+            elif list_message[0] == prefix + "전적솔로":
+                await ranked.ranked_mode(message,client,pubg_platform,"tpp","solo",pubg_json,season,pubg_id)
+            elif list_message[0] == prefix + "전적스쿼드":
+                await ranked.ranked_mode(message,client,pubg_platform,"tpp","squad",pubg_json,season,pubg_id)
+            return
+        elif pubg_type == "1인칭경쟁":
+            pubg_json = await s_info.ranked_status(pubg_id,season,message,pubg_platform)
+            if list_message[0] == prefix + "전적":
+                await ranked.ranked_total(message,client,pubg_platform,"fpp",pubg_json,season,pubg_id)
+            elif list_message[0] == prefix + "전적솔로":
+                await ranked.ranked_mode(message,client,pubg_platform,"fpp","solo-fpp",pubg_json,season,pubg_id)
+            elif list_message[0] == prefix + "전적스쿼드":
+                await ranked.ranked_mode(message,client,pubg_platform,"fpp","squad-fpp",pubg_json,season,pubg_id)
             return
         elif pubg_type == "1인칭":
             pubg_json = await s_info.season_status(pubg_id,season,message,pubg_platform)
@@ -435,7 +463,7 @@ async def profile(message,prefix,command):
             if pubg_json == "Failed_Response":
                 return
             if list_message[0] == prefix + "전적":
-                await normal.profile_total(message,client,pubg_platform,"tpp",pubg_json,season,pubg_id)
+                await normal.profile_total(message,client,pubg_platform,"fpp",pubg_json,season,pubg_id)
             elif list_message[0] == prefix + "전적솔로":
                 await normal.profile_mode(message,client,pubg_platform,"tpp","solo",pubg_json,season,pubg_id)
             elif list_message[0] == prefix + "전적듀오":
@@ -473,17 +501,17 @@ async def profile(message,prefix,command):
 
 @client.event
 async def on_ready():
-    log_info('Discord API','system-log','PUBG_BOT','디스코드 봇 로그인이 완료되었습니다.')
-    log_info('Discord API','system-log','PUBG_BOT',"디스코드봇 이름:" + client.user.name)
-    log_info('Discord API','system-log','PUBG_BOT',"디스코드봇 ID:" + str(client.user.id))
-    log_info('Discord API','system-log','PUBG_BOT',"디스코드봇 버전:" + str(discord.__version__))
+    log_system('디스코드 봇 로그인이 완료되었습니다.')
+    log_system("디스코드봇 이름:" + client.user.name)
+    log_system("디스코드봇 ID:" + str(client.user.id))
+    log_system("디스코드봇 버전:" + str(discord.__version__))
     print('------------')
     answer = ""
     total = 0
     for i in range(len(client.guilds)):
         answer = answer + str(i+1) + "번째: " + str(client.guilds[i]) + "(" + str(client.guilds[i].id) + "):"+ str(len(client.guilds[i].members)) +"명\n"
         total += len(client.guilds[i].members)
-    log_info('Discord API','guilds-log','PUBG_BOT',"방목록: \n" + answer + "방의 종합 멤버:" + str(total) + "명")
+    log_system("방목록: \n" + answer + "방의 종합 멤버:" + str(total) + "명")
     global DBL, DBKR
     DBL = dbl.DBLClient(client,DBL_token,autopost=True)
     DBKR = dbkrpy.UpdateGuilds(client,DBKR_token)
@@ -615,15 +643,44 @@ async def on_message(message):
         log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
-        embed = discord.Embed(title="도움말",color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
-        embed.add_field(name=prefix + "전적 [1인칭|3인칭 혹은 일반|랭크] [닉네임(선택)] [시즌(선택)]:",value="배틀그라운드 종합 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name=prefix + "전적[솔로|듀오|스쿼드(랭크 제외,선택) 혹은 1인칭|3인칭(랭크 경우,선택)] [1인칭|3인칭 혹은 일반|랭크] [닉네임(선택)] [시즌(선택)]:",value="배틀그라운드 솔로/듀오/스쿼드 모드에 대한 전적을 검색해 줍니다.",inline=False)
-        embed.add_field(name=prefix + "매치 [닉네임]:",value="해당 유저에 대한 매치 전적을 확일 할수 있게 해줍니다..",inline=False)
-        embed.add_field(name=prefix + "서버상태:",value="배틀그라운드 서버 상태를 알려줍니다.",inline=False)
-        embed.add_field(name=prefix + "ping:",value="디스코드봇의 ping을 알려줍니다.",inline=False)
-        embed.add_field(name=prefix + "접두어 [설정/초기화/정보] [(설정 사용시)설정할 접두어]:",value="접두어를 설정합니다.",inline=False)
-        embed.set_footer(text=f"{version}")
-        await message.channel.send(embed=embed)
+        async def help_command(help_page):
+            embed = discord.Embed(title="도움말",color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
+            if page == 1:
+                embed.add_field(name=prefix + "전적 [1인칭|3인칭 혹은 일반|3인칭경쟁 혹은 경쟁, 랭크|1인칭경쟁] [닉네임(선택)] [시즌(선택)]:",value="배틀그라운드 종합 전적을 검색해 줍니다.",inline=False)
+                embed.add_field(name=prefix + "전적[솔로|듀오(경쟁 X)|스쿼드] [1인칭|3인칭 혹은 일반|3인칭경쟁 혹은 경쟁, 랭크|1인칭경쟁] [닉네임(선택)] [시즌(선택)]:",value="배틀그라운드 솔로/듀오/스쿼드 모드에 대한 전적을 검색해 줍니다.",inline=False)
+                embed.add_field(name=prefix + "매치 [닉네임]:",value="해당 유저에 대한 매치 전적을 확일 할수 있게 해줍니다.",inline=False)
+                embed.add_field(name=prefix + "서버상태:",value="배틀그라운드 서버 상태를 알려줍니다.",inline=False)
+            elif page == 2:
+                embed.add_field(name=prefix + "에란겔:",value="배틀그라운드 에란겔 맵에 대해 볼 수 있습니다.",inline=False)
+                embed.add_field(name=prefix + "미라마:",value="배틀그라운드 미라마 맵에 대해 볼 수 있습니다.",inline=False)
+                embed.add_field(name=prefix + "사녹:",value="배틀그라운드 사녹 맵에 대해 볼 수 있습니다.",inline=False)
+                embed.add_field(name=prefix + "비켄디:",value="배틀그라운드 비켄디 맵에 대해 볼 수 있습니다.",inline=False)
+                embed.add_field(name=prefix + "카라킨:",value="배틀그라운드 카라킨 맵에 대해 볼 수 있습니다.",inline=False)
+                embed.add_field(name=prefix + "카라킨:",value="배틀그라운드 파라모 맵에 대해 볼 수 있습니다.",inline=False)
+                embed.add_field(name=prefix + "캠프자칼:",value="배틀그라운드 캠프자칼 맵에 대해 볼 수 있습니다.",inline=False)
+            elif page == 3:
+                embed.add_field(name=prefix + "ping:",value="디스코드봇의 ping을 알려줍니다.",inline=False)
+                embed.add_field(name=prefix + "접두어 [설정/초기화/정보] [(설정 사용시)설정할 접두어]:",value="접두어를 설정합니다.",inline=False)
+                embed.add_field(name=prefix + "블랙리스트 [추가/여부/제거] [맨션(선택)]:", value="해당 기능을 통해 유저가 PUBG BOT를 사용하지 못하도록 설정할수 있습니다.",inline=False)
+            embed.set_footer(text=f"{version}")
+            await message.channel.send(embed=embed)
+            if not help_page == 1:
+                await msg.add_reaction("\U00002B05")
+            if not help_page + 1 == 3:
+                await msg.add_reaction("\U000027A1")
+            message_id = msg.id
+            def check(reaction, user):
+                if "\U000027A1" == reaction.emoji or "\U00002B05" == reaction.emoji:
+                    return user.id == message.author.id and message_id == reaction.message.id
+            reaction,_ = await client.wait_for('reaction_add', check=check)
+            if reaction.emoji == "\U000027A1":
+                await msg.delete()
+                await help_command(help_page+1)
+            elif reaction.emoji == "\U00002B05":
+                await msg.delete()
+                await help_command(help_page-1)
+            return
+        await help_command(1)
         return
     if message.content == prefix + "서버상태":
         log_info(message.guild,message.channel,message.author,message.content)
@@ -662,29 +719,28 @@ async def on_message(message):
             embed = discord.Embed(title="에러!",description="내용을 적어주세요!", color=0xffd619)
             await message.channel.send(embed=embed)
             return
-        answer = eval(code)
-        embed = discord.Embed(title="eval",description=answer, color=0xffd619)
+        try:
+            answer = eval(code)
+        except Exception as e:
+            embed = discord.Embed(title="eval",description=f'작동중에 에러가 발생하였습니다.\n```{e}```', color=0xffd619)
+            await message.channel.send(embed=embed)
+        else:
+            embed = discord.Embed(title="eval",description=answer, color=0xffd619)
         await message.channel.send(embed=embed)
         return
-    if message.content.startswith(prefix + 'hellothisisverification'):
-        log_info(message.guild,message.channel,message.author,message.content)
-        if is_banned(author_id,message):
-            return
-        await message.channel.send("건유1019#0001(340373909339635725)")
-        return
-    if message.content == prefix + "ping":
+    if message.content == prefix + "ping" or message.content == prefix + "핑" :
         log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
         now = datetime.datetime.utcnow()
         response_ping_c = now - message.created_at
-        reading_ping = float(str(response_ping_c.seconds) + "." +  str(response_ping_c.microseconds))
-        embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms", color=0xffd619)
+        reading_ping = float(f"{response_ping_c.seconds}.{response_ping_c.microseconds}")
+        embed = discord.Embed(title="Pong!",description=f"클라이언트 핑상태: {round(client.latency * 1000,2)}ms\n읽기 속도: {round(reading_ping * 1000,2)}ms", color=0xffd619)
         msg = await message.channel.send(embed=embed)
         now = datetime.datetime.utcnow()
-        response_ping_a = msg.created_at - now
-        response_ping = float(str(response_ping_a.seconds) + "." +  str(response_ping_a.microseconds))
-        embed = discord.Embed(title="Pong!",description="클라이언트 핑상태: " + str(round(client.latency * 1000,2)) + "ms\n읽기 속도: " + str(round(reading_ping * 1000,2)) + "ms\n출력 속도: " + str(round(response_ping * 1000,2)) + "ms", color=0xffd619)
+        response_ping_a = now - msg.created_at
+        response_ping = float(f"{response_ping_a.seconds}.{response_ping_a.microseconds}")
+        embed = discord.Embed(title="Pong!",description=f"클라이언트 핑상태: {round(client.latency * 1000,2)}ms\n읽기 속도: {round(reading_ping * 1000,2)}ms\n출력 속도: {round(response_ping * 1000,2)}ms", color=0xffd619)
         await msg.edit(embed=embed)
         return
     if message.content == prefix + '시스템':
@@ -822,6 +878,30 @@ async def on_message(message):
         embed.set_image(url="attachment://Vikendi_Main_Low_Res.png")
         await message.channel.send(file=map_picture,embed=embed)
         return
+    if message.content == prefix + '카라킨':
+        log_info(message.guild,message.channel,message.author,message.content)
+        if is_banned(author_id,message):
+            return
+        embed = discord.Embed(title="지도", color=0xffd619)
+        map_picture = discord.File(directory + type_software + "assets" + type_software + "Maps" + type_software + "Karakin_Main_Low_Res.png")
+        embed.add_field(name="원본(텍스트 삭제)",value="[링크](" + map_link["Karakin"]["No_Text_Low_Res"] + ")",inline=True)
+        embed.add_field(name="고화질",value="[링크](" + map_link["Karakin"]["High_Res"] + ")",inline=True)
+        embed.add_field(name="고화질(텍스트 삭제)",value="[링크](" + map_link["Karakin"]["No_Text_High_Res"] + ")",inline=True)
+        embed.set_image(url="attachment://Karakin_Main_Low_Res.png")
+        await message.channel.send(file=map_picture,embed=embed)
+        return
+    if message.content == prefix + '파라모':
+        log_info(message.guild,message.channel,message.author,message.content)
+        if is_banned(author_id,message):
+            return
+        embed = discord.Embed(title="지도", color=0xffd619)
+        map_picture = discord.File(directory + type_software + "assets" + type_software + "Maps" + type_software + "Paramo_Main_Low_Res.png")
+        embed.add_field(name="원본(텍스트 삭제)",value="[링크](" + map_link["Paramo"]["No_Text_Low_Res"] + ")",inline=True)
+        embed.add_field(name="고화질",value="[링크](" + map_link["Paramo"]["High_Res"] + ")",inline=True)
+        embed.add_field(name="고화질(텍스트 삭제)",value="[링크](" + map_link["Paramo"]["No_Text_High_Res"] + ")",inline=True)
+        embed.set_image(url="attachment://Paramo_Main_Low_Res.png")
+        await message.channel.send(file=map_picture,embed=embed)
+        return
     if message.content == prefix + '캠프자칼' or message.content == '훈련장':
         log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
@@ -854,7 +934,43 @@ async def on_message(message):
 
 @client.event
 async def on_resumed():
-    log_info('Discord API','system-log','PUBG_BOT','재시작 되었습니다.')
+    log_system('재시작 되었습니다.')
+
+@client.event
+async def on_guild_join(guild):
+    server_number = None
+    for i in client.guilds:
+        if i.name == guild.name:
+            server_number = client.guilds.index(i)+1
+    if not server_number == None:
+        log_system(guild.name + '에 가입이 확인되었습니다. 서버번호: ' + str(server_number) + '번, 서버멤버' + str(len(guild.members)) + '명')
+    return
+
+@client.event
+async def on_guild_remove(guild):
+    log_system(guild.name + '로 부터 추방 혹은 차단되었습니다.')
+    return
+
+@client.event
+async def on_error(event, *args, **kwargs):
+    if event == "on_message":
+        message = args[0]
+        exc = sys.exc_info()
+        excname = exc[0].__name__
+        excarglist = [str(x) for x in exc[1].args]
+        if not excarglist:
+            traceback = excname
+        else:
+            traceback = excname + ": " + ", ".join(excarglist)
+        log_error(f"[{message.guild.name},{message.channel.name},{message.author},{message.content}]{traceback}")
+        embed = discord.Embed(title="\U000026A0 에러", color=0xaa0000)
+        embed.add_field(name='에러 내용(traceback)',value=f'{traceback}',inline=False)
+        embed.add_field(name='서버명',value=f'{message.guild.name}',inline=True)
+        embed.add_field(name='채널명',value=f'{message.channel.name}',inline=True)
+        embed.add_field(name='유저명',value=f'{message.author}',inline=True)
+        embed.add_field(name='메세지',value=f'{message.content}',inline=False)
+        await client.get_guild(738294838063136808).get_channel(738526796575670333).send(embed=embed)
+    raise
 
 client.loop.create_task(autopost1())
 client.loop.create_task(autopost2(30))
