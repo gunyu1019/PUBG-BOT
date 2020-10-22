@@ -972,6 +972,21 @@ async def on_error(event, *args, **kwargs):
         await client.get_guild(738294838063136808).get_channel(738526796575670333).send(embed=embed)
     raise
 
+@client.event
+async def on_guild_join(guild):
+    server_number = None
+    for i in client.guilds:
+        if i.name == guild.name:
+            server_number = client.guilds.index(i)+1
+    if not server_number == None:
+       log_info('Discord API','system-log','PUBG_BOT',guild.name + '에 가입이 확인되었습니다. 서버번호: ' + str(server_number) + '번, 서버멤버' + str(len(guild.members)) + '명')
+    return
+
+@client.event
+async def on_guild_remove(guild):
+    log_info('Discord API','system-log','PUBG_BOT',guild.name + '로 부터 추방 혹은 차단되었습니다.')
+    return
+
 client.loop.create_task(autopost1())
 client.loop.create_task(autopost2(30))
 client.loop.create_task(autopost3())
