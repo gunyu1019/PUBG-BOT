@@ -22,7 +22,7 @@ image_name = ["steam.png","kakao.png","xbox.png","playstation.png","stadia.png"]
 platform_name = ["Steam","Kakao","XBOX","PS","Stadia"]
 platform_site = ["steam","kakao","xbox","psn","stadia"]
 
-version = "v1.1(2020-10-01)"
+version = "v1.1(2020-10-23)"
 
 def image(pubg_platform):
     kakao = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "kakao.png")
@@ -645,12 +645,12 @@ async def on_message(message):
             return
         async def help_command(help_page):
             embed = discord.Embed(title="도움말",color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
-            if page == 1:
+            if help_page == 1:
                 embed.add_field(name=prefix + "전적 [1인칭|3인칭 혹은 일반|3인칭경쟁 혹은 경쟁, 랭크|1인칭경쟁] [닉네임(선택)] [시즌(선택)]:",value="배틀그라운드 종합 전적을 검색해 줍니다.",inline=False)
                 embed.add_field(name=prefix + "전적[솔로|듀오(경쟁 X)|스쿼드] [1인칭|3인칭 혹은 일반|3인칭경쟁 혹은 경쟁, 랭크|1인칭경쟁] [닉네임(선택)] [시즌(선택)]:",value="배틀그라운드 솔로/듀오/스쿼드 모드에 대한 전적을 검색해 줍니다.",inline=False)
                 embed.add_field(name=prefix + "매치 [닉네임]:",value="해당 유저에 대한 매치 전적을 확일 할수 있게 해줍니다.",inline=False)
                 embed.add_field(name=prefix + "서버상태:",value="배틀그라운드 서버 상태를 알려줍니다.",inline=False)
-            elif page == 2:
+            elif help_page == 2:
                 embed.add_field(name=prefix + "에란겔:",value="배틀그라운드 에란겔 맵에 대해 볼 수 있습니다.",inline=False)
                 embed.add_field(name=prefix + "미라마:",value="배틀그라운드 미라마 맵에 대해 볼 수 있습니다.",inline=False)
                 embed.add_field(name=prefix + "사녹:",value="배틀그라운드 사녹 맵에 대해 볼 수 있습니다.",inline=False)
@@ -658,15 +658,16 @@ async def on_message(message):
                 embed.add_field(name=prefix + "카라킨:",value="배틀그라운드 카라킨 맵에 대해 볼 수 있습니다.",inline=False)
                 embed.add_field(name=prefix + "카라킨:",value="배틀그라운드 파라모 맵에 대해 볼 수 있습니다.",inline=False)
                 embed.add_field(name=prefix + "캠프자칼:",value="배틀그라운드 캠프자칼 맵에 대해 볼 수 있습니다.",inline=False)
-            elif page == 3:
+            elif help_page == 3:
                 embed.add_field(name=prefix + "ping:",value="디스코드봇의 ping을 알려줍니다.",inline=False)
+                embed.add_field(name=prefix + "정보:",value="디스코드봇의 정보를 알려줍니다.",inline=False)
                 embed.add_field(name=prefix + "접두어 [설정/초기화/정보] [(설정 사용시)설정할 접두어]:",value="접두어를 설정합니다.",inline=False)
                 embed.add_field(name=prefix + "블랙리스트 [추가/여부/제거] [맨션(선택)]:", value="해당 기능을 통해 유저가 PUBG BOT를 사용하지 못하도록 설정할수 있습니다.",inline=False)
-            embed.set_footer(text=f"{version}")
-            await message.channel.send(embed=embed)
+            embed.set_footer(text=f"{version} | 페이지: {help_page}/3")
+            msg = await message.channel.send(embed=embed)
             if not help_page == 1:
                 await msg.add_reaction("\U00002B05")
-            if not help_page + 1 == 3:
+            if not help_page == 3:
                 await msg.add_reaction("\U000027A1")
             message_id = msg.id
             def check(reaction, user):
@@ -971,21 +972,6 @@ async def on_error(event, *args, **kwargs):
         embed.add_field(name='메세지',value=f'{message.content}',inline=False)
         await client.get_guild(738294838063136808).get_channel(738526796575670333).send(embed=embed)
     raise
-
-@client.event
-async def on_guild_join(guild):
-    server_number = None
-    for i in client.guilds:
-        if i.name == guild.name:
-            server_number = client.guilds.index(i)+1
-    if not server_number == None:
-       log_info('Discord API','system-log','PUBG_BOT',guild.name + '에 가입이 확인되었습니다. 서버번호: ' + str(server_number) + '번, 서버멤버' + str(len(guild.members)) + '명')
-    return
-
-@client.event
-async def on_guild_remove(guild):
-    log_info('Discord API','system-log','PUBG_BOT',guild.name + '로 부터 추방 혹은 차단되었습니다.')
-    return
 
 client.loop.create_task(autopost1())
 client.loop.create_task(autopost2(30))
