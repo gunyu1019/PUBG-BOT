@@ -463,7 +463,7 @@ async def profile(message,prefix,command):
             if pubg_json == "Failed_Response":
                 return
             if list_message[0] == prefix + "전적":
-                await normal.profile_total(message,client,pubg_platform,"fpp",pubg_json,season,pubg_id)
+                await normal.profile_total(message,client,pubg_platform,"tpp",pubg_json,season,pubg_id)
             elif list_message[0] == prefix + "전적솔로":
                 await normal.profile_mode(message,client,pubg_platform,"tpp","solo",pubg_json,season,pubg_id)
             elif list_message[0] == prefix + "전적듀오":
