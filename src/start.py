@@ -22,7 +22,12 @@ image_name = ["steam.png","kakao.png","xbox.png","playstation.png","stadia.png"]
 platform_name = ["Steam","Kakao","XBOX","PS","Stadia"]
 platform_site = ["steam","kakao","xbox","psn","stadia"]
 
-version = "v1.1(2020-10-23)"
+xbox = "<:XBOX:718482204035907586>"
+playstation = "<:PS:718482204417720400>"
+steam = "<:Steam:698454004656504852>"
+kakao = "<:kakao:718482204103278622>"
+stadia = "<:Stadia:718482205575348264>"
+version = "v1.1.1(2020-10-27)"
 
 def image(pubg_platform):
     kakao = discord.File(directory + type_software + "assets" + type_software + "Icon" + type_software + "kakao.png")
@@ -323,13 +328,8 @@ async def player_info(message,nickname):
         pubg_id = cache[0][0]
         pubg_platform = cache[0][1]
     except Exception:
-        embed = discord.Embed(title="플랫폼 선택!",description="해당 계정의 플랫폼을 선택해주세요.\n초기에 한번만 눌러주시면 됩니다.", color=0xffd619)
+        embed = discord.Embed(title="플랫폼 선택!",description="해당 계정의 플랫폼을 선택해주세요.\n유저를 처음 검색 했을 때 뜨는 기능이며, \U0000274C를 통해 취소 가능합니다.", color=0xffd619)
         msg = await message.channel.send(embed=embed)
-        xbox = "<:XBOX:718482204035907586>"
-        playstation = "<:PS:718482204417720400>"
-        steam = "<:Steam:698454004656504852>"
-        kakao = "<:kakao:718482204103278622>"
-        stadia = "<:Stadia:718482205575348264>"
         await msg.add_reaction(steam)
         await msg.add_reaction(kakao)
         await msg.add_reaction(xbox)
@@ -345,7 +345,7 @@ async def player_info(message,nickname):
             reaction,_ = await client.wait_for('reaction_add',check=check2,timeout=20)
         except asyncio.TimeoutError:
             await msg.delete()
-            embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다!", color=0xaa0000)
+            embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다! 20초 내로 선택해주시기 바랍니다.", color=0xaa0000)
             await message.channel.send(embed=embed)
         await msg.delete()
         count = 0
@@ -401,7 +401,7 @@ async def profile(message,prefix,command):
             await msg1.delete()
         except asyncio.TimeoutError:
             await msg1.delete()
-            embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다!", color=0xaa0000)
+            embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다! 20초 내로 선택해주시기 바랍니다.", color=0xaa0000)
             await message.channel.send(embed=embed)
             return
     pubg_id,pubg_platform = await player_info(message,nickname)
@@ -498,6 +498,74 @@ async def profile(message,prefix,command):
         await msg1.delete()
         await matches.get(message,client,pubg_json,pubg_id,count,pubg_platform)
         return
+
+async def platform_exchange(message,prefix):
+    list_message = message.content.split()
+    try:
+        nickname = list_message[1]
+    except Exception:
+        embed = discord.Embed(title="닉네임 작성 요청!",description="닉네임을 작성해주세요!\n취소를 하고싶으시다면 \"" + prefix + "취소\"를 적어주세요.", color=0xffd619)
+        msg1 = await message.channel.send(embed=embed)
+        def check1(m):
+            return message.author.id == m.author.id and message.channel.id == m.channel.id
+        try:
+            a_nickname = await client.wait_for('message',check=check1,timeout=20)
+            nickname = a_nickname.content
+            if nickname == prefix + "취소":
+                await msg1.delete()
+                return
+            await msg1.delete()
+        except asyncio.TimeoutError:
+            await msg1.delete()
+            embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다! 20초 내로 선택해주시기 바랍니다.", color=0xaa0000)
+            await message.channel.send(embed=embed)
+            return
+    connect = pymysql.connect(host=db_ip, user=db_user, password=db_pw,db=db_name, charset='utf8')
+    cur = connect.cursor()
+    try:
+        sql = "select id from player where name=%s"
+        cur.execute(sql,(str(nickname)))
+        cache = cur.fetchone()
+        pubg_id = cache[0]
+    except:
+        embed = discord.Embed(title="에러!",description="해당 유저가 등록되어 있지 않습니다. 최초 1회 이상 조회해주세요.", color=0xaa0000)
+        await message.channel.send(embed=embed)
+        return
+    embed = discord.Embed(title="플랫폼 변경",description="해당 계정의 플랫폼을 선택해주세요.\n잘못 사용했을 경우 \U0000274C를 통해 취소 가능합니다.", color=0xffd619)
+    msg = await message.channel.send(embed=embed)
+    await msg.add_reaction(steam)
+    await msg.add_reaction(kakao)
+    await msg.add_reaction(xbox)
+    await msg.add_reaction(playstation)
+    await msg.add_reaction(stadia)
+    await msg.add_reaction("\U0000274C")
+    emoji = [steam,kakao,xbox,playstation,stadia,"\U0000274C"]
+    def check3(reaction,user):
+        for i in range(5):
+            if str(reaction.emoji)==str(emoji[i]):
+                return user == message.author
+    try:
+        reaction,_ = await client.wait_for('reaction_add',check=check3,timeout=20)
+    except asyncio.TimeoutError:
+        await msg.delete()
+        embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다! 20초 내로 선택해주시기 바랍니다.", color=0xaa0000)
+        await message.channel.send(embed=embed)
+        await msg.delete()
+    count = 0
+    if reaction.emoji == "\U0000274C":
+        return
+    for i in range(5):
+        if str(reaction.emoji)==str(emoji[i]):
+            count = i
+    await msg.delete()
+    embed = discord.Embed(title="플랫폼 변경",description="성공적으로 플랫폼 변경이 되었습니다.", color=0xffd619)
+    await message.channel.send(embed=embed)
+    pubg_platform = count
+    sql = pymysql.escape_string("UPDATE player SET platform=%s WHERE=%s",pubg_platform,pubg_id)
+    cur.execute(sql)
+    connect.commit()
+    connect.close()
+    return
 
 @client.event
 async def on_ready():
@@ -650,6 +718,7 @@ async def on_message(message):
                 embed.add_field(name=prefix + "전적[솔로|듀오(경쟁 X)|스쿼드] [1인칭|3인칭 혹은 일반|3인칭경쟁 혹은 경쟁, 랭크|1인칭경쟁] [닉네임(선택)] [시즌(선택)]:",value="배틀그라운드 솔로/듀오/스쿼드 모드에 대한 전적을 검색해 줍니다.",inline=False)
                 embed.add_field(name=prefix + "매치 [닉네임]:",value="해당 유저에 대한 매치 전적을 확일 할수 있게 해줍니다.",inline=False)
                 embed.add_field(name=prefix + "서버상태:",value="배틀그라운드 서버 상태를 알려줍니다.",inline=False)
+                embed.add_field(name=prefix + "플랫폼변경 [닉네임]:",value="유저 플랫폼을 잘못 등록했을 경우 변경 기능을 제공합니다.",inline=False)
             elif help_page == 2:
                 embed.add_field(name=prefix + "에란겔:",value="배틀그라운드 에란겔 맵에 대해 볼 수 있습니다.",inline=False)
                 embed.add_field(name=prefix + "미라마:",value="배틀그라운드 미라마 맵에 대해 볼 수 있습니다.",inline=False)
@@ -682,6 +751,12 @@ async def on_message(message):
                 await help_command(help_page-1)
             return
         await help_command(1)
+        return
+    if message.content.startswith(f'{prefix}플랫폼변경'):
+        log_info(message.guild,message.channel,message.author,message.content)
+        if is_banned(author_id,message):
+            return
+        await platform_exchange(message,prefix)
         return
     if message.content == prefix + "서버상태":
         log_info(message.guild,message.channel,message.author,message.content)
