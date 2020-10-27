@@ -98,7 +98,12 @@ async def get(message,client,pubg_json,player_id,count,pubg_platform):
     embed = discord.Embed(color=0xffd619,timestamp=datetime.datetime.now(timezone('UTC')))
     player_module = p_info.player(player_id)
     embed.set_author(icon_url="attachment://" + image_name[pubg_platform] ,name=f"{await player_module.name()}님의 매치히스토리(#{count+1})")
-    match_id = pubg_json["data"][0]["relationships"]["matches"]["data"][count]["id"]
+    try:
+        match_id = pubg_json["data"][0]["relationships"]["matches"]["data"][count]["id"]
+    except:
+        embed = discord.Embed(title="에러",description="매치 조회에 실패하였습니다.", color=0xaa0000)
+        await message.channel.send(embed=embed)
+        return
     url = "https://api.pubg.com/shards/" + platform_site[pubg_platform] + "/matches/" + match_id
     response = await requests.get(url,headers=header)
     if response.status_code == 200:

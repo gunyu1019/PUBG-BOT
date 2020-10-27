@@ -495,6 +495,8 @@ async def profile(message,prefix,command):
             embed = discord.Embed(title="\U000026A0경고!",description="디스코드봇에게 \"메세지 관리\"권한을 부여해주시기 바랍니다.", color=0xaa0000)
             await message.channel.send(embed=embed)
         pubg_json = await m_info.match_status(pubg_id,message,pubg_platform)
+        if pubg_json == "Failed_Response":
+            return
         await msg1.delete()
         await matches.get(message,client,pubg_json,pubg_id,count,pubg_platform)
         return
@@ -707,7 +709,7 @@ async def on_message(message):
                 connect.close()
                 await message.channel.send(embed=embed)
                 return
-    if message.content == prefix + "도움" or message.content == prefix + "help":
+    if message.content == prefix + "도움" or message.content == prefix + "도움말" or message.content == prefix + "help":
         log_info(message.guild,message.channel,message.author,message.content)
         if is_banned(author_id,message):
             return
