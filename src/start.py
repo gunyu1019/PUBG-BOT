@@ -386,7 +386,7 @@ async def profile(message,prefix,command):
     list_message = message.content.split(" ")
     nickname = ""
     if command == "Information":
-        pubg_type_all = ['1인칭','3인칭','일반','랭크']
+        pubg_type_all = ['1인칭','3인칭','일반','랭크','경쟁','3인칭경쟁','1인칭경쟁']
         helper = "**" + prefix + "전적[솔로|듀오(경쟁 X)|스쿼드] [1인칭|3인칭 혹은 일반|3인칭경쟁 혹은 경쟁, 랭크|1인칭경쟁] [닉네임(선택)] [시즌(선택)]**:"
         try:
             pubg_type = list_message[1]
