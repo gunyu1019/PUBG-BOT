@@ -363,6 +363,7 @@ async def player_info(message,nickname):
             await msg.delete()
             embed = discord.Embed(title="에러!",description="입력시간이 초과되었습니다! 20초 내로 선택해주시기 바랍니다.", color=0xaa0000)
             await message.channel.send(embed=embed)
+            return "Failed_Response", 0
         await msg.delete()
         count = 0
         if reaction.emoji == "\U0000274C":
