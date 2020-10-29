@@ -122,7 +122,7 @@ async def autopost1():
         await asyncio.sleep(3.0)
         total = 0
         for i in range(len(client.guilds)):
-            total += len(client.guilds[i].members)
+            total += len(client.guilds[i].member_count)
         await client.change_presence(status=discord.Status.online, activity=discord.Game("활동중인 서버갯수: " + str(len(client.guilds)) + "개, 유저수" + str(total) + "명"))
         await asyncio.sleep(3.0)
         await client.change_presence(status=discord.Status.online, activity=discord.Game("PUBG봇은 현재 OBT를 시행중입니다. 오류 발생시 신고해주시기 바랍니다."))
@@ -601,8 +601,8 @@ async def on_ready():
     answer = ""
     total = 0
     for i in range(len(client.guilds)):
-        answer = answer + str(i+1) + "번째: " + str(client.guilds[i]) + "(" + str(client.guilds[i].id) + "):"+ str(len(client.guilds[i].members)) +"명\n"
-        total += len(client.guilds[i].members)
+        answer = answer + str(i+1) + "번째: " + str(client.guilds[i]) + "(" + str(client.guilds[i].id) + "):"+ str(len(client.guilds[i].member_count)) +"명\n"
+        total += len(client.guilds[i].member_count)
     log_system("방목록: \n" + answer + "방의 종합 멤버:" + str(total) + "명")
     global DBL, DBKR
     DBL = dbl.DBLClient(client,DBL_token,autopost=True)
@@ -1020,7 +1020,7 @@ async def on_message(message):
             return
         total = 0
         for i in client.guilds:
-            total += len(i.members)
+            total += len(i.member_count)
         embed = discord.Embed(title='PUBG_BOT', color=0xffd619)
         embed.add_field(name='개발팀',value='[Team Developer Space](https://github.com/Team-Developer-Space)',inline=True)
         embed.add_field(name='운영팀',value='[Team Alpha | Γεαϻ Αιρηα | α](http://www.yonghyeon.com/PUBG_BOT/forum.html)',inline=True)
@@ -1043,7 +1043,7 @@ async def on_guild_join(guild):
         if i.name == guild.name:
             server_number = client.guilds.index(i)+1
     if not server_number == None:
-        log_system(guild.name + '에 가입이 확인되었습니다. 서버번호: ' + str(server_number) + '번, 서버멤버' + str(len(guild.members)) + '명')
+        log_system(guild.name + '에 가입이 확인되었습니다. 서버번호: ' + str(server_number) + '번, 서버멤버' + str(len(guild.member_count)) + '명')
     return
 
 @client.event
