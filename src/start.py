@@ -586,8 +586,8 @@ async def platform_exchange(message,prefix):
     embed = discord.Embed(title="플랫폼 변경",description="성공적으로 플랫폼 변경이 되었습니다.", color=0xffd619)
     await message.channel.send(embed=embed)
     pubg_platform = count
-    sql = pymysql.escape_string("UPDATE player SET platform=%s WHERE=%s",pubg_platform,pubg_id)
-    cur.execute(sql)
+    sql = pymysql.escape_string("UPDATE player SET platform=%s WHERE=%s")
+    cur.execute(sql,(pubg_platform,pubg_id))
     connect.commit()
     connect.close()
     return
