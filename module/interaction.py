@@ -64,10 +64,10 @@ class SlashContext:
 
         if self.guild is not None:
             member = payload.get("member")
-            self.member = discord.Member(data=member, state=self._state, guild=self.guild)
+            self.author = discord.Member(data=member, state=self._state, guild=self.guild)
         else:
             user = payload.get("user")
-            self.member = discord.User(data=user, state=self._state)
+            self.author = discord.User(data=user, state=self._state)
 
         self.name = data.get("name")
         self.options = {}
