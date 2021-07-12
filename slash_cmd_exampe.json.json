@@ -1,0 +1,56 @@
+{
+  "": "INTERACTION_CREATE",
+  "s": 224,
+  "op": 0,
+  "d": {
+    "version": 1,
+    "type": 2,
+    "token": "<interaction_token>",
+    "member": {
+      "user": {
+        "username": "건유1019",
+        "public_flags": 131136,
+        "id": "340373909339635725",
+        "discriminator": "0001",
+        "avatar": "5ea1e04646f1cf05ab357d4feab6d1e0"
+      },
+      "roles": [
+        "786477526901588018"
+      ],
+      "premium_since": null,
+      "permissions": "109558746688",
+      "pending": false,
+      "nick": null,
+      "mute": false,
+      "joined_at": "2021-01-14T02:22:30.202000+00:00",
+      "is_pending": false,
+      "deaf": false,
+      "avatar": null
+    },
+    "id": "862245375372689418",
+    "guild_id": "786470326732587008",
+    "data": {
+      "options": [
+        {
+          "value": 1,
+          "type": 4,
+          "name": "유형"
+        },
+        {
+          "value": "gunyu1019",
+          "type": 3,
+          "name": "닉네임"
+        },
+        {
+          "value": 8,
+          "type": 4,
+          "name": "시즌"
+        }
+      ],
+      "name": "전적",
+      "id": "<interaction_id>"
+    },
+    "channel_id": "786482278700285963",
+    "application_id": "704683198164238446"
+  }
+}

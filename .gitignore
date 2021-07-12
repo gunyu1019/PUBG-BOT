@@ -127,7 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-src/log/
-src/USER_setting/
-src/Data/bot_info.json
-log.txt
+
+# PUBG BOT configuration
+config/config.ini
+
+# PUBG BOT Logging File
+log/
+log/log.txt
+
+# IDLE(PyCharm) configuration
+.idea/
