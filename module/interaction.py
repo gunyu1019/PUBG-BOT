@@ -282,12 +282,13 @@ class Message(discord.Message):
         self.http = HttpClient(http=self._state.http)
 
         options = self.content.split()
-        if len(options) > 1:
+
+        if len(options) >= 1:
             self.name = options[0]
         else:
             self.name = None
 
-        if len(options) > 2:
+        if len(options) >= 2:
             self.options = self.content.split()[1:]
         else:
             self.options = []

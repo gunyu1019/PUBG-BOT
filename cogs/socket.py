@@ -9,6 +9,7 @@ from discord.state import ConnectionState
 from typing import Union, List, Dict
 from module.interaction import SlashContext, Message
 from module.commands import Command
+from module.components import from_payload
 from utils.directory import directory
 from utils.prefix import get_prefix
 from utils.perm import permission
@@ -34,6 +35,13 @@ class SocketReceive(commands.Cog):
                 if isinstance(attr, Command):
                     self.func.append({"class": _class, "func": attr})
 
+    @staticmethod
+    def check_interaction(ctx: Union[SlashContext, Message], func: Command):
+        if isinstance(ctx, SlashContext):
+            return func.interaction
+        elif isinstance(ctx, Message):
+            return func.message
+
     @commands.Cog.listener()
     async def on_interaction_command(self, ctx: Union[SlashContext, Message]):
         if isinstance(ctx, Message):
@@ -44,21 +52,20 @@ class SocketReceive(commands.Cog):
                 cc = ctx.content[prefix_length:]
                 prefix_cc = ctx.content[0:prefix_length]
                 if prefix_cc == prefix:
-                    name = cc
+                    name = cc.split()
                     break
-        else:
-            name = ctx.name
+            if len(name) >= 1:
+                ctx.name = name[0]
 
-        if name not in [i.get("func").name for i in self.func]:
-            return
+        name = ctx.name
 
         _state: ConnectionState = getattr(self.bot, "_connection")
-        _state.dispatch("command", ctx)
-
         for func in self.func:
             _function = func.get("func")
-            if _function.name == name:
-                await _function.callback(func.get("class"), ctx)
+            if (_function.name == name or name in _function.aliases) and self.check_interaction(ctx, _function):
+                _state.dispatch("command", ctx)
+                if permission(_function.permission)(ctx):
+                    await _function.callback(func.get("class"), ctx)
                 break
         return
 
@@ -77,6 +84,10 @@ class SocketReceive(commands.Cog):
             if data.get("type") == 2:
                 slash = SlashContext(data, self.bot)
                 state.dispatch('interaction_command', slash)
+            elif data.get("type") == 3:
+                components = data.get("data")
+                result = from_payload(components)
+                state.dispatch('components', result)
             return
         elif t == "MESSAGE_CREATE":
             channel, _ = getattr(state, "_get_guild_channel")(data)

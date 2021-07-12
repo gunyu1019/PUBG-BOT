@@ -93,15 +93,15 @@ class Events(commands.Cog):
     async def on_command(self, ctx):
         if isinstance(ctx, Message):
             if ctx.guild is not None:
-                logger.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) {ctx.name} {' '.join(ctx.options)}")
+                logger.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) {ctx.content}")
             else:
-                logger.info(f"(DM채널 | {ctx.author}) {ctx.name} {' '.join(ctx.options)}")
+                logger.info(f"(DM채널 | {ctx.author}) {ctx.content}")
         else:
             options = [ctx.options[i] for i in ctx.options.keys()]
             if ctx.guild is not None:
-                logger.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) {ctx.name} {' '.join(options)}")
+                logger.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) /{ctx.name} {' '.join(options)}")
             else:
-                logger.info(f"(DM채널 | {ctx.author}) {ctx.name} {' '.join(options)}")
+                logger.info(f"(DM채널 | {ctx.author}) /{ctx.name} {' '.join(options)}")
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):

@@ -8,8 +8,9 @@ import traceback
 import discord
 from discord.ext import commands
 
+from module import commands as _command
 from utils.database import getDatabase
-from utils.perm import permission, check_perm
+from utils.perm import check_perm
 from utils.prefix import get_prefix
 from utils.directory import directory
 
@@ -27,21 +28,19 @@ def insert_returns(body):
         insert_returns(body[-1].body)
 
 
-class Command(commands.Cog, name="기본 명령어"):
+class Command:
     def __init__(self, bot):
         self.client = bot
         self.color = 0xffd619
 
-    @commands.command(aliases=["디버그"])
-    @permission(1)
+    @_command.command(aliases=["디버그"], permission=1, interaction=False)
     async def debug(self, ctx):
-        message = ctx.message
-        list_message = message.content.split()
-        if len(list_message) < 2:
+        list_message = ctx.options
+        if len(list_message) < 1:
             embed = discord.Embed(title="PUBG BOT 도우미", description='사용하실 커맨드를 작성해주세요.', color=self.color)
             await ctx.send(embed=embed)
             return
-        cmd = " ".join(list_message[1:])
+        cmd = " ".join(list_message[0:])
         if cmd.startswith("```") and cmd.endswith("```"):
             cmd = cmd[3:-3]
             if cmd.startswith("py"):
@@ -72,7 +71,6 @@ class Command(commands.Cog, name="기본 명령어"):
                 "channel": ctx.channel,
                 "author": ctx.author,
                 "server": ctx.guild,
-                "message": ctx.message,
                 "__import__": __import__,
             }
             exec(compile(parsed, filename="<ast>", mode="exec"), env)
@@ -102,17 +100,15 @@ class Command(commands.Cog, name="기본 명령어"):
             await msg.edit(embed=embed)
         return
 
-    @commands.command()
-    @permission(1)
+    @_command.command(permission=1, interaction=False)
     async def cmd(self, ctx):
-        message = ctx.message
+        list_message = ctx.options
         prefix = get_prefix(self.client, ctx)[0]
-        list_message = message.content.split()
-        if len(list_message) < 2:
+        if len(list_message) < 1:
             embed = discord.Embed(title="PUBG BOT 도우미", description=prefix + "cmd <명령어>\n명령어를 입력해주세요!", color=self.color)
             await ctx.send(embed=embed)
             return
-        search = " ".join(list_message[1:])
+        search = " ".join(list_message[0:])
         proc = await asyncio.create_subprocess_shell(search,
                                                      stdout=asyncio.subprocess.PIPE,
                                                      stderr=asyncio.subprocess.PIPE)
@@ -129,30 +125,29 @@ class Command(commands.Cog, name="기본 명령어"):
             await ctx.send(embed=embed)
         return
 
-    @commands.command(name="블랙리스트")
-    @permission(9)
+    @_command.command(name="블랙리스트", permission=9, interaction=False)
     async def blacklist(self, ctx):
-        message = ctx.message
+        list_message = ctx.options
         prefix = get_prefix(self.client, ctx)[0]
-        list_message = message.content.split()
-        if len(list_message) < 2:
+        if len(list_message) < 1:
             embed = discord.Embed(title="PUBG BOT 도우미", description=f"{prefix}블랙리스트 <등록/제거/여부> <맨션(선택)> 와 같이 작성해주세요.",
                                   color=self.color)
             await ctx.send(embed=embed)
             return
-        mod = list_message[1]
+        mod = list_message[0]
         if mod == "여부":
-            if len(list_message) > 2:
-                mention = int(list_message[2].replace("<@", "").replace(">", "").replace("!", ""))
-                if ctx.guild.get_member(mention) is None:
+            if len(list_message) > 1:
+                mention = int(list_message[1].replace("<@", "").replace(">", "").replace("!", ""))
+                member = await ctx.guild.fetch_member(mention)
+                if member is None:
                     embed = discord.Embed(title="PUBG BOT 도우미",
-                                          description=f"옳바른 유저를 기재하여 주세요.",
+                                          description=f"올바른 유저를 기재하여 주세요.",
                                           color=self.color)
                     await ctx.send(embed=embed)
                     return
             else:
                 mention = ctx.author.id
-            result = check_perm(ctx.guild.get_member(mention))
+            result = check_perm(member)
             if 4 >= result:
                 embed = discord.Embed(title="Blacklist!", description="이 사람은 블랙리스트에 등재되어 있지 않습니다.", color=self.color)
             else:
@@ -160,16 +155,17 @@ class Command(commands.Cog, name="기본 명령어"):
             await ctx.send(embed=embed)
             return
         elif mod == "등록":
-            if len(list_message) < 3:
+            if len(list_message) < 2:
                 embed = discord.Embed(title="PUBG BOT 도우미",
                                       description=f"블랙리스트에 등재할 유저를 기재하여 주세요.",
                                       color=self.color)
                 await ctx.send(embed=embed)
                 return
-            mention = int(list_message[2].replace("<@", "").replace(">", "").replace("!", ""))
-            if ctx.guild.get_member(mention) is None:
+            mention = int(list_message[1].replace("<@", "").replace(">", "").replace("!", ""))
+            member = await ctx.guild.fetch_member(mention)
+            if member is None:
                 embed = discord.Embed(title="PUBG BOT 도우미",
-                                      description=f"옳바른 유저를 기재하여 주세요.",
+                                      description=f"올바른 유저를 기재하여 주세요.",
                                       color=self.color)
                 await ctx.send(embed=embed)
                 return
@@ -177,15 +173,15 @@ class Command(commands.Cog, name="기본 명령어"):
                 embed = discord.Embed(title="에러", description="권한이 부족합니다.", color=0xaa0000)
                 await ctx.send(embed=embed)
                 return
-            if 2 >= check_perm(ctx.guild.get_member(mention)):
+            if 2 >= check_perm(member):
                 embed = discord.Embed(title="Blacklist!", description="봇 관리자의 권한을 가지고 있는 사용자는 블랙리스트에 등재할 수 없습니다.", color=self.color)
                 await ctx.send(embed=embed)
                 return
             connect = getDatabase()
             cur = connect.cursor()
             sql_Black = "insert into BLACKLIST(ID) value(%s)"
-            if 9 == check_perm(ctx.guild.get_member(mention)):
-                embed = discord.Embed(title="Blacklist!", description=f"{ctx.guild.get_member(mention)}는 이미 등재되어 있습니다.",
+            if 9 == check_perm(member):
+                embed = discord.Embed(title="Blacklist!", description=f"{member}는 이미 등재되어 있습니다.",
                                       color=self.color)
                 await ctx.send(embed=embed)
                 connect.commit()
@@ -194,32 +190,33 @@ class Command(commands.Cog, name="기본 명령어"):
             cur.execute(sql_Black, mention)
             connect.commit()
             connect.close()
-            embed = discord.Embed(title="Blacklist!", description=f"{ctx.guild.get_member(mention)}가 블랙리스트에 추가되었습니다!", color=self.color)
+            embed = discord.Embed(title="Blacklist!", description=f"{member}가 블랙리스트에 추가되었습니다!", color=self.color)
             await ctx.send(embed=embed)
             return
         elif mod == "제거":
-            if len(list_message) < 3:
+            if len(list_message) < 2:
                 embed = discord.Embed(title="PUBG BOT 도우미",
                                       description=f"블랙리스트에 등재할 유저를 기재하여 주세요.",
                                       color=self.color)
                 await ctx.send(embed=embed)
                 return
-            mention = int(list_message[2].replace("<@", "").replace(">", "").replace("!", ""))
+            mention = int(list_message[1].replace("<@", "").replace(">", "").replace("!", ""))
+            member = await ctx.guild.fetch_member(mention)
             if 2 < check_perm(ctx.author):
                 embed = discord.Embed(title="에러", description="권한이 부족합니다.", color=0xaa0000)
                 await ctx.send(embed=embed)
                 return
-            if ctx.guild.get_member(mention) is None:
+            if member is None:
                 embed = discord.Embed(title="PUBG BOT 도우미",
-                                      description=f"옳바른 유저를 기재하여 주세요.",
+                                      description=f"올바른 유저를 기재하여 주세요.",
                                       color=self.color)
                 await ctx.send(embed=embed)
                 return
             connect = getDatabase()
             cur = connect.cursor()
             sql_delete = "delete from BLACKLIST where ID=%s"
-            if 4 >= check_perm(ctx.guild.get_member(mention)):
-                embed = discord.Embed(title="Blacklist!", description=f"{ctx.guild.get_member(mention)}는, 블랙리스트에 추가되어 있지 않습니다.",
+            if 4 >= check_perm(member):
+                embed = discord.Embed(title="Blacklist!", description=f"{member}는, 블랙리스트에 추가되어 있지 않습니다.",
                                       color=self.color)
                 await ctx.send(embed=embed)
                 connect.commit()
@@ -228,12 +225,11 @@ class Command(commands.Cog, name="기본 명령어"):
             cur.execute(sql_delete, mention)
             connect.commit()
             connect.close()
-            embed = discord.Embed(title="Blacklist!", description=f"{ctx.guild.get_member(mention)}가 블랙리스트에서 제거되었습니다!", color=self.color)
+            embed = discord.Embed(title="Blacklist!", description=f"{member}가 블랙리스트에서 제거되었습니다!", color=self.color)
             await ctx.send(embed=embed)
             return
 
-    @commands.command(name="서버목록")
-    @permission(2)
+    @_command.command(name="서버목록", permission=2, interaction=False)
     async def server_list(self, ctx):
         embed = discord.Embed(title="서버목록", description="서버목록은 개인정보보호를 위해, DM를 통하여 보내드렸습니다.", color=0x00aaaa)
         await ctx.send(embed=embed)
@@ -250,24 +246,21 @@ class Command(commands.Cog, name="기본 명령어"):
         await ctx.author.send(f"{answer}\n방의 종합 멤버:{total}명\n마지막 페이지")
         return
 
-    @commands.command()
-    @permission(2)
+    @_command.command(permission=2, interaction=False)
     async def echo(self, ctx):
-        message = ctx.message
-        list_message = message.content.split(' ')
+        list_message = ctx.options
         prefix = get_prefix(self.client, ctx)
-        if len(list_message) < 1:
+        if len(list_message) < 0:
             embed = discord.Embed(title='PUBG BOT 도우미', description=f'{prefix}echo <내용>\n알맞게 사용해 주시기 바랍니다.',
                                   color=self.color)
             await ctx.send(embed=embed)
             return
-        answer = " ".join(list_message[1:])
+        answer = " ".join(list_message[0:])
         await ctx.send(f'{answer}')
         return
 
-    @commands.command(aliases=['리로드'])
-    @permission(2)
-    async def reload(self, ctx: commands.Context):
+    @_command.command(aliases=['리로드'], permission=2, interaction=False)
+    async def reload(self, ctx):
         exts = ["cogs." + file[:-3] for file in os.listdir(f"{directory}/cogs") if file.endswith(".py")]
 
         embed = discord.Embed(
@@ -297,4 +290,4 @@ class Command(commands.Cog, name="기본 명령어"):
 
 
 def setup(client):
-    client.add_cog(Command(client))
+    return Command(client)
