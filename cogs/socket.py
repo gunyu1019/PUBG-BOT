@@ -51,7 +51,10 @@ class SocketReceive(commands.Cog):
 
         if name not in [i.get("func").name for i in self.func]:
             return
-        logger.info("On command: {}".format(name))
+
+        _state: ConnectionState = getattr(self.bot, "_connection")
+        _state.dispatch("command", ctx)
+
         for func in self.func:
             _function = func.get("func")
             if _function.name == name:

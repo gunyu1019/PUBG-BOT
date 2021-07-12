@@ -5,6 +5,7 @@ import DBSkr
 import discord
 from discord.ext import commands
 
+from module.interaction import SlashContext, Message
 from utils import token
 
 logger = logging.getLogger(__name__)
@@ -90,10 +91,17 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
-        if ctx.guild is not None:
-            logger.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) {ctx.message.content}")
+        if isinstance(ctx, Message):
+            if ctx.guild is not None:
+                logger.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) {ctx.name} {' '.join(ctx.options)}")
+            else:
+                logger.info(f"(DM채널 | {ctx.author}) {ctx.name} {' '.join(ctx.options)}")
         else:
-            logger.info(f"(DM채널 | {ctx.author}) {ctx.message.content}")
+            options = [ctx.options[i] for i in ctx.options.keys()]
+            if ctx.guild is not None:
+                logger.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) {ctx.name} {' '.join(options)}")
+            else:
+                logger.info(f"(DM채널 | {ctx.author}) {ctx.name} {' '.join(options)}")
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
