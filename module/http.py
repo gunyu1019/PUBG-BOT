@@ -28,9 +28,9 @@ class HttpClient:
         data = {"type": 4, "data": payload}
         return await self.http.request(r, json=data)
 
-    async def get_initial_response(self, payload: dict):
+    async def get_initial_response(self):
         r = Route("GET", "/webhooks/{id}/{token}/messages/@original", id=self.data.application, token=self.data.token)
-        return await self.http.request(r, json=payload)
+        return await self.http.request(r)
 
     async def edit_initial_response(self, payload: dict = None, form=None, files=None):
         if files is not None or form is not None:

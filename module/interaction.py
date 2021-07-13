@@ -75,6 +75,8 @@ class SlashContext:
         self.deferred = False
         self.responded = False
 
+        self.created_at = discord.utils.snowflake_time(int(self.id))
+
         for option in data.get("options", []):
             key = option.get("name")
             value = option.get("value")
@@ -100,31 +102,9 @@ class SlashContext:
         data = InteractionData(interaction_token=self.token, interaction_id=self.id, application_id=self.application)
         self.http = HttpClient(http=self.client.http, data=data)
 
+
     @staticmethod
     def _get_payload(
-            content=None,
-            embed=None,
-            tts: bool = False,
-            hidden: bool = False,
-            allowed_mentions=None,
-            components=None
-    ) -> dict:
-
-        payload = {'tts': tts}
-        if content:
-            payload['content'] = content
-        if embed:
-            payload['embed'] = embed
-        if allowed_mentions:
-            payload['allowed_mentions'] = allowed_mentions
-        if hidden:
-            payload['flags'] = 1 << 6
-        if components:
-            payload['components'] = components
-        return payload
-
-    @staticmethod
-    def _get_webhook_payload(
             content=None,
             embed=None,
             hidden: bool = False,
@@ -178,23 +158,13 @@ class SlashContext:
             components = [i.to_all_dict() if isinstance(i, ActionRow) else i.to_dict() for i in components]
 
         allowed_mentions = _allowed_mentions(self._state, allowed_mentions)
-        if self.deferred or files or self.responded:
-            payload = self._get_webhook_payload(
-                content=content,
-                embed=embed,
-                hidden=hidden,
-                allowed_mentions=allowed_mentions,
-                components=components,
-            )
-        else:
-            payload = self._get_payload(
-                content=content,
-                tts=tts,
-                embed=embed,
-                hidden=hidden,
-                allowed_mentions=allowed_mentions,
-                components=components,
-            )
+        payload = self._get_payload(
+            content=content,
+            embed=embed,
+            hidden=hidden,
+            allowed_mentions=allowed_mentions,
+            components=components,
+        )
 
         if files:
             form = _files_to_form(files=files, payload=payload)
@@ -208,7 +178,8 @@ class SlashContext:
             if self.deferred:
                 resp = await self.http.edit_initial_response(payload=payload, form=form, files=files)
             else:
-                resp = await self.http.post_initial_response(payload=payload)
+                await self.http.post_initial_response(payload=payload)
+                resp = await self.http.get_initial_response()
             self.responded = True
         else:
             resp = await self.http.post_followup(payload=payload, form=form, files=files)
@@ -243,7 +214,7 @@ class SlashContext:
 
         allowed_mentions = _allowed_mentions(self._state, allowed_mentions)
 
-        payload = self._get_webhook_payload(
+        payload = self._get_payload(
             content=content,
             embed=embed,
             allowed_mentions=allowed_mentions,

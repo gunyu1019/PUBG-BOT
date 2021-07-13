@@ -5,10 +5,12 @@ import json
 
 from discord.ext import tasks, commands
 
+from module.pubgpy import Api, Platforms, APIException
 from utils.database import getDatabase
-from utils.request import requests, platform_site
+from utils.token import PUBG_API
 
 log = logging.getLogger(__name__)
+platform_site = [i for i in Platforms]
 
 
 class Task(commands.Cog):
@@ -16,6 +18,7 @@ class Task(commands.Cog):
         self.bot = bot
 
         self.check_season.start()
+        self.requests = Api(token=PUBG_API)
 
     @tasks.loop(minutes=120)
     async def check_season(self):
@@ -36,15 +39,19 @@ class Task(commands.Cog):
         time_delta = time_now - time_last
         if time_delta.days > 2:
             log.info('시즌정보를 체크합니다.')
-            response = await requests("GET", "https://api.pubg.com/shards/steam/seasons")
-            if response.status_code == 200:
-                html2 = [None] * 5
-                html2[0] = response.json()
+            self.requests.platform = platform_site[0].value
+            try:
+                response = await self.requests.requests("GET", "/seasons")
+            except APIException as message:
+                log.warning(f"시즌 업데이트에 실패하였습니다: response 에러 %s" % message)
+            else:
+                html2 = [None, None, None, None, None]
+                html2[0] = response
                 if date_json2 != html2:
                     c = 1
                     for i in platform_site[1:]:
-                        response = await requests("GET", f"https://api.pubg.com/shards/{i}/seasons")
-                        html2[c] = response.json()
+                        self.requests.platform = i.value
+                        html2[c] = await self.requests.requests("GET", "/seasons")
                         c += 1
                     steam_s = json.dumps(html2[0], indent=2)
                     kakao_s = json.dumps(html2[1], indent=2)
@@ -61,8 +68,6 @@ class Task(commands.Cog):
                     }
                     sql = pymysql.escape_string('UPDATE SEASON_STATUS SET Steam=%s,Kakao=%s,XBOX=%s,psn=%s,Stadia=%s,last_update=%s WHERE id=1')
                     cur.execute(sql, (steam_s, kakao_s, xbox_s, psn_s, stadia_s, json.dumps(w_time)))
-            else:
-                log.warning(f"시즌 업데이트에 실패하였습니다: response 에러 (%s): %s" % (response.status, response.data))
         connect.commit()
         connect.close()
 

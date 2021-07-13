@@ -1,5 +1,4 @@
-"""
-MIT License
+"""MIT License
 
 Copyright (c) 2021 gunyu1019
 
@@ -35,11 +34,13 @@ from .leaderboards import Leaderboards
 from .tournaments import Tournaments
 from .sample import Sample
 
+from typing import Union
+
 log = logging.getLogger(__name__)
 
 
 class Client:
-    """Indicates the client connection to the PUBG.
+    """ Indicates the client connection to the PUBG.
      Save the platform type and token values through that class.
 
     Parameters
@@ -51,17 +52,18 @@ class Client:
         `Platforms` information to report with API by substituting the value of `Platform` or string.
         Sometimes the platform type is not required for some features that do not require it.
     """
-    def __init__(self, token: str, platform: (str, Platforms) = None):
+    def __init__(self, token: str, platform: Union[str, Platforms] = None):
         self.token = token
         if isinstance(platform, Platforms):
-            self.Platform = platform.value
+            self._platform = platform.value
         else:
-            self.Platform = platform
-        self.requests = Api(token=token, platform=self.Platform)
+            self._platform = platform
+        self.requests = Api(token=token, platform=self._platform)
         log.info("PUBGpy client was created. (Platform: {})".format(platform))
 
-    def platform(self, platform: (str, Platforms) = None) -> (Platforms, str):
-        """Change the platform type through the function.
+    def platform(self, platform: Union[str, Platforms] = None) -> Union[Platforms, str]:
+        """
+        Change the platform type through the function.
 
         Parameters
         ----------
@@ -77,12 +79,18 @@ class Client:
         """
         log.info("PUBGpy changed platform ({} -> {})".format(self.platform, platform))
         if platform is None:
-            self.Platform = platform
+            if isinstance(platform, Platforms):
+                self._platform = platform.value
+                self.requests.platform = self._platform.value
+            else:
+                self._platform = platform
+                self.requests.platform = self._platform
 
-        return get_enum(Platforms, self.Platform)
+        return get_enum(Platforms, self._platform)
 
     def player_id(self, player_id: str) -> Player:
-        """Create a :class:`Player` arbitrarily.
+        """
+        Create a :class:`Player` arbitrarily.
 
         Notes
         -----
@@ -105,7 +113,8 @@ class Client:
         return Player(client=self, data=_data)
 
     async def player(self, nickname: str):
-        """Get a single player.
+        """
+        Get a single player.
 
         Parameters
         ----------
@@ -121,7 +130,8 @@ class Client:
         return data[0]
 
     async def players(self, players: list = None, ids: list = None):
-        """Get a collection of up to 10 players.
+        """
+        Get a collection of up to 10 players.
 
         Parameters
         ----------
@@ -152,7 +162,8 @@ class Client:
         return [Player(client=self, data=_) for _ in data]
 
     async def current_season(self):
-        """Get a current seasons.
+        """
+        Get a current seasons.
 
         Returns
         -------
@@ -173,7 +184,8 @@ class Client:
         raise ValueError("Can not find current season.")
 
     async def seasons(self):
-        """Get the list of available seasons.
+        """
+        Get the list of available seasons.
 
         Returns
         -------
@@ -186,7 +198,8 @@ class Client:
         return [Season(_) for _ in data]
 
     async def season_stats(self, player_id: str, season: (Season, str) = None):
-        """Get season information for a single player.
+        """
+        Get season information for a single player.
 
         Parameters
         ----------
@@ -204,8 +217,9 @@ class Client:
         data = await player.season_stats(season)
         return data
 
-    async def ranked_stats(self, player_id: str, season: (Season, str) = None):
-        """Get ranked stats for a single player.
+    async def ranked_stats(self, player_id: str, season: Union[Season, str] = None):
+        """
+        Get ranked stats for a single player.
 
         Parameters
         ----------
@@ -224,7 +238,8 @@ class Client:
         return data
 
     async def lifetime_stats(self, player_id: str):
-        """Get lifetime stats for a single player.
+        """
+        Get lifetime stats for a single player.
 
         Parameters
         ----------
@@ -241,7 +256,8 @@ class Client:
         return data
 
     async def weapon_mastery(self, player_id: str):
-        """Get weapon mastery information for a single player
+        """
+        Get weapon mastery information for a single player
 
         Parameters
         ----------
@@ -258,7 +274,8 @@ class Client:
         return data
 
     async def survival_mastery(self, player_id: str):
-        """Get survival mastery information for a single player
+        """
+        Get survival mastery information for a single player
 
         Parameters
         ----------
@@ -275,7 +292,8 @@ class Client:
         return data
 
     async def matches(self, match_id: str):
-        """Get a single match.
+        """
+        Get a single match.
 
         Notes
         -----
@@ -298,7 +316,8 @@ class Client:
         return Matches(data=data, included=included)
 
     async def tournaments(self):
-        """Get the list of available tournaments.
+        """
+        Get the list of available tournaments.
 
         Returns
         -------
@@ -311,7 +330,8 @@ class Client:
         return [Tournaments(self, x) for x in data]
 
     async def tournament_id(self, tournament_id: str):
-        """Get information for a single tournament.
+        """
+        Get information for a single tournament.
 
         Notes
         -----
@@ -334,7 +354,8 @@ class Client:
         return Tournaments(self, data)
 
     async def samples(self, create_at: (datetime.datetime, str) = None):
-        """Get a list of sample matches.
+        """
+        Get a list of sample matches.
 
         Parameters
         ----------
@@ -356,7 +377,8 @@ class Client:
         return Sample(self, data)
 
     async def status(self):
-        """Check the status of the API.
+        """
+        Check the status of the API.
 
         Returns
         -------
@@ -370,8 +392,14 @@ class Client:
             return False
         return True
 
-    async def leaderboards(self, region: (str, Region), game_mode: (str, GameMode), season: (str, Season) = None):
-        """Get the leaderboard for a game mode.
+    async def leaderboards(
+            self,
+            region: Union[str, Region],
+            game_mode: Union[str, GameMode],
+            season: Union[str, Season] = None
+    ):
+        """
+        Get the leaderboard for a game mode.
 
         Parameters
         ----------

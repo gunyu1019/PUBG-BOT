@@ -73,8 +73,9 @@ class SocketReceive(commands.Cog):
     async def on_socket_response(self, payload: dict):
         data = payload.get("d", {})
         t = payload.get("t", "")
+        op = payload.get("op", "")
 
-        if t == "PRESENCE_UPDATE":
+        if t == "PRESENCE_UPDATE" or op != 0:
             return
 
         logger.debug(payload)
@@ -91,12 +92,12 @@ class SocketReceive(commands.Cog):
             return
         elif t == "MESSAGE_CREATE":
             channel, _ = getattr(state, "_get_guild_channel")(data)
-            message = Message(state=state, data=data, channel=channel)
+            try:
+                message = Message(state=state, data=data, channel=channel)
+            except KeyError:
+                print(data)
+                return
             state.dispatch('interaction_command', message)
-            if getattr(state, "_messages") is not None:
-                getattr(state, "_messages").append(message)
-            if channel and channel.__class__ is TextChannel:
-                channel.last_message_id = message.id
             return
         return
 
