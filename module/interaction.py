@@ -102,10 +102,10 @@ class SlashContext:
         data = InteractionData(interaction_token=self.token, interaction_id=self.id, application_id=self.application)
         self.http = HttpClient(http=self.client.http, data=data)
 
-
     @staticmethod
     def _get_payload(
             content=None,
+            tts: bool = False,
             embed=None,
             hidden: bool = False,
             allowed_mentions=None,
@@ -115,6 +115,8 @@ class SlashContext:
         payload = {}
         if content:
             payload['content'] = content
+        if tts:
+            payload['tts'] = tts
         if embed:
             payload['embeds'] = [embed]
         if allowed_mentions:
@@ -161,6 +163,7 @@ class SlashContext:
         payload = self._get_payload(
             content=content,
             embed=embed,
+            tts=tts,
             hidden=hidden,
             allowed_mentions=allowed_mentions,
             components=components,

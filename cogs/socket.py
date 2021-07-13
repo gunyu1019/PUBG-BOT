@@ -4,7 +4,6 @@ import importlib
 import os
 
 from discord.ext import commands
-from discord.channel import TextChannel
 from discord.state import ConnectionState
 from typing import Union, List, Dict
 from module.interaction import SlashContext, Message
