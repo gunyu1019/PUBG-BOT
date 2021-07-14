@@ -38,8 +38,16 @@ class Events(commands.Cog):
         log_system(f"방목록: \n{answer}\n방의 종합 멤버:{total}명")
 
         log_system(f'DBSkr이 실행됩니다.')
+        dbs = logging.getLogger("DBSkr")
+        dbs.setLevel(logging.DEBUG)
         global DBS
-        DBS = DBSkr.Client(self.bot, koreanbots_token=token.DBKR_token, topgg_token=token.DBL_token, autopost=True)
+        DBS = DBSkr.Client(
+            self.bot,
+            koreanbots_token=token.koreanBots_token,
+            topgg_token=token.DBL_token,
+            uniquebots_token=token.uniqueBots_token,
+            autopost=True
+        )
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):

@@ -10,7 +10,8 @@ cur.execute("SELECT * from PUBG_BOT")
 client_list = cur.fetchone()
 DBL_token = client_list['DBL_token']
 token = client_list['token']
-DBKR_token = client_list['DBKR_token']
+koreanBots_token = client_list['DBKR_token']
+uniqueBots_token = client_list['UniqueBots_token']
 PUBG_API = client_list['DB_token']
 
 connect.close()

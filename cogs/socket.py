@@ -63,7 +63,9 @@ class SocketReceive(commands.Cog):
             _function = func.get("func")
             if (_function.name == name or name in _function.aliases) and self.check_interaction(ctx, _function):
                 _state.dispatch("command", ctx)
-                if permission(_function.permission)(ctx):
+                # if permission(_function.permission)(ctx):
+                if permission(1)(ctx):
+                    # todo: 테스트 기간 임의적으로 권한 상승.
                     await _function.callback(func.get("class"), ctx)
                 break
         return
@@ -91,11 +93,7 @@ class SocketReceive(commands.Cog):
             return
         elif t == "MESSAGE_CREATE":
             channel, _ = getattr(state, "_get_guild_channel")(data)
-            try:
-                message = Message(state=state, data=data, channel=channel)
-            except KeyError:
-                print(data)
-                return
+            message = Message(state=state, data=data, channel=channel)
             state.dispatch('interaction_command', message)
             return
         return

@@ -49,11 +49,11 @@ def _allowed_mentions(state, allowed_mentions):
 class SlashContext:
     def __init__(self, payload: dict, client: discord.Client):
         self.client = client
-        self.id = payload.get("id")
+        self.id: int = getattr(discord.utils, "_get_as_snowflake")(payload, "id")
         self.version = payload.get("version")
         self.type = payload.get("type", 2)
         self.token = payload.get("token")
-        self.application = payload.get("application_id")
+        self.application = getattr(discord.utils, "_get_as_snowflake")(payload, "application_id")
 
         self._state: ConnectionState = getattr(client, "_connection")
         data = payload.get("data", {})
@@ -75,7 +75,7 @@ class SlashContext:
         self.deferred = False
         self.responded = False
 
-        self.created_at = discord.utils.snowflake_time(int(self.id))
+        self.created_at = discord.utils.snowflake_time(self.id)
 
         for option in data.get("options", []):
             key = option.get("name")
@@ -249,9 +249,17 @@ class SlashContext:
 
 
 class Message(discord.Message):
-    def __init__(self, *, state, channel, data):
+    def __init__(
+            self,
+            *,
+            state: ConnectionState,
+            channel: Union[discord.TextChannel, discord.DMChannel, discord.GroupChannel],
+            data: dict
+    ):
+        if "message_reference" in data and "channel_id" not in data.get("message_reference", {}):
+            data["message_reference"]["channel_id"] = channel.id
         super().__init__(state=state, channel=channel, data=data)
-        self._state: ConnectionState = self._state
+        self._state = self._state
         self.components = from_payload(data.get("components", []))
         self.http = HttpClient(http=self._state.http)
 

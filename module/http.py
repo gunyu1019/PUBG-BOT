@@ -8,8 +8,8 @@ class SlashRoute(Route):
 
 class InteractionData:
     def __init__(self, interaction_token, interaction_id=None, application_id=None):
-        self.id: str = interaction_id
-        self.application: str = application_id
+        self.id = str(interaction_id)
+        self.application = str(application_id)
         self.token: str = interaction_token
 
 
