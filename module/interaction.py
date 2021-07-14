@@ -149,7 +149,7 @@ class SlashContext:
             components: List[Union[ActionRow, Button, Selection]] = None
     ):
         if file is not None and files is not None:
-            raise
+            raise InvildArgument()
 
         content = str(content) if content is not None else None
         if embed is not None:
@@ -189,8 +189,8 @@ class SlashContext:
         ret = self._state.create_message(channel=self.channel, data=resp)
 
         if files:
-            for file in files:
-                file.close()
+            for i in files:
+                i.close()
         return ret
 
     async def edit(
@@ -205,7 +205,7 @@ class SlashContext:
             components: List[Union[ActionRow, Button, Selection]] = None
     ):
         if file is not None and files is not None:
-            raise
+            raise InvildArgument()
 
         content = str(content) if content is not None else None
         if embed is not None:
@@ -307,7 +307,7 @@ class Message(discord.Message):
             components: List[Union[ActionRow, Button, Selection]] = None
     ):
         if file is not None and files is not None:
-            raise
+            raise InvildArgument()
 
         content = str(content) if content is not None else None
         if embed is not None:
@@ -334,6 +334,11 @@ class Message(discord.Message):
         ret = self._state.create_message(channel=self.channel, data=resp)
 
         if files:
-            for file in files:
-                file.close()
+            for i in files:
+                i.close()
         return ret
+
+
+class InvildArgument(Exception):
+    """Argument가 잘못되었을 리턴되는 예외입니다"""
+    pass
