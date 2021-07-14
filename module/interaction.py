@@ -259,7 +259,6 @@ class Message(discord.Message):
         if "message_reference" in data and "channel_id" not in data.get("message_reference", {}):
             data["message_reference"]["channel_id"] = channel.id
         super().__init__(state=state, channel=channel, data=data)
-        self._state = self._state
         self.components = from_payload(data.get("components", []))
         self.http = HttpClient(http=self._state.http)
 

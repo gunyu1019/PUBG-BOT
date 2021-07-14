@@ -9,7 +9,6 @@ from module.interaction import SlashContext, Message
 from utils import token
 
 logger = logging.getLogger(__name__)
-DBS = None
 
 
 def log_system(msg):
@@ -40,8 +39,7 @@ class Events(commands.Cog):
         log_system(f'DBSkr이 실행됩니다.')
         dbs = logging.getLogger("DBSkr")
         dbs.setLevel(logging.DEBUG)
-        global DBS
-        DBS = DBSkr.Client(
+        DBSkr.Client(
             self.bot,
             koreanbots_token=token.koreanBots_token,
             topgg_token=token.DBL_token,
