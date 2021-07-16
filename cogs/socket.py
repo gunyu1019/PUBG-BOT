@@ -97,11 +97,6 @@ class SocketReceive(commands.Cog):
             return
         return
 
-    @commands.Cog.listener()
-    async def on_components(self, result: ComponentsContext):
-        print(result.custom_id)
-        print(result.components_type)
-
 
 def setup(client):
     client.add_cog(SocketReceive(client))

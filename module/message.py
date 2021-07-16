@@ -67,8 +67,7 @@ class Message(discord.Message):
             self.name = None
 
         if len(options) >= 2:
-            options = self.content.split()[1:]
-
+            self.options = self.content.split()[1:]
         else:
             self.options = []
 
@@ -89,7 +88,7 @@ class Message(discord.Message):
         if content:
             payload['content'] = content
         if embed:
-            payload['embed'] = embed
+            payload['embeds'] = embed
         if allowed_mentions:
             payload['allowed_mentions'] = allowed_mentions
         if components:
@@ -102,6 +101,7 @@ class Message(discord.Message):
             *,
             tts: bool = False,
             embed: discord.Embed = None,
+            embeds: List[discord.Embed] = None,
             file: discord.File = None,
             files: List[discord.File] = None,
             allowed_mentions: discord.AllowedMentions = None,
@@ -109,10 +109,14 @@ class Message(discord.Message):
     ):
         if file is not None and files is not None:
             raise InvalidArgument()
+        if embed is not None and embeds is not None:
+            raise InvalidArgument()
 
         content = str(content) if content is not None else None
         if embed is not None:
-            embed = embed.to_dict()
+            embeds = [embed]
+        if embeds is not None:
+            embeds = [embed.to_dict() for embed in embeds]
         if file:
             files = [file]
         if components is not None:
@@ -122,7 +126,7 @@ class Message(discord.Message):
         payload = self._get_payload(
             content=content,
             tts=tts,
-            embed=embed,
+            embed=embeds,
             allowed_mentions=allowed_mentions,
             components=components,
         )
@@ -132,9 +136,58 @@ class Message(discord.Message):
             resp = await self.http.create_message(form=form, files=files, channel_id=self.channel.id)
         else:
             resp = await self.http.create_message(payload=payload, channel_id=self.channel.id)
-        ret = self._state.create_message(channel=self.channel, data=resp)
+        ret = Message(state=self._state, channel=self.channel, data=resp)
 
         if files:
             for i in files:
                 i.close()
         return ret
+
+    async def edit(
+            self,
+            content=None,
+            *,
+            embed: discord.Embed = None,
+            embeds: List[discord.Embed] = None,
+            file: discord.File = None,
+            files: List[discord.File] = None,
+            allowed_mentions: discord.AllowedMentions = None,
+            components: List[Union[ActionRow, Button, Selection]] = None
+    ):
+        if file is not None and files is not None:
+            raise InvalidArgument()
+        if embed is not None and embeds is not None:
+            raise InvalidArgument()
+
+        content = str(content) if content is not None else None
+        if embed is not None:
+            embeds = [embed]
+        if embeds is not None:
+            embeds = [embed.to_dict() for embed in embeds]
+        if file:
+            files = [file]
+        if components is not None:
+            components = [i.to_all_dict() if isinstance(i, ActionRow) else i.to_dict() for i in components]
+
+        allowed_mentions = _allowed_mentions(self._state, allowed_mentions)
+
+        payload = self._get_payload(
+            content=content,
+            embed=embeds,
+            allowed_mentions=allowed_mentions,
+            components=components,
+        )
+
+        if files:
+            form = _files_to_form(files=files, payload=payload)
+        else:
+            form = None
+
+        await self.http.edit_message(
+            channel_id=self.channel.id, message_id=self.id,
+            payload=payload, form=form, files=files
+        )
+
+        if files:
+            for file in files:
+                file.close()

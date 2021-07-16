@@ -2,7 +2,8 @@ import discord
 import pymysql
 
 from module.pubgpy import Client
-from module.interaction import SlashContext, Message
+from module.interaction import SlashContext, ComponentsContext
+from module.message import Message
 from module.components import ActionRow, Button
 from utils.database import getDatabase
 from utils.token import token
@@ -59,7 +60,12 @@ async def player_info(
         ]
         msg = await ctx.send(embed=embed, components=components)
 
-        def check(result):
-            return True
-        result = await client.wait_for("components", check=check)
-    return
+        def check(component: ComponentsContext):
+            if component.component_type == 2 and msg.id == component.message.id:
+                return component.message.webhook_id
+        result: ComponentsContext = await client.wait_for("components", check=check)
+        new_platform = result.custom_id
+        embed = discord.Embed(title="플랫폼 선택!", description="{}가 선택되었습니다.\n값이 잘못되었을 경우 `플랫폼변경` 명령어를 사용해주세요.".format(new_platform), color=0xffd619)
+        await result.update(embed=embed)
+
+    return player_data

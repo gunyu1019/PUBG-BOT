@@ -63,7 +63,7 @@ class InteractionContext:
         if tts:
             payload['tts'] = tts
         if embed:
-            payload['embeds'] = [embed]
+            payload['embeds'] = embed
         if allowed_mentions:
             payload['allowed_mentions'] = allowed_mentions
         if hidden:
@@ -87,6 +87,7 @@ class InteractionContext:
             *,
             tts: bool = False,
             embed: discord.Embed = None,
+            embeds: List[discord.Embed] = None,
             file: discord.File = None,
             files: List[discord.File] = None,
             hidden: bool = False,
@@ -95,10 +96,14 @@ class InteractionContext:
     ):
         if file is not None and files is not None:
             raise InvalidArgument()
+        if embed is not None and embeds is not None:
+            raise InvalidArgument()
 
         content = str(content) if content is not None else None
         if embed is not None:
-            embed = embed.to_dict()
+            embeds = [embed]
+        if embeds is not None:
+            embeds = [embed.to_dict() for embed in embeds]
         if file:
             files = [file]
         if components is not None:
@@ -107,7 +112,7 @@ class InteractionContext:
         allowed_mentions = _allowed_mentions(self._state, allowed_mentions)
         payload = self._get_payload(
             content=content,
-            embed=embed,
+            embed=embeds,
             tts=tts,
             hidden=hidden,
             allowed_mentions=allowed_mentions,
@@ -131,7 +136,7 @@ class InteractionContext:
             self.responded = True
         else:
             resp = await self.http.post_followup(payload=payload, form=form, files=files)
-        ret = self._state.create_message(channel=self.channel, data=resp)
+        ret = Message(state=self._state, channel=self.channel, data=resp)
 
         if files:
             for i in files:
@@ -144,6 +149,7 @@ class InteractionContext:
             content=None,
             *,
             embed: discord.Embed = None,
+            embeds: List[discord.Embed] = None,
             file: discord.File = None,
             files: List[discord.File] = None,
             allowed_mentions: discord.AllowedMentions = None,
@@ -151,10 +157,14 @@ class InteractionContext:
     ):
         if file is not None and files is not None:
             raise InvalidArgument()
+        if embed is not None and embeds is not None:
+            raise InvalidArgument()
 
         content = str(content) if content is not None else None
         if embed is not None:
-            embed = embed.to_dict()
+            embeds = [embed]
+        if embeds is not None:
+            embeds = [embed.to_dict() for embed in embeds]
         if file:
             files = [file]
         if components is not None:
@@ -164,7 +174,7 @@ class InteractionContext:
 
         payload = self._get_payload(
             content=content,
-            embed=embed,
+            embed=embeds,
             allowed_mentions=allowed_mentions,
             components=components,
         )
@@ -178,7 +188,7 @@ class InteractionContext:
             resp = await self.http.edit_initial_response(payload=payload, form=form, files=files)
         else:
             resp = await self.http.edit_followup(message_id, payload=payload, form=form, files=files)
-        ret = self._state.create_message(channel=self.channel, data=resp)
+        ret = Message(state=self._state, channel=self.channel, data=resp)
 
         if files:
             for file in files:
@@ -229,13 +239,81 @@ class ComponentsContext(InteractionContext):
         super().__init__(payload, client)
         self.type = payload.get("type", 3)
         data = payload.get("data", {})
-        print(payload)
 
         self.custom_id = data.get("custom_id")
-        self.components_type = data.get("components_type")
-        if self.components_type == 3:
+        self.component_type = data.get("component_type")
+        if self.component_type == 3:
             self.value: List[str] = data.get("value")
         else:
             self.value: List[str] = []
 
         self.message = Message(state=self._state, channel=self.channel, data=payload.get("message", {}))
+
+    async def defer_update(self, hidden: bool = False):
+        base = {"type": 6}
+        if hidden:
+            base["data"] = {"flags": 64}
+
+        await self.http.post_defer_response(payload=base)
+        self.deferred = True
+        return
+
+    async def update(
+            self,
+            content=None,
+            *,
+            tts: bool = False,
+            embed: discord.Embed = None,
+            embeds: List[discord.Embed] = None,
+            file: discord.File = None,
+            files: List[discord.File] = None,
+            allowed_mentions: discord.AllowedMentions = None,
+            components: List[Union[ActionRow, Button, Selection]] = None
+    ):
+        if file is not None and files is not None:
+            raise InvalidArgument()
+        if embed is not None and embeds is not None:
+            raise InvalidArgument()
+
+        content = str(content) if content is not None else None
+        if embed is not None:
+            embeds = [embed]
+        if embeds is not None:
+            embeds = [embed.to_dict() for embed in embeds]
+        if file:
+            files = [file]
+        if components is not None:
+            components = [i.to_all_dict() if isinstance(i, ActionRow) else i.to_dict() for i in components]
+
+        allowed_mentions = _allowed_mentions(self._state, allowed_mentions)
+        payload = self._get_payload(
+            content=content,
+            embed=embeds,
+            tts=tts,
+            allowed_mentions=allowed_mentions,
+            components=components,
+        )
+
+        if files:
+            form = _files_to_form(files=files, payload=payload)
+        else:
+            form = None
+
+        if not self.responded:
+            if files:
+                await self.defer_update()
+
+            if self.deferred:
+                await self.http.edit_message(
+                    channel_id=self.channel.id, message_id=self.message.id,
+                    payload=payload, form=form, files=files
+                )
+            else:
+                await self.http.post_initial_components_response(payload=payload)
+            self.responded = True
+        else:
+            await self.http.post_followup(payload=payload, form=form, files=files)
+
+        if files:
+            for i in files:
+                i.close()
