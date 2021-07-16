@@ -103,7 +103,7 @@ class Events(commands.Cog):
             else:
                 logger.info(f"(DM채널 | {ctx.author}) {ctx.content}")
         else:
-            options = [ctx.options[i] for i in ctx.options.keys()]
+            options = [str(ctx.options[i]) for i in ctx.options.keys()]
             if ctx.guild is not None:
                 logger.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) /{ctx.name} {' '.join(options)}")
             else:

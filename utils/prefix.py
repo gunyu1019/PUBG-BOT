@@ -12,7 +12,7 @@ def get_prefix(bot, message):
     if guild:
         connect = getDatabase()
         cur = connect.cursor(pymysql.cursors.DictCursor)
-        sql_prefix = pymysql.escape_string(f"select prefix from SERVER_INFO where ID={message.guild.id}")
+        sql_prefix = pymysql.escape_string(f"select prefix from SERVER_INFO where ID={guild.id}")
         try:
             cur.execute(sql_prefix)
             prefix = cur.fetchone()

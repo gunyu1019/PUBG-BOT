@@ -6,9 +6,9 @@ import os
 from discord.ext import commands
 from discord.state import ConnectionState
 from typing import Union, List, Dict
-from module.interaction import SlashContext, Message
+from module.interaction import SlashContext, ComponentsContext
+from module.message import Message
 from module.commands import Command
-from module.components import from_payload
 from utils.directory import directory
 from utils.prefix import get_prefix
 from utils.perm import permission
@@ -84,11 +84,10 @@ class SocketReceive(commands.Cog):
         state: ConnectionState = getattr(self.bot, "_connection")
         if t == "INTERACTION_CREATE":
             if data.get("type") == 2:
-                slash = SlashContext(data, self.bot)
-                state.dispatch('interaction_command', slash)
+                result = SlashContext(data, self.bot)
+                state.dispatch('interaction_command', result)
             elif data.get("type") == 3:
-                components = data.get("data")
-                result = from_payload(components)
+                result = ComponentsContext(data, self.bot)
                 state.dispatch('components', result)
             return
         elif t == "MESSAGE_CREATE":
@@ -97,6 +96,11 @@ class SocketReceive(commands.Cog):
             state.dispatch('interaction_command', message)
             return
         return
+
+    @commands.Cog.listener()
+    async def on_components(self, result: ComponentsContext):
+        print(result.custom_id)
+        print(result.components_type)
 
 
 def setup(client):
