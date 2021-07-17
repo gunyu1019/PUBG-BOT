@@ -35,7 +35,7 @@ from .errors import *
 from .leaderboards import Leaderboards
 from .mastery import Weapon, Survival, Medal, WeaponSummary, Stats
 from .matches import Roster, Participant, Assets, Matches
-from .player import GameModeReceive, SeasonStats, RankedStats, Rank
+from .player import Player, GameModeReceive, SeasonStats, RankedStats, Rank
 from .sample import Sample
 from .season import get_season, Season
 from .tournaments import Tournaments

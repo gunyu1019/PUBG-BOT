@@ -1,12 +1,15 @@
 import discord
 
-from config.config import parser
 from typing import Union, Optional
+
+import pymysql.cursors
+
 from module import commands
 from module import pubgpy
 from module.interaction import SlashContext, Message
 from utils import player
 from utils import token
+from utils.database import getDatabase
 
 
 class Command:
@@ -28,12 +31,18 @@ class Command:
     async def status(self, ctx: Union[SlashContext, Message]):
         command = "{prefix}전적 <1인칭|3인칭, 일반|3인칭경쟁, 경쟁, 랭크|1인칭경쟁> <닉네임> <시즌(선택)>".format(prefix=ctx.prefix)
         all_option = ["1인칭", "3인칭", "일반", "3인칭경쟁", "경쟁", "랭크", "1인칭경쟁"]
+        option1 = None
+        option2 = None
+        option3 = None
         if isinstance(ctx, Message):
             options = ctx.options
             if len(options) < 1:
                 await self.option1_error(ctx, "**{}**\n 1인칭, 3인칭 혹은 일반, 랭크 중에서만 선택하여 주세요.".format(command))
                 return
             tp = options[0]
+            if tp not in all_option:
+                await self.option1_error(ctx, "**{}**\n 1인칭, 3인칭 혹은 일반, 랭크 중에서만 선택하여 주세요.".format(command))
+                return
             if tp == "1인칭":
                 option1 = 0
             elif tp == "3인칭" or tp == "일반":
@@ -64,7 +73,21 @@ class Command:
                 return
 
             option3 = options.get("시즌")
-        await player.player_info(option2, ctx, self.client, self.pubgpy)
+        player_id, _platform = await player.player_info(option2, ctx, self.client, self.pubgpy)
+        if player_id is None:
+            return
+
+        if option3 is not None:
+            season = pubgpy.get_season(int(option3), _platform)
+        else:
+            connect = getDatabase()
+            cur = connect.cursor(pymysql.cursors.DictCursor)
+            sql = "SELECT * FROM SEASON_STATUS"
+            cur.execute(sql)
+            season_data = cur.fetchone()
+            database_platform = {"steam": "Steam", "kakao": "Kakao", "xbox": "XBOX", "psn": "PSN", "stadia": "Stadia"}
+
+            season = season_data.get(database_platform[_platform.value], {}).get("data", [{}])[-1].get("id")
         return
 
 

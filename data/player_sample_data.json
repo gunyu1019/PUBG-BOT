@@ -1,0 +1,30 @@
+{
+  "weapon":{
+    "years":1,
+    "months":1,
+    "days":1,
+    "hours":0,
+    "minutes":0
+  },
+  "matches":{
+    "years":1,
+    "months":1,
+    "days":1,
+    "hours":0,
+    "minutes":0
+  },
+  "normal":{
+    "years":1,
+    "months":1,
+    "days":1,
+    "hours":0,
+    "minutes":0
+  },
+  "ranked":{
+    "years":1,
+    "months":1,
+    "days":1,
+    "hours":0,
+    "minutes":0
+  }
+}
