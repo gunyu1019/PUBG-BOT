@@ -78,10 +78,10 @@ class Client:
             Returns platform value set.
         """
         log.info("PUBGpy changed platform ({} -> {})".format(self.platform, platform))
-        if platform is None:
+        if platform is not None:
             if isinstance(platform, Platforms):
                 self._platform = platform.value
-                self.requests.platform = self._platform.value
+                self.requests.platform = self._platform
             else:
                 self._platform = platform
                 self.requests.platform = self._platform

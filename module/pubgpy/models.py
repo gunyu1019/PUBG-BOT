@@ -1,5 +1,4 @@
-"""
-MIT License
+"""MIT License
 
 Copyright (c) 2021 gunyu1019
 
@@ -36,8 +35,8 @@ class PUBGModel(BaseModel):
     """Based on models provided by PUBG API."""
     def __init__(self, _class):
         super().__init__(_class.data)
-        self.id = _class.id
-        self.type = _class.type
+        self.id: str = _class.id
+        self.type: str = _class.type
     
     def __eq__(self, other):
         return self.id == other.id and self.type == other.type

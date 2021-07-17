@@ -1,5 +1,4 @@
-"""
-MIT License
+"""MIT License
 
 Copyright (c) 2021 gunyu1019
 
@@ -24,7 +23,7 @@ SOFTWARE.
 
 
 class APIException(Exception):
-    """Exception occurred while communicating with API."""
+    """ Exception occurred while communicating with API."""
     def __init__(self, response, message):
         self.response = response
         if isinstance(message, dict):
@@ -38,20 +37,20 @@ class APIException(Exception):
 
 
 class Unauthorized(APIException):
-    """Unauthorized"""
+    """ Unauthorized"""
     pass
 
 
 class NotFound(APIException):
-    """Not Found"""
+    """ Not Found"""
     pass
 
 
 class UnsupportedMediaType(APIException):
-    """Unsupported Media Type"""
+    """ Unsupported Media Type"""
     pass
 
 
 class TooManyRequests(APIException):
-    """Too Many Requests"""
+    """ Too Many Requests"""
     pass
