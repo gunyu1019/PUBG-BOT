@@ -3,14 +3,17 @@ import discord
 from config.config import parser
 from typing import Union, Optional
 from module import commands
+from module import pubgpy
 from module.interaction import SlashContext, Message
 from utils import player
+from utils import token
 
 
 class Command:
     def __init__(self, bot):
         self.client = bot
         self.color = 0xffd619
+        self.pubgpy = pubgpy.Client(token=token.PUBG_API)
 
     async def option1_error(self, ctx, message):
         embed = discord.Embed(
@@ -61,7 +64,7 @@ class Command:
                 return
 
             option3 = options.get("시즌")
-        await player.player_info(option2, ctx, self.client)
+        await player.player_info(option2, ctx, self.client, self.pubgpy)
         return
 
 

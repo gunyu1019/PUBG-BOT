@@ -1,5 +1,4 @@
-"""
-MIT License
+"""MIT License
 
 Copyright (c) 2021 gunyu1019
 
@@ -28,7 +27,8 @@ from .models import PUBGModel
 
 
 def get_season(d_season: int, platform: Platforms):
-    """Randomly creates a season class. It's easier to look up specific season information without additional phrases.
+    """
+    Randomly creates a season class. It's easier to look up specific season information without additional phrases.
 
     Parameters
     ----------
@@ -61,7 +61,7 @@ def get_season(d_season: int, platform: Platforms):
 
 
 class Season(PUBGModel):
-    """Season objects each contain the ID of a season, which can be used to lookup season information for a player.
+    """ Season objects each contain the ID of a season, which can be used to lookup season information for a player.
 
     Attributes
     ----------
@@ -79,12 +79,12 @@ class Season(PUBGModel):
     def __init__(self, data: dict):
         self.data = data
 
-        self.type = self.data.get("type")
-        self.id = self.data.get("id", "season")
+        self.type: str = self.data.get("type")
+        self.id: str = self.data.get("id", "season")
         super().__init__(self)
 
-        self.current = self.data.get("attributes", {}).get("isCurrentSeason")
-        self.off_season = self.data.get("attributes", {}).get("isOffseason")
+        self.current: bool = self.data.get("attributes", {}).get("isCurrentSeason")
+        self.off_season: bool = self.data.get("attributes", {}).get("isOffseason")
 
     def __repr__(self):
         return "Season(id='{}', current='{}', type='{}')".format(self.id, self.current, self.type)

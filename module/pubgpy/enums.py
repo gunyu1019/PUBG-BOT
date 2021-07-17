@@ -1,8 +1,31 @@
+"""MIT License
+
+Copyright (c) 2021 gunyu1019
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
 from enum import Enum
 
 
 class Platforms(Enum):
-    """Platforms supported"""
+    """ Platforms supported"""
     STEAM = "steam"
     KAKAO = "kakao"
     XBOX = "xbox"
@@ -14,7 +37,7 @@ class Platforms(Enum):
 
 
 class Region(Enum):
-    """Region supported"""
+    """ Region supported"""
     AS = 'as'
     EU = 'eu'
     KAKAO = 'kakao'
@@ -32,7 +55,7 @@ class Region(Enum):
 
 
 class GameMode(Enum):
-    """GameMode"""
+    """ GameMode"""
     solo = "solo"
     duo = "duo"
     squad = "squad"
@@ -42,7 +65,7 @@ class GameMode(Enum):
 
 
 class MatchType(Enum):
-    """Game Match Type"""
+    """ Game Match Type"""
     arcade = "arcade"
     custom = "custom"
     event = "event"
@@ -51,7 +74,7 @@ class MatchType(Enum):
 
 
 class MapName(Enum):
-    """Game Map Name"""
+    """ Game Map Name"""
     erangel = "Baltic_Main"
     paramo = "Chimera_Main"
     miramar = "Desert_Main"
@@ -64,14 +87,14 @@ class MapName(Enum):
 
 
 class SeasonStats(Enum):
-    """Season Status"""
+    """ Season Status"""
     progress = "progress"
     prepare = "prepare"
     closed = "closed"
 
 
 class DeathType(Enum):
-    """Death Type"""
+    """ Death Type"""
     alive = "alive"
     kill = "byplayer"
     zone = "byzone"

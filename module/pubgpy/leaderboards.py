@@ -1,5 +1,4 @@
-"""
-MIT License
+"""MIT License
 
 Copyright (c) 2021 gunyu1019
 
@@ -28,7 +27,7 @@ from .player import Player
 
 
 class Leaderboards(PUBGModel):
-    """Leaderboard objects show the current rank of the top 500 players for a game mode.
+    """ Leaderboard objects show the current rank of the top 500 players for a game mode.
 
     Attributes
     ----------
@@ -55,15 +54,15 @@ class Leaderboards(PUBGModel):
         self.data = data
         self.client = client
 
-        self.id = self.data.get("id")
-        self.type = self.data.get("type", "leaderboard")
+        self.id: str = self.data.get("id")
+        self.type: str = self.data.get("type", "leaderboard")
         super().__init__(self)
 
         # attributes
         attributes = self.data.get("attributes")
-        self.shard = get_enum(Platforms, attributes.get("shardId"))
-        self.gamemode = get_enum(GameMode, attributes.get("gameMode"))
-        self.season = attributes.get("seasonId")
+        self.shard: Platforms = get_enum(Platforms, attributes.get("shardId"))
+        self.gamemode: GameMode = get_enum(GameMode, attributes.get("gameMode"))
+        self.season: str = attributes.get("seasonId")
 
         # included
         self.included = list()

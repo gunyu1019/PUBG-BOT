@@ -1,5 +1,4 @@
-"""
-MIT License
+"""MIT License
 
 Copyright (c) 2021 gunyu1019
 
@@ -33,7 +32,7 @@ log = logging.getLogger(__name__)
 
 
 class Api:
-    """Used to report with the PUBG API.
+    """ Used to report with the PUBG API.
 
     Parameters
     ----------
@@ -54,7 +53,8 @@ class Api:
             self.platform = platform
 
     async def requests(self, method: str, path: str, ni_shards: bool = True, **kwargs):
-        """Function that interacts with api.
+        """
+        Function that interacts with api.
         This function attempts to interact with the API.
 
         Parameters
@@ -125,7 +125,8 @@ class Api:
                     raise errors.APIException(resp, data)
 
     async def get(self, path, ni_shards: bool = True, **kwargs):
-        """Same as :function:`requests`. Only, method is called GET.
+        """
+        Same as :function:`requests`. Only, method is called GET.
 
         Parameters
         ----------

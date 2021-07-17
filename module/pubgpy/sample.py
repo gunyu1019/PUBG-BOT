@@ -1,5 +1,4 @@
-"""
-MIT License
+"""MIT License
 
 Copyright (c) 2021 gunyu1019
 
@@ -27,7 +26,7 @@ from .enums import Platforms, get_enum
 
 
 class Sample(PUBGModel):
-    """	Sample objects contain the ID of a match.
+    """ Sample objects contain the ID of a match.
 
     Attributes
     ----------
@@ -53,19 +52,20 @@ class Sample(PUBGModel):
         self.client = client
 
         self.type = self.data.get("type")
-        self.id = self.data.get("id")
+        self.id: int = self.data.get("id")
         super().__init__(self)
 
         attributes = self.data.get("attributes")
-        self.created_at = attributes.get("createdAt")
-        self.title = attributes.get("titleId")
-        self.shard = get_enum(Platforms, attributes.get("shardId"))
+        self.created_at: str = attributes.get("createdAt")
+        self.title: str = attributes.get("titleId")
+        self.shard: Platforms = get_enum(Platforms, attributes.get("shardId"))
 
         relationships = self.data.get("relationships")
         self.matches = [i.get("id") for i in relationships.get("matches", {}).get("data", [])]
 
     async def match(self, position: int = 0):
-        """Recall match dates in sample data to suit the location.
+        """
+        Recall match dates in sample data to suit the location.
 
         Parameters
         ----------
