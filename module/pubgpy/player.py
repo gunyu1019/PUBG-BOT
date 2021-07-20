@@ -26,7 +26,7 @@ from .models import BaseModel, PUBGModel
 from .mastery import Weapon, Survival
 from .enums import get_enum, Platforms
 
-from typing import Union
+from typing import Union, Type
 
 
 class Player(PUBGModel):
@@ -461,7 +461,7 @@ class GameModeReceive(BaseModel):
     squad_fpp : type_class
         Squad(First person) Play Stats
     """
-    def __init__(self, data, type_class: Union[RankedStats, SeasonStats]):
+    def __init__(self, data, type_class: Type[Union[RankedStats, SeasonStats]]):
         super().__init__(data)
         self.type_class = type_class
 

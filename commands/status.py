@@ -8,10 +8,10 @@ import pymysql.cursors
 from module import commands
 from module import pubgpy
 from module.interaction import SlashContext, Message
-from utils import player
+from process import player
 from utils import token
 from utils.database import getDatabase
-from utils.status import Status
+from process.status import Status
 
 
 class Command:
