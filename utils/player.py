@@ -17,6 +17,13 @@ kakao = discord.PartialEmoji(name="kakao", id=718482204103278622)
 stadia = discord.PartialEmoji(name="Stadia", id=718482205575348264)
 
 game_ids = ["steam", "kakao", "xbox", "psn", "stadia"]
+game_enums = [
+    pubgpy.Platforms.STEAM,
+    pubgpy.Platforms.KAKAO,
+    pubgpy.Platforms.XBOX,
+    pubgpy.Platforms.PLAYSTATION,
+    pubgpy.Platforms.STADIA,
+]
 
 
 async def player_info(
@@ -44,7 +51,7 @@ async def player_info(
         connect.commit()
     else:
         player_id = player_data['id']
-        platform = game_ids[player_data['platform']]
+        platform = game_enums[player_data['platform']]
     connect.close()
     return player_id, platform
 

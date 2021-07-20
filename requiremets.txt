@@ -1,0 +1,4 @@
+discord
+pymysql
+DBSkr
+timezone

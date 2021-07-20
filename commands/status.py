@@ -1,4 +1,5 @@
 import discord
+import json
 
 from typing import Union, Optional
 
@@ -10,6 +11,7 @@ from module.interaction import SlashContext, Message
 from utils import player
 from utils import token
 from utils.database import getDatabase
+from utils.status import Status
 
 
 class Command:
@@ -87,7 +89,26 @@ class Command:
             season_data = cur.fetchone()
             database_platform = {"steam": "Steam", "kakao": "Kakao", "xbox": "XBOX", "psn": "PSN", "stadia": "Stadia"}
 
-            season = season_data.get(database_platform[_platform.value], {}).get("data", [{}])[-1].get("id")
+            season = json.loads(season_data.get(database_platform[_platform.value], {})).get("data", [{}])[-1].get("id")
+
+        self.pubgpy.platform(_platform)
+        status = Status(
+                ctx=ctx,
+                client=self.client,
+                pubg=self.pubgpy,
+                player_id=player_id,
+                player=option2,
+                season=season
+        )
+        if option1 == 0:
+            return
+        elif option1 == 1:
+            await status.normal_total()
+            return
+        elif option1 == 2:
+            return
+        elif option1 == 3:
+            return
         return
 
 

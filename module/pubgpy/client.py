@@ -77,8 +77,8 @@ class Client:
         Platforms :
             Returns platform value set.
         """
-        log.info("PUBGpy changed platform ({} -> {})".format(self.platform, platform))
         if platform is not None:
+            log.info("PUBGpy changed platform ({} -> {})".format(self.platform, platform))
             if isinstance(platform, Platforms):
                 self._platform = platform.value
                 self.requests.platform = self._platform
@@ -112,7 +112,7 @@ class Client:
         }
         return Player(client=self, data=_data)
 
-    async def player(self, nickname: str):
+    async def player(self, nickname: str) -> Player:
         """
         Get a single player.
 
