@@ -1,7 +1,6 @@
 import json
 
 from utils.database import getDatabase
-from discord.ext import commands
 
 from config.config import parser
 
