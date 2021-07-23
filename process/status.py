@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Union
 from module import pubgpy
 from module.interaction import SlashContext, Message
+from utils.cache import CacheData
 from utils.directory import directory
 from utils.time import get_time_to_string
 
@@ -30,6 +31,7 @@ class Status:
         self.ctx = ctx
         self.client = client
         self.pubg = pubg
+        self.database = CacheData(self.pubg)
         self.player_nickname = player
         self.player_id = player_id
         self.player = self.pubg.player_id(self.player_id)
@@ -43,7 +45,7 @@ class Status:
         return discord.File(f"{directory}/assets/Icon/{image_name[self.platform]}")
 
     async def _normal_data(self, player_id) -> pubgpy.GameModeReceive:
-        return await self.pubg.season_stats(player_id, self.season)
+        return await self.database.get_playdata(player_id=player_id, season=self.season, cls=pubgpy.SeasonStats)
 
     @staticmethod
     def _get_kill_death_points(kills: int, deaths: int, assists: int = 0) -> float:

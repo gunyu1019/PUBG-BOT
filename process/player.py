@@ -35,7 +35,7 @@ async def player_info(
     connect = getDatabase()
     cur = connect.cursor(pymysql.cursors.DictCursor)
 
-    sql = pymysql.escape_string("select id, platform from player where name=%s")
+    sql = pymysql.escape_string("SELECT player_id, platform FROM player_data WHERE nickname = %s")
     cur.execute(sql, nickname)
     player_data = cur.fetchone()
     if player_data is None:
@@ -44,13 +44,13 @@ async def player_info(
             connect.close()
             return None, None
 
-        sql = pymysql.escape_string("insert into player(id,name,last_update,platform) values (%s, %s, %s, %s)")
-        with open("{}/data/player_sample_data.json".format(directory)) as f:
-            sample = json.load(f)
-        cur.execute(sql, (player_id, nickname, json.dumps(sample), int(platform_id)))
+        sql = pymysql.escape_string(
+            "INSERT INTO player_data(player_id, nickname, platform) VALUE (%s, %s, %s)"
+        )
+        cur.execute(sql, (player_id, nickname, int(platform_id)))
         connect.commit()
     else:
-        player_id = player_data['id']
+        player_id = player_data['player_id']
         platform = game_enums[player_data['platform']]
     connect.close()
     return player_id, platform

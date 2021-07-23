@@ -79,8 +79,8 @@ class Season(PUBGModel):
     def __init__(self, data: dict):
         self.data = data
 
-        self.type: str = self.data.get("type")
-        self.id: str = self.data.get("id", "season")
+        self.type: str = self.data.get("type", "season")
+        self.id: str = self.data.get("id")
         super().__init__(self)
 
         self.current: bool = self.data.get("attributes", {}).get("isCurrentSeason")
