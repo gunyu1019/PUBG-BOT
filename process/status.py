@@ -37,6 +37,12 @@ squad_player_btn = Button(
     emoji=discord.PartialEmoji(id=868178845721829428, name="squad"),
     custom_id="squad"
 )
+update_btn = Button(
+    label="업데이트",
+    style=1,
+    emoji=discord.PartialEmoji(id=868183008161697842, name="update"),
+    custom_id="update"
+)
 
 
 class Status:
@@ -113,6 +119,6 @@ class Status:
         await self.ctx.send(
             file=self._platform_file(), embed=embed,
             components=[
-                ActionRow(components=[solo_player_btn, duo_player_btn, squad_player_btn])
+                ActionRow(components=[solo_player_btn, duo_player_btn, squad_player_btn, update_btn])
             ]
         )
