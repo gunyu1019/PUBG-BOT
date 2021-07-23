@@ -4,6 +4,7 @@ from pytz import timezone
 from datetime import datetime
 from typing import Union
 from module import pubgpy
+from module.components import ActionRow, Button
 from module.interaction import SlashContext, Message
 from utils.cache import CacheData
 from utils.directory import directory
@@ -16,6 +17,26 @@ image_name = {
     "psn": "playstation.png",
     "stadia": "stadia.png"
 }
+
+# <:solo:868178845373726790> <:duo:868178863941886013> <:squad:868178845721829428>
+solo_player_btn = Button(
+    label="솔로",
+    style=1,
+    emoji=discord.PartialEmoji(id=868178845373726790, name="solo"),
+    custom_id="solo"
+)
+duo_player_btn = Button(
+    label="듀오",
+    style=1,
+    emoji=discord.PartialEmoji(id=868178863941886013, name="duo"),
+    custom_id="duo"
+)
+squad_player_btn = Button(
+    label="스쿼드",
+    style=1,
+    emoji=discord.PartialEmoji(id=868178845721829428, name="squad"),
+    custom_id="squad"
+)
 
 
 class Status:
@@ -47,6 +68,9 @@ class Status:
     async def _normal_data(self, player_id) -> pubgpy.GameModeReceive:
         return await self.database.get_playdata(player_id=player_id, season=self.season, cls=pubgpy.SeasonStats)
 
+    async def _ranked_data(self, player_id) -> pubgpy.GameModeReceive:
+        return await self.database.get_playdata(player_id=player_id, season=self.season, cls=pubgpy.RankedStats)
+
     @staticmethod
     def _get_kill_death_points(kills: int, deaths: int, assists: int = 0) -> float:
         if int(deaths) is not 0:
@@ -57,8 +81,6 @@ class Status:
 
     async def normal_total(self, fpp: bool = False):
         section = await self._normal_data(self.player_id)
-        # TODO -> 이부분 캐시화 해야하는데, 데이터베이스의 구조 개선이 필요한것으로 확인되었음.
-        # TODO -> 조만간 데이터베이스 내 Rewrite 코드를 짜야할듯..
         embed = discord.Embed(color=0xffd619)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=self.player_nickname + "님의 전적")
 
@@ -88,4 +110,9 @@ class Status:
                 inline=True
             )
 
-        await self.ctx.send(file=self._platform_file(), embed=embed)
+        await self.ctx.send(
+            file=self._platform_file(), embed=embed,
+            components=[
+                ActionRow(components=[solo_player_btn, duo_player_btn, squad_player_btn])
+            ]
+        )
