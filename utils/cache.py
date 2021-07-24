@@ -106,7 +106,7 @@ class CacheData:
             self,
             player_id: Union[str, player.Player],
             cls: Type[Union[player.SeasonStats, player.RankedStats]]
-    ):
+    ) -> Optional[datetime]:
         cur = self.database.cursor(pymysql.cursors.DictCursor)
         player_id = player_id.id if isinstance(player_id, player.Player) else player_id
         command = pymysql.escape_string(
@@ -152,7 +152,7 @@ class CacheData:
                 self.save_play_data(player_id=player_id, season=season, data=data, update=True)
 
             self.save_lastupdate(player_id=player_id, cls=cls, dt=datetime.now())
-        return GameModeReceive(data, cls)
+        return GameModeReceive(data, cls) if not isinstance(data, GameModeReceive) else data
 
     async def update_playdata(
             self,
@@ -163,4 +163,4 @@ class CacheData:
         data = await self._playdata(player_id=player_id, cls=cls, season=season)
         self.save_play_data(player_id=player_id, season=season, data=data, update=True)
         self.save_lastupdate(player_id=player_id, cls=cls, dt=datetime.now())
-        return GameModeReceive(data, cls)
+        return data

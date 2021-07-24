@@ -136,7 +136,6 @@ class Player(PUBGModel):
             season = season.id
         path = "/players/{}/seasons/{}/ranked".format(self.id, season)
         resp = await self.client.requests.get(path=path)
-        print(resp)
         return GameModeReceive(resp.get("data", {}).get("attributes", {}).get("rankedGameModeStats", {}), RankedStats)
 
     async def lifetime_stats(self):
