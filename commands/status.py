@@ -120,29 +120,29 @@ class Command:
         )
         if ctx.name == "전적솔로":
             if option1 == 0:
-                await status.normal_mode(mode="solo")
-            elif option1 == 1:
                 await status.normal_mode(mode="solo_fpp")
+            elif option1 == 1:
+                await status.normal_mode(mode="solo")
             elif option1 == 2:
-                await status.ranked_mode(mode="solo")
-            elif option1 == 3:
                 await status.ranked_mode(mode="solo_fpp")
+            elif option1 == 3:
+                await status.ranked_mode(mode="solo")
         elif ctx.name == "전적듀오":
             if option1 == 0:
-                await status.normal_mode(mode="duo")
-            elif option1 == 1:
                 await status.normal_mode(mode="duo_fpp")
+            elif option1 == 1:
+                await status.normal_mode(mode="duo")
             elif option1 == 2 or option1 == 3:
                 await self._option_error(ctx, "**{}**\n 경쟁전에서는 듀오모드를 지원하지 않습니다.".format(command))
         elif ctx.name == "전적스쿼드":
             if option1 == 0:
-                await status.normal_mode(mode="squad")
-            elif option1 == 1:
                 await status.normal_mode(mode="squad_fpp")
+            elif option1 == 1:
+                await status.normal_mode(mode="squad")
             elif option1 == 2:
-                await status.ranked_mode(mode="squad")
-            elif option1 == 3:
                 await status.ranked_mode(mode="squad_fpp")
+            elif option1 == 3:
+                await status.ranked_mode(mode="squad")
         else:
             if option1 == 0:
                 await status.normal_total(fpp=True)
