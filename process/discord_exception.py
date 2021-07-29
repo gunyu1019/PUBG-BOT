@@ -1,13 +1,15 @@
 import discord
-from directory import directory
+from config.config import parser
+from utils.directory import directory
 
 
 async def forbidden_manage(ctx):
     embed_warning = discord.Embed(
-        title="\U000026A0경고!",
+        title="\U000026A0 경고!",
         description="권한설정이 잘못되었습니다! 메세지 관리를 활성해 주세요.\n메세지 관리 권한이 활성화 되지 않을 경우 디스코드봇이 정상적으로 작동하지 않습니다.",
-        color=0xffd619)
-    file_warning = discord.File(f"{directory}/asset/manage_message.png")
+        color=0xffd619
+    )
+    file_warning = discord.File(f"{directory}/assets/manage_message.png")
     embed_warning.set_image(url="attachment://manage_message.png")
     embed_warning.add_field(
         name="Q: 왜 `메세지 관리`가 필요한가요?",
@@ -15,4 +17,20 @@ async def forbidden_manage(ctx):
               "필요합니다.",
         inline=True)
     await ctx.send(embed=embed_warning, file=file_warning)
+    return
+
+
+async def inspection(ctx):
+    embed = discord.Embed(
+        title="\U000026A0 안내",
+        description=f"죄송합니다. 지금은 PUBG BOT 점검 중입니다. 잠시 후 다시 시도해주세요. :(",
+        color=0xffd619
+    )
+
+    if parser.get("Inspection", "reason") != "" and parser.get("Inspection", "reason") is not None:
+        embed.description += "\n{}".format(parser.get("Inspection", "reason"))
+
+    if parser.get("Inspection", "date") != "" and parser.get("Inspection", "date") is not None:
+        embed.description += "\n\n기간: {}".format(parser.get("Inspection", "date"))
+    await ctx.send(embed=embed)
     return

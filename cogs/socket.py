@@ -3,12 +3,16 @@ import inspect
 import importlib
 import os
 
+import discord
 from discord.ext import commands
 from discord.state import ConnectionState
 from typing import Union, List, Dict
+
+from config.config import parser
 from module.interaction import SlashContext, ComponentsContext
 from module.message import Message
 from module.commands import Command
+from process.discord_exception import inspection
 from utils.directory import directory
 from utils.prefix import get_prefix
 from utils.perm import permission
@@ -65,6 +69,9 @@ class SocketReceive(commands.Cog):
                 _state.dispatch("command", ctx)
                 # if permission(_function.permission)(ctx):
                 if permission(1)(ctx):
+                    if parser.getboolean("Inspection", "inspection"):
+                        await inspection(ctx)
+                        return
                     # todo: 테스트 기간 임의적으로 권한 상승.
                     await _function.callback(func.get("class"), ctx)
                 break
