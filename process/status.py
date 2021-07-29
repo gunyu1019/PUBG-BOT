@@ -41,6 +41,14 @@ class Status:
         self.before_func = None
         self.before_mode: Optional[Union[bool, str]] = None
 
+        self.total_player_btn = None
+        self.solo_player_btn = None
+        self.duo_player_btn = None
+        self.squad_player_btn = None
+        self.update_btn = None
+        self.init_button()
+
+    def init_button(self):
         self.total_player_btn = Button(
             style=1,
             emoji=discord.PartialEmoji(id=868342431177900074, name="bar"),
@@ -67,7 +75,16 @@ class Status:
             emoji=discord.PartialEmoji(id=868344053262061578, name="update"),
             custom_id="update"
         )
-        self.btn = [self.total_player_btn, self.solo_player_btn, self.duo_player_btn, self.squad_player_btn, self.update_btn]
+
+    @property
+    def button(self):
+        return [
+            self.total_player_btn,
+            self.solo_player_btn,
+            self.duo_player_btn,
+            self.squad_player_btn,
+            self.update_btn
+        ]
 
     @property
     def platform(self):
@@ -117,10 +134,18 @@ class Status:
         return tier.point if tier.point is not None else 0
 
     @staticmethod
-    def check(ctx: Union[SlashContext, Message]):
+    def check(ctx: Message):
         def check_func(component: ComponentsContext):
-            return component.component_type == 2
+            return component.component_type == 2 and ctx.id == component.message.id
         return check_func
+
+    def current_button(self):
+        self.init_button()
+        if self.before_func == self.ranked_total or self.before_func == self.normal_total:
+            self.total_player_btn.style = 3
+        elif isinstance(self.before_mode, str):
+            getattr(self, "{}_player_btn".format(self.before_mode), Button()).style = 3
+        return
 
     async def response(self, b_msg: Message, custom_id: str, fpp: bool = False, ranked: bool = False):
         if custom_id == "update":
@@ -129,9 +154,9 @@ class Status:
             else:
                 await self._normal_update_data(self.player_id)
             if isinstance(self.before_mode, bool):
-                await self.before_func(fpp=self.before_func, b_msg=b_msg)
+                await self.before_func(fpp=self.before_mode, b_msg=b_msg)
             else:
-                await self.before_func(mode=self.before_func, b_msg=b_msg)
+                await self.before_func(mode=self.before_mode, b_msg=b_msg)
 
         if ranked:
             if custom_id == "total":
@@ -179,22 +204,23 @@ class Status:
             )
         last_update = self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.SeasonStats)
         embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
+        self.current_button()
 
         if b_msg is None:
             b_msg = await self.ctx.send(
                 file=self._platform_file(), embed=embed,
                 components=[
-                    ActionRow(components=self.btn)
+                    ActionRow(components=self.button)
                 ]
             )
         else:
             await b_msg.edit(
                 file=self._platform_file(), embed=embed,
                 components=[
-                    ActionRow(components=self.btn)
+                    ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(self.ctx))
+        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg))
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=fpp)
         return
@@ -233,24 +259,26 @@ class Status:
             )
         last_update = self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
         embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
+        self.current_button()
+        self.duo_player_btn.disabled = True
 
         if b_msg is None:
             b_msg = await self.ctx.send(
                 file=self._platform_file(), embed=embed,
                 components=[
-                    ActionRow(components=self.btn)
+                    ActionRow(components=self.button)
                 ]
             )
         else:
             await b_msg.edit(
                 file=self._platform_file(), embed=embed,
                 components=[
-                    ActionRow(components=self.btn)
+                    ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(self.ctx))
+        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg))
         await resp.defer_update()
-        await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=fpp)
+        await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=fpp, ranked=True)
         return
 
     async def normal_mode(self, mode: str, b_msg: Message = None):
@@ -290,22 +318,23 @@ class Status:
 
         last_update = self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
         embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
+        self.current_button()
 
         if b_msg is None:
             b_msg = await self.ctx.send(
                 file=self._platform_file(), embed=embed,
                 components=[
-                    ActionRow(components=self.btn)
+                    ActionRow(components=self.button)
                 ]
             )
         else:
             await b_msg.edit(
                 file=self._platform_file(), embed=embed,
                 components=[
-                    ActionRow(components=self.btn)
+                    ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(self.ctx))
+        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg))
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=mode.endswith("_fpp"))
         return
@@ -351,22 +380,24 @@ class Status:
 
         last_update = self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
         embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
+        self.current_button()
+        self.duo_player_btn.disabled = True
 
         if b_msg is None:
             b_msg = await self.ctx.send(
                 files=[self._platform_file(), file], embed=embed,
                 components=[
-                    ActionRow(components=self.btn)
+                    ActionRow(components=self.button)
                 ]
             )
         else:
             await b_msg.edit(
                 files=[self._platform_file(), file], embed=embed,
                 components=[
-                    ActionRow(components=self.btn)
+                    ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(self.ctx))
+        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg))
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=mode.endswith("_fpp"), ranked=True)
         return

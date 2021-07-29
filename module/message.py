@@ -179,6 +179,7 @@ class Message(discord.Message):
         )
 
         if files:
+            payload["attachments"] = []
             form = _files_to_form(files=files, payload=payload)
         else:
             form = None
@@ -191,3 +192,4 @@ class Message(discord.Message):
         if files:
             for file in files:
                 file.close()
+        return
