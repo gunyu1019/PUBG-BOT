@@ -106,6 +106,7 @@ class Command:
             cur.execute(sql)
             season_data = cur.fetchone()
             database_platform = {"steam": "Steam", "kakao": "Kakao", "xbox": "XBOX", "psn": "PSN", "stadia": "Stadia"}
+            connect.close()
 
             season = json.loads(season_data.get(database_platform[_platform.value], {})).get("data", [{}])[-1].get("id")
 
@@ -154,6 +155,37 @@ class Command:
                 await status.ranked_total()
         return
 
+    @commands.command(name="플랫폼변경", permission=4)
+    async def platform_change(self, ctx):
+        connect = getDatabase()
+        cur = connect.cursor(pymysql.cursors.DictCursor)
+        command = "{prefix}{command_name} <닉네임>".format(command_name=ctx.name, prefix=ctx.prefix)
+        nickname = None
+        if isinstance(ctx, Message):
+            options = ctx.options
+
+            if len(options) < 1:
+                await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
+                return
+            nickname = options[0]
+        elif isinstance(ctx, SlashContext):
+            options = ctx.options
+            nickname: Optional[str] = options.get("닉네임")
+            if nickname is None:
+                await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
+                return
+        player_id, _, platform_id = await player.player_platform(nickname, ctx, self.client, self.pubgpy)
+        if player_id is None:
+            connect.close()
+            return
+
+        sql = pymysql.escape_string(
+            "UPDATE player_data SET platform=%s WHERE player_id=%s and nickname=%s"
+        )
+        cur.execute(sql, (int(platform_id), player_id, nickname))
+        connect.commit()
+        connect.close()
+        return
 
 def setup(client):
     return Command(client)
