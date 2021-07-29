@@ -6,7 +6,7 @@ from typing import Union, Optional
 from module import pubgpy
 from module.components import ActionRow, Button
 from module.interaction import SlashContext, Message, ComponentsContext
-from utils.cache import CacheData
+from utils.cache import CachePlayData
 from utils.directory import directory
 from utils.time import get_time_to_string
 
@@ -32,7 +32,7 @@ class Status:
         self.ctx = ctx
         self.client = client
         self.pubg = pubg
-        self.database = CacheData(self.pubg)
+        self.database = CachePlayData(self.pubg)
         self.player_nickname = player
         self.player_id = player_id
         self.player = self.pubg.player_id(self.player_id)
