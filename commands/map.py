@@ -4,7 +4,7 @@ import json
 from module import commands
 from utils.directory import directory
 
-with open(directory + "/data/map_link.json", mode='r') as file:
+with open(directory + "/data/mapLink.json", mode='r') as file:
     map_link = json.load(file)
 
 

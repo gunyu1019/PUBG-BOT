@@ -99,8 +99,7 @@ async def player_platform(
     msg = await ctx.send(embed=embed, components=components)
 
     def check(component: ComponentsContext):
-        if component.component_type == 2 and msg.id == component.message.id and ctx.author == component.author:
-            return component.message.webhook_id
+        return component.component_type == 2 and msg.id == component.message.id and ctx.author == component.author
 
     result: ComponentsContext = await client.wait_for("components", check=check)
     new_platform = game_ids[int(result.custom_id)]

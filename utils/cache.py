@@ -1,7 +1,7 @@
 import pymysql
 import json
 from datetime import datetime
-from typing import Union, Type, Optional, List
+from typing import Union, Type, Optional, List, Tuple
 
 from config.config import parser
 from utils.database import getDatabase
@@ -21,7 +21,7 @@ class CacheData:
         elif cls == player.RankedStats:
             return "ranked_date"
         elif cls == player.Player:
-            return "player_data"
+            return "matches_date"
 
     @staticmethod
     def _get_mode(cls) -> Optional[str]:
@@ -67,7 +67,7 @@ class CacheData:
     def get_lastupdate(
             self,
             player_id: Union[str, player.Player],
-            cls: Type[Union[player.SeasonStats, player.RankedStats, Matches, list]]
+            cls: Type[Union[player.SeasonStats, player.RankedStats, player.Player]]
     ) -> Optional[datetime]:
         cur = self.database.cursor(pymysql.cursors.DictCursor)
         player_id = player_id.id if isinstance(player_id, player.Player) else player_id
@@ -222,11 +222,11 @@ class CacheMatchesList(CacheData):
             player_id: Union[str, player.Player]
     ):
         data = self.get_matches_lists(player_id=player_id)
-        last_update = self.get_lastupdate(player_id=player_id, cls=list)
-        if data is None or data == {} or (datetime.now() - last_update).days >= 2:
+        last_update = self.get_lastupdate(player_id=player_id, cls=player.Player)
+        if data is None or data == [] or data == {} or (datetime.now() - last_update).days >= 2:
             _player: List[player.Player] = await self.pubg.players(ids=[player_id])
             new_data = True if data is None or data else False
-            data = await _player[0].matches
+            data = _player[0].matches
 
             if new_data:
                 self.save_matches_lists(player_id=player_id, data=data, update=False)
@@ -241,7 +241,7 @@ class CacheMatchesList(CacheData):
             player_id: Union[str, player.Player]
     ):
         _player: List[player.Player] = await self.pubg.players(ids=[player_id])
-        data = await _player[0].matches
+        data = _player[0].matches
         self.save_matches_lists(player_id=player_id, data=data, update=True)
         self.save_lastupdate(player_id=player_id, cls=player.Player, dt=datetime.now())
         return data
@@ -254,19 +254,13 @@ class CacheMatches(CacheData):
     def save_matches(
             self,
             matches_id: str,
-            data: Matches,
-            update: bool = False
+            data: Matches
     ):
         cur = self.database.cursor(pymysql.cursors.DictCursor)
-        if update:
-            command = pymysql.escape_string(
-                "UPDATE {} SET match_data=%s WHERE match_id=%s".format(self._get_mode(Matches))
-            )
-        else:
-            command = pymysql.escape_string(
-                "INSERT INTO {}(match_data, match_id) value (%s, %s, %s)".format(self._get_mode(Matches))
-            )
-        cur.execute(command, (self._dump_dict(data.data), matches_id))
+        command = pymysql.escape_string(
+            "INSERT INTO {}(match_data, included_data, match_id) value (%s, %s, %s)".format(self._get_mode(Matches))
+        )
+        cur.execute(command, (self._dump_dict(data.data), self._dump_dict(data.included), matches_id))
         self.commit()
         cur.close()
         return
@@ -277,25 +271,23 @@ class CacheMatches(CacheData):
     ):
         cur = self.database.cursor(pymysql.cursors.DictCursor)
         command = pymysql.escape_string(
-            "SELECT match_data FROM {} WHERE match_id = %s".format(self._get_mode(Matches))
+            "SELECT match_data, included_data FROM {} WHERE match_id = %s".format(self._get_mode(Matches))
         )
         cur.execute(command, matches_id)
         data = cur.fetchone()
-        result = self._load_dict(data.get("matches_data")) if data is not None else None
+        result1 = self._load_dict(data.get("matches_data")) if data is not None else None
+        result2 = self._load_dict(data.get("included_data")) if data is not None else None
         cur.close()
-        return result
+        return result1, result2
 
     async def get_match(
             self,
             matches_id: str
     ):
-        data: Optional[Matches] = self.get_matches(matches_id=matches_id)
-        if data is None or data == {}:
+        data: Optional[Tuple[dict, dict]] = self.get_matches(matches_id=matches_id)
+        print(data)
+        if data is None or data == (None, None):
             data: Matches = await self.pubg.matches(matches_id)
-            new_data = True if data is None or data else False
-
-            if new_data:
-                self.save_matches(matches_id=matches_id, data=data.data, update=False)
-            else:
-                self.save_matches(matches_id=matches_id, data=data.data, update=True)
-        return data
+            self.save_matches(matches_id=matches_id, data=data)
+            return data
+        return Matches(data[0], data[1])

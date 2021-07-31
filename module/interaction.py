@@ -230,8 +230,10 @@ class SlashContext(InteractionContext):
                 self.options[key] = self.guild.get_channel(value)
             elif option_type == 8:
                 self.options[key]: discord.Role = self.guild.get_role(value)
+            elif option_type == 10:
+                self.options[key]: float = float(value)
             else:
-                self.options[key]: int = value
+                self.options[key] = value
 
 
 class ComponentsContext(InteractionContext):
@@ -243,9 +245,9 @@ class ComponentsContext(InteractionContext):
         self.custom_id = data.get("custom_id")
         self.component_type = data.get("component_type")
         if self.component_type == 3:
-            self.value: List[str] = data.get("value")
+            self.values: List[str] = data.get("values")
         else:
-            self.value: List[str] = []
+            self.values: List[str] = []
 
         self.message = Message(state=self._state, channel=self.channel, data=payload.get("message", {}))
 
