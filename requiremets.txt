@@ -3,3 +3,4 @@ pymysql
 DBSkr
 timezone
 matplotlib
+Pillow
