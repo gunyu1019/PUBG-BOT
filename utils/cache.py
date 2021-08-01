@@ -275,19 +275,18 @@ class CacheMatches(CacheData):
         )
         cur.execute(command, matches_id)
         data = cur.fetchone()
-        result1 = self._load_dict(data.get("matches_data")) if data is not None else None
+        result1 = self._load_dict(data.get("match_data")) if data is not None else None
         result2 = self._load_dict(data.get("included_data")) if data is not None else None
         cur.close()
-        return result1, result2
+        return {"data": result1, "included": result2}
 
     async def get_match(
             self,
             matches_id: str
     ):
-        data: Optional[Tuple[dict, dict]] = self.get_matches(matches_id=matches_id)
-        print(data)
-        if data is None or data == (None, None):
+        data: Optional[dict] = self.get_matches(matches_id=matches_id)
+        if data is None or data == {}:
             data: Matches = await self.pubg.matches(matches_id)
             self.save_matches(matches_id=matches_id, data=data)
             return data
-        return Matches(data[0], data[1])
+        return Matches(data["data"], data["included"])

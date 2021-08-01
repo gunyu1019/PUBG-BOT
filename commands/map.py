@@ -70,6 +70,13 @@ class Command:
         await ctx.send(file=map_file, embed=self.embed)
         return
 
+    @commands.command(name="캠프자칼", permission=4)
+    async def camp_jackal(self, ctx):
+        map_file = discord.File(directory + "/assets/Maps/Haven_Main_Low_Res.png")
+        add_map_file('Heaven', self.embed)
+        await ctx.send(file=map_file, embed=self.embed)
+        return
+
 
 def setup(client):
     return Command(client)

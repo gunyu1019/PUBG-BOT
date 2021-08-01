@@ -239,7 +239,7 @@ class Assets(MatchesBaseModel):
 #       attributes
         attributes = data.get("attributes", {})
         self.shard: Platforms = get_enum(Platforms, attributes.get("shardId"))
-        self.url: str = attributes.get("url")
+        self.url: str = attributes.get("URL")
         created_at = attributes.get("createdAt")
         self.created_at: datetime = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=None)
         self.name: str = attributes.get("name", "Telemetry")
@@ -387,7 +387,7 @@ class Matches(MatchesBaseModel):
             list_search.extend(self.participant)
             list_search.extend(self.asset)
 
-        if filter_id in list_search or len(list_search) == 0:
+        if len(list_search) == 0:
             raise ValueError("No results for the item in searching data")
 
         result = None

@@ -9,6 +9,7 @@ from module.components import ActionRow, Button, Selection
 from module.interaction import SlashContext, Message, ComponentsContext
 from utils.cache import CacheMatches, CacheMatchesList
 from utils.directory import directory
+from utils.map_image import MapData
 from utils.time import get_time_to_string
 
 with open(f"{directory}/data/deathReason.json", "r", encoding='utf-8') as f:
@@ -34,6 +35,7 @@ class Match:
         self.player_nickname = player
         self.player_id = player_id
         self.player = self.pubg.player_id(self.player_id)
+        self.image = None
 
         self.default_map_size = 102000
 
@@ -94,31 +96,38 @@ class Match:
 
     async def match_stats(self, match_id: str, b_msg: Message = None):
         data: pubgpy.Matches = await self.database1.get_match(matches_id=match_id)
-        player_data: pubgpy.Participant = data.get_player_id(player_id=self.player_id)
-        team_data: pubgpy.Roster = data.get_team(player_id=self.player_id)
 
-        team_member = [data.get_player_id(i).name for i in team_data.teams]
-        map_nm = data.map
+        self.image = MapData(player_id=self.player_id, map_name=data.map)
+        url = data.asset[0].url
+        await self.image.get_assets(url)
+        self.image.process()
+        self.image.open()
+
+        player_data: pubgpy.Participant = data.get_player_id(player_id=self.player_id)
+        team_data: pubgpy.Roster = data.get_team(player_id=player_data.id)
+
+        team_member = [data.filter(filter_id=i, base_model=pubgpy.Participant).name for i in team_data.teams]
+        map_nm = map_id.get(data.map.value)
         playtime = datetime.fromtimestamp(float(player_data.time_survived), timezone('UTC'))
 
         kills = player_data.kills
         assists = player_data.assists
-        death_tp = player_data.death_type
+        death_tp = death_reason.get(player_data.death_type.value)
         distance = player_data.walk_distance + player_data.swim_distance + player_data.ride_distance
-        deals = player_data.damage_dealt
+        deals = round(player_data.damage_dealt, 2)
         rank = player_data.win_place
 
         embed = discord.Embed(color=0xffd619)
-        embed.add_field(name="팀원:", value=",".join(team_member), inline=False)
-        embed.add_field(name="결과:", value=f'{death_reason(death_tp)}({rank}위)', inline=True)
-        embed.add_field(name="맵:", value=map_id[map_nm], inline=True)
+        embed.add_field(name="팀원:", value=", ".join(team_member), inline=False)
+        embed.add_field(name="결과:", value=f'{death_tp}({rank}위)', inline=True)
+        embed.add_field(name="맵:", value=map_nm, inline=True)
         embed.add_field(name="킬/어시:", value=f"{kills}회/{assists}회", inline=True)
         embed.add_field(name="생존시간:", value=f"{get_time_to_string(playtime)}", inline=True)
         embed.add_field(name="이동한 거리:", value=f"{distance} km", inline=True)
-        embed.add_field(name="딜량:", value=f"{round(deals, 2)}", inline=True)
+        embed.add_field(name="딜량:", value=f"{deals}", inline=True)
 
         if b_msg is None:
-            b_msg = await self.ctx.send(embed=embed)
+            b_msg = await self.ctx.send(embed=embed, components=[])
         else:
-            await b_msg.edit(embed=embed)
+            await b_msg.edit(embed=embed, components=[])
         return
