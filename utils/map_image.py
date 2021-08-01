@@ -48,21 +48,21 @@ class MapData:
     def add_icon(self, image, x: int, y: int):
         x_pic = self._map(x, 0, self.map_size_x, 0, self.file_size_x)
         y_pic = self._map(y, 0, self.map_size_y, 0, self.file_size_y)
-        image = image.convert("RGBA").resize((25, 25))
+        image = image.convert("RGBA").resize((40, 40))
         self.file.paste(image, (x_pic, y_pic), mask=image)
 
-    def process(self):
+    def process(self, kill: bool = True, revive: bool = False, carepackage: bool = False):
         for data in self.data:
-            if data.get("_T") == "LogPlayerKillV2":
+            if data.get("_T") == "LogPlayerKillV2" and kill:
                 killer = data.get("killer", {}) if data.get("killer", {}) is not None else {}
                 victim = data.get("victim", {}) if data.get("victim", {}) is not None else {}
                 if killer.get("accountId", "") == self.player_id:
                     position = self._get_location(killer.get("location"))
-                    kill = Image.open(f"{directory}/assets/Kill.png")
-                    self.add_icon(kill, position[0], position[1])
+                    _kill = Image.open(f"{directory}/assets/kill.png")
+                    self.add_icon(_kill, position[0], position[1])
                 elif victim.get("accountId", "") == self.player_id:
                     position = self._get_location(victim.get("location"))
-                    death = Image.open(f"{directory}/assets/Death.png")
+                    death = Image.open(f"{directory}/assets/death.png")
                     self.add_icon(death, position[0], position[1])
         return
 
