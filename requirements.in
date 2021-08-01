@@ -1,6 +1,5 @@
 discord
 pymysql
 DBSkr
-timezone
+pytz
 matplotlib
-Pillow
