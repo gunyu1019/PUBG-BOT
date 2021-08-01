@@ -285,7 +285,7 @@ class CacheMatches(CacheData):
             matches_id: str
     ):
         data: Optional[dict] = self.get_matches(matches_id=matches_id)
-        if data is None or data == {}:
+        if data is None or data == {"data": None, "included": None}:
             data: Matches = await self.pubg.matches(matches_id)
             self.save_matches(matches_id=matches_id, data=data)
             return data

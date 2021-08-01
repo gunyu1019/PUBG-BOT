@@ -1,4 +1,5 @@
 import json
+import io
 from aiohttp import ClientSession
 from PIL import Image
 
@@ -27,12 +28,6 @@ class MapData:
         self.file = None
         self.init()
 
-    async def get_assets(self, link: str):
-        async with ClientSession() as session:
-            async with session.request(method="GET", url=link) as resp:
-                self.data = await resp.json()
-        return
-
     def init(self):
         self.file = Image.new("RGBA", self.map_file.size)
         self.file.paste(self.map_file, (0, 0))
@@ -51,7 +46,8 @@ class MapData:
         image = image.convert("RGBA").resize((40, 40))
         self.file.paste(image, (x_pic, y_pic), mask=image)
 
-    def process(self, kill: bool = True, revive: bool = False, carepackage: bool = False):
+    def process(self, kill: bool = True, revive: bool = False, care_package: bool = False):
+        care_package_unique = []
         for data in self.data:
             if data.get("_T") == "LogPlayerKillV2" and kill:
                 killer = data.get("killer", {}) if data.get("killer", {}) is not None else {}
@@ -64,8 +60,28 @@ class MapData:
                     position = self._get_location(victim.get("location"))
                     death = Image.open(f"{directory}/assets/death.png")
                     self.add_icon(death, position[0], position[1])
+            elif data.get("_T") == "LogPlayerRevive" and revive:
+                reviver = data.get("reviver", {}) if data.get("reviver", {}) is not None else {}
+                if reviver.get("accountId", "") == self.player_id and revive:
+                    position = self._get_location(reviver.get("location"))
+                    _revive = Image.open(f"{directory}/assets/revive.png")
+                    self.add_icon(_revive, position[0], position[1])
+            elif data.get("_T") == "LogItemPickupFromCarepackage" and care_package:
+                character = data.get("character", {}) if data.get("character", {}) is not None else {}
+                _care_package = data.get("carePackageUniqueId", -1)
+                if character.get("accountId", "") == self.player_id and _care_package not in care_package_unique:
+                    care_package_unique.append(_care_package)
+                    position = self._get_location(character.get("location"))
+                    _cargo = Image.open(f"{directory}/assets/care_package.png")
+                    self.add_icon(_cargo, position[0], position[1])
         return
 
-    def open(self):
+    def show(self):
         """For Debug"""
         self.file.show()
+
+    def save(self):
+        buf = io.BytesIO()
+        self.file.save(buf, format='png')
+        buf.seek(0)
+        return buf

@@ -1,13 +1,12 @@
 import discord
-import json
 
-from typing import Union, Optional, Tuple, List
+from typing import Optional
 
 from module import commands
 from module import pubgpy
 from module.interaction import SlashContext, Message
 from process import player
-from process.match import Match
+from process.matches import Match
 from utils import token
 
 
@@ -39,14 +38,14 @@ class Command:
                 await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
                 return
             option1 = options[0]
-            option2 = options[1] if len(options) > 2 else None
+            option2 = options[1] - 1 if len(options) > 2 else None
         elif isinstance(ctx, SlashContext):
             options = ctx.options
             option1: Optional[str] = options.get("닉네임")
             if option1 is None:
                 await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
                 return
-            option2 = options.get("매치_순서")
+            option2 = options.get("매치_순서") - 1 if options.get("매치_순서") is not None else None
             option3 = options.get("업데이트", False)
         player_id, _platform = await player.player_info(option1, ctx, self.client, self.pubgpy)
         if player_id is None:
@@ -70,6 +69,11 @@ class Command:
         if len(match_list) < option2:
             await self._option_error(
                 ctx, "**{}**\n 해당 순서의 매치를 찾을 수 없습니다. (발견된 매치 갯수: {})".format(command, len(match_list))
+            )
+            return
+        elif 0 > option2:
+            await self._option_error(
+                ctx, "**{}**\n 매치 순서값으로 음수 값을 줄 수 없습니다.".format(command)
             )
             return
         await match.match_stats(match_list[option2], msg)
