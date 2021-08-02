@@ -100,8 +100,8 @@ class Command:
         for i in self.client.guilds:
             total += i.member_count
         embed = discord.Embed(title='PUBG BOT', color=self.color)
-        embed.add_field(name='개발', value='건유1019#0001', inline=True)
-        embed.add_field(name='개발팀', value='[Calico Cheese](https://calicocheese.xyz/ )', inline=True)
+        embed.add_field(name='개발', value='[건유1019#0001](https://yhs.kr/YBOT/forum.html)', inline=True)
+        embed.add_field(name='개발팀', value='[CalicoCheese](https://calicocheese.xyz/ )', inline=True)
         embed.add_field(name='<:user:735138021850087476>서버수 / 유저수', value=f'{len(self.client.guilds)}서버/{total}명', inline=True)
         embed.add_field(name='PUBG BOT 버전', value=f'{parser.get("DEFAULT","version")}', inline=True)
         embed.add_field(name='<:discord:735135879990870086>discord.py 버전', value=f'v{discord.__version__}', inline=True)
