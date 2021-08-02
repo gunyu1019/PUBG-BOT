@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="" width="50%"/>
+    <img src="https://user-images.githubusercontent.com/16767890/127808428-f1cb3adb-f159-43d1-bc33-1a0f6db182bc.png" width="30%"/>
 </p>
 <h1 align="center">PUBG BOT</h1>
 <p align="center">
