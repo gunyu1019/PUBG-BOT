@@ -4,6 +4,7 @@ import discord
 
 from config.config import parser
 from module import commands
+from process.help import Help
 from utils.prefix import get_prefix, set_prefix
 
 
@@ -44,7 +45,7 @@ class Command:
         prefix = get_prefix(bot=self.client, message=ctx)[0]
 
         def help_message(msg: str = ""):
-            return f"{prefix}접두어 [설정/초기화/정보] [접두어(옵션)]: {msg}\n접두어 설정은 \\n,\\t,(공백) 사용금지, 20자 미만으로 설정이 가능합니다."
+            return f"{prefix}접두어 <설정|초기화|정보> <접두어(옵션)>: {msg}\n접두어 설정은 \\n,\\t,(공백) 사용금지, 20자 미만으로 설정이 가능합니다."
 
         if ctx.guild:
             if len(list_message) < 1:
@@ -108,9 +109,13 @@ class Command:
         await ctx.send(embed=embed)
         return
 
-    @commands.command(name="도움말", permission=4)
+    @commands.command(name="도움말", aliases=["도움", "help", "명령어"], permission=4)
     async def help(self, ctx):
-        list_message = ctx.options
+        help_command = Help(
+                ctx=ctx,
+                client=self.client
+        )
+        await help_command.first_page()
         return
 
 

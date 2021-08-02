@@ -23,7 +23,7 @@ class Command:
     @staticmethod
     def _choose_to_option1(ranked: bool = True) -> Tuple[List[str], List[str]]:
         all_option = ["1인칭", "3인칭", "일반", "3인칭경쟁", "경쟁", "랭크", "1인칭경쟁"]
-        all_option_comment = ["1인칭", "3인칭, 일반", "3인칭경, 경쟁, 랭크", "1인칭경쟁"]
+        all_option_comment = ["1인칭", "3인칭, 일반", "3인칭경쟁, 경쟁, 랭크", "1인칭경쟁"]
         return (all_option, all_option_comment) if ranked else (all_option[0:3], all_option_comment[0:1])
 
     async def _option_error(self, ctx, message):

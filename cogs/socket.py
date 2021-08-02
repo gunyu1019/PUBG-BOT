@@ -70,10 +70,9 @@ class SocketReceive(commands.Cog):
             if (_function.name == name or name in _function.aliases) and self.check_interaction(ctx, _function):
                 _state.dispatch("command", ctx)
                 if permission(_function.permission)(ctx):
-                    if parser.getboolean("Inspection", "inspection"):
+                    if parser.getboolean("Inspection", "inspection") and not permission(1)(ctx):
                         await inspection(ctx)
                         return
-                    # todo: 테스트 기간 임의적으로 권한 상승.
                     await _function.callback(func.get("class"), ctx)
                 break
         return
