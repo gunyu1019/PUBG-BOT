@@ -1,6 +1,0 @@
-discord
-pymysql
-DBSkr
-timezone
-matplotlib
-Pillow
