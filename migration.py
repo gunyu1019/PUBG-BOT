@@ -34,6 +34,12 @@ if __name__ == "__main__":
     log.info("Start Migration Database")
     connect = getDatabase()
     cursor = connect.cursor(pymysql.cursors.DictCursor)
+    command1 = pymysql.escape_string("DELETE FROM PUBG_BOT.player_data")
+    command2 = pymysql.escape_string("DELETE FROM PUBG_BOT.season_stats")
+    command3 = pymysql.escape_string("DELETE FROM PUBG_BOT.ranked_stats")
+    cursor.execute(command1)
+    cursor.execute(command2)
+    cursor.execute(command3)
 
     log.info("Starting Convent Player Data")
     command = pymysql.escape_string("SELECT id, name, last_update, platform FROM PUBG_BOT.player")
@@ -129,7 +135,7 @@ if __name__ == "__main__":
             continue
         duplicate_check.append(player_id)
 
-        convert_data = html.get("data", {}).get("attributes", {}).get("gameModeStats", {})
+        convert_data = html.get("data", {}).get("attributes", {}).get("rankedGameModeStats", {})
         season_data.append(
             (player_id, dump_data(convert_data), season)
         )
