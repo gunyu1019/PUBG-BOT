@@ -59,6 +59,8 @@ class SocketReceive(commands.Cog):
                     break
             if len(name) >= 1:
                 ctx.name = name[0]
+            elif len(name) < 1:
+                return
 
         name = ctx.name
 
