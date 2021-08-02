@@ -108,6 +108,11 @@ class Command:
         await ctx.send(embed=embed)
         return
 
+    @commands.command(name="도움말", permission=4)
+    async def help(self, ctx):
+        list_message = ctx.options
+        return
+
 
 def setup(client):
     return Command(client)

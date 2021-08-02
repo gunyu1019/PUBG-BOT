@@ -69,8 +69,7 @@ class SocketReceive(commands.Cog):
             _function = func.get("func")
             if (_function.name == name or name in _function.aliases) and self.check_interaction(ctx, _function):
                 _state.dispatch("command", ctx)
-                # if permission(_function.permission)(ctx):
-                if permission(1)(ctx):
+                if permission(_function.permission)(ctx):
                     if parser.getboolean("Inspection", "inspection"):
                         await inspection(ctx)
                         return
