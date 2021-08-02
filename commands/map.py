@@ -15,10 +15,7 @@ def add_map_file(map_name, embed):
     embed.add_field(name="원본(텍스트 삭제)", value=f"[링크]({map_file['No_Text_Low_Res']})", inline=True)
     embed.add_field(name="고화질", value=f"[링크]({map_file['High_Res']})", inline=True)
     embed.add_field(name="고화질(텍스트 삭제)", value=f"[링크]({map_file['No_Text_High_Res']})", inline=True)
-    if map_name == "Erangel":
-        embed.set_image(url=f"attachment://{map_name}_Remastered_Main_Low_Res.png")
-    else:
-        embed.set_image(url=f"attachment://{map_name}_Main_Low_Res.png")
+    embed.set_image(url=f"attachment://{map_name}_Main_Low_Res.png")
 
 
 class Command:
@@ -30,7 +27,7 @@ class Command:
 
     @commands.command(name="에란겔", permission=4)
     async def erangel(self, ctx):
-        map_file = discord.File(directory + "/assets/Maps/Erangel_Remastered_Main_Low_Res.png")
+        map_file = discord.File(directory + "/assets/Maps/Erangel_Main_Low_Res.png")
         add_map_file('Erangel', self.embed)
         await ctx.send(file=map_file, embed=self.embed)
         return
@@ -56,7 +53,7 @@ class Command:
         await ctx.send(file=map_file, embed=self.embed)
         return
 
-    @commands.command(name="파르모", permission=4)
+    @commands.command(name="파라모", permission=4)
     async def paramo(self, ctx):
         map_file = discord.File(directory + "/assets/Maps/Paramo_Main_Low_Res.png")
         add_map_file('Paramo', self.embed)
@@ -70,8 +67,8 @@ class Command:
         await ctx.send(file=map_file, embed=self.embed)
         return
 
-    @commands.command(name="캠프자칼", permission=4)
-    async def camp_jackal(self, ctx):
+    @commands.command(name="헤이븐", permission=4)
+    async def heaven(self, ctx):
         map_file = discord.File(directory + "/assets/Maps/Haven_Main_Low_Res.png")
         add_map_file('Heaven', self.embed)
         await ctx.send(file=map_file, embed=self.embed)
