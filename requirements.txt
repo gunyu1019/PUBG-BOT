@@ -18,7 +18,7 @@ chardet==4.0.0
     # via aiohttp
 cycler==0.10.0
     # via matplotlib
-dbskr==1.0.1
+dbskr==2.0
     # via -r requirements.in
 discord==1.7.3
     # via -r requirements.in
