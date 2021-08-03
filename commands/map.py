@@ -74,6 +74,13 @@ class Command:
         await ctx.send(file=map_file, embed=self.embed)
         return
 
+    @commands.command(name="테이고", permission=4)
+    async def taego(self, ctx):
+        map_file = discord.File(directory + "/assets/Maps/Taego_Main_Low_Res.png")
+        add_map_file('Taego', self.embed)
+        await ctx.send(file=map_file, embed=self.embed)
+        return
+
 
 def setup(client):
     return Command(client)

@@ -46,5 +46,11 @@
     "High_Res":"https://yonghyeon.com/PUBG_BOT/asset/Haven_Main_High_Res.png",
     "No_Text_Low_Res":"https://yonghyeon.com/PUBG_BOT/asset/Haven_Main_No_Text_Low_Res.png",
     "No_Text_High_Res":"https://yonghyeon.com/PUBG_BOT/asset/Haven_Main_No_Text_High_Res.png"
+  },
+  "Taego":{
+    "Low_Res":"https://yonghyeon.com/PUBG_BOT/asset/TaegoMain_Low_Res.png",
+    "High_Res":"https://yonghyeon.com/PUBG_BOT/asset/Taego_Main_High_Res.png",
+    "No_Text_Low_Res":"https://yonghyeon.com/PUBG_BOT/asset/Taego_Main_No_Text_Low_Res.png",
+    "No_Text_High_Res":"https://yonghyeon.com/PUBG_BOT/asset/Taego_Main_No_Text_High_Res.png"
   }
 }

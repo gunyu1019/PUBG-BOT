@@ -15,7 +15,7 @@ with open(f"{directory}/data/mapSize.json") as f:
 class MapData:
     def __init__(self, map_name: pubgpy.MapName, player_id: str, data: dict = None):
         self.map = map_name
-        self.map_file = Image.open(f"{directory}/assets/Maps/{map_file_name.get(self.map.value)}_Main_No_Text_Low_Res.png")
+        self.map_file = Image.open(f"{directory}/assets/Maps/{map_file_name.get(self.map.value)}_Main_Low_Res.png")
         self.data = data
         self.player_id = player_id
 

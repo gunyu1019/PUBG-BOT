@@ -26,7 +26,8 @@ class InteractionContext:
         self._state: ConnectionState = getattr(client, "_connection")
         guild_id = payload.get("guild_id")
         channel_id = payload.get("channel_id")
-        self.guild: Optional[discord.Guild] = client.get_guild(int(guild_id))
+        if guild_id is not None:
+            self.guild: Optional[discord.Guild] = client.get_guild(int(guild_id))
         self.channel = self._state.get_channel(int(channel_id))
 
         if self.guild is not None:

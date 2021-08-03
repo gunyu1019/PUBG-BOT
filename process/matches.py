@@ -203,7 +203,7 @@ class Match:
         kills = player_data.kills
         assists = player_data.assists
         death_tp = death_reason.get(player_data.death_type.value)
-        distance = player_data.walk_distance + player_data.swim_distance + player_data.ride_distance
+        distance = round((player_data.walk_distance + player_data.swim_distance + player_data.ride_distance)/1000, 2)
         deals = round(player_data.damage_dealt, 2)
         rank = player_data.win_place
 
@@ -249,7 +249,7 @@ class Match:
             kills = member.kills
             assists = member.assists
             playtime = datetime.fromtimestamp(float(member.time_survived), timezone('UTC'))
-            distance = member.walk_distance + member.swim_distance + member.ride_distance
+            distance = round((member.walk_distance + member.swim_distance + member.ride_distance)/1000, 2)
             embed.add_field(
                 name=member.name,
                 value=f"킬/어시: {kills}회/{assists}회\n"
