@@ -84,7 +84,7 @@ class MapName(Enum):
     camp_jackal = "Range_Main"
     sanhok = "Savage_Main"
     karakin = "Summerland_Main"
-    tageo = "Summerland_Main"
+    tageo = "Tiger_Main"
 
 
 class SeasonStats(Enum):
