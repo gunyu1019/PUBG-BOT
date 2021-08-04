@@ -27,7 +27,7 @@ class Command:
             description=f"클라이언트 핑상태: {first_latency}ms\n응답속도(읽기): {round(response_ping_read * 1000, 2)}ms",
             color=self.color)
         msg = await ctx.send(embed=embed)
-        if now > ctx.created_at:
+        if msg.created_at > now:
             response_ping_w = now - msg.created_at
         else:
             response_ping_w = msg.created_at - now

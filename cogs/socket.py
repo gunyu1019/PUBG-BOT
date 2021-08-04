@@ -3,7 +3,6 @@ import inspect
 import importlib
 import os
 
-import discord
 from discord.ext import commands
 from discord.state import ConnectionState
 from typing import Union, List, Dict
@@ -19,10 +18,6 @@ from utils.perm import permission
 
 logger = logging.getLogger(__name__)
 DBS = None
-
-
-def log_system(msg):
-    logger.info(msg)
 
 
 class SocketReceive(commands.Cog):
@@ -73,7 +68,11 @@ class SocketReceive(commands.Cog):
                     if parser.getboolean("Inspection", "inspection") and not permission(1)(ctx):
                         await inspection(ctx)
                         return
-                    await _function.callback(func.get("class"), ctx)
+                    try:
+                        await _function.callback(func.get("class"), ctx)
+                    except Exception as error:
+                        _state.dispatch("command_exception", ctx, error)
+                        return
                 break
         return
 

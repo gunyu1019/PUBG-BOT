@@ -1,4 +1,6 @@
 import os
+
+import discord
 from discord.ext import commands
 
 from config.config import parser
@@ -13,9 +15,9 @@ if __name__ == "__main__":
     log.info("PUBG BOT을 불러오는 중입니다.")
     if parser.getboolean("DEFAULT", "AutoShard"):
         log.info("Config 파일에서 AutoShard가 켜져있습니다. AutoShard 기능을 킵니다.")
-        bot = commands.AutoShardedBot(command_prefix=get_prefix)
+        bot = commands.AutoShardedBot(command_prefix=get_prefix, intents=discord.Intents.default())
     else:
-        bot = commands.Bot(command_prefix=get_prefix)
+        bot = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.default())
 
     bot.remove_command("help")
     cogs = ["cogs." + file[:-3] for file in os.listdir(f"{directory}/cogs") if file.endswith(".py")]

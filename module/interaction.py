@@ -24,13 +24,14 @@ class InteractionContext:
         self.application = getattr(discord.utils, "_get_as_snowflake")(payload, "application_id")
 
         self._state: ConnectionState = getattr(client, "_connection")
-        guild_id = payload.get("guild_id")
-        channel_id = payload.get("channel_id")
-        if guild_id is not None:
-            self.guild: Optional[discord.Guild] = client.get_guild(int(guild_id))
+
+        self.guild_id = payload.get("guild_id")
+        self.channel_id = payload.get("channel_id")
+        if self.guild_id is not None:
+            self.guild: Optional[discord.Guild] = self.client.get_guild(int(self.guild_id))
         else:
             self.guild: Optional[discord.Guild] = None
-        self.channel = self._state.get_channel(int(channel_id))
+        self.channel = self._state.get_channel(int(self.channel_id))
 
         if self.guild is not None:
             member = payload.get("member")
@@ -237,6 +238,11 @@ class SlashContext(InteractionContext):
                 self.options[key]: float = float(value)
             else:
                 self.options[key] = value
+
+    @property
+    def content(self):
+        options = [str(self.options[i]) for i in self.options.keys()]
+        return f"/{self.name} {' '.join(options)}"
 
 
 class ComponentsContext(InteractionContext):
