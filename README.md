@@ -4,7 +4,7 @@
 <h1 align="center">PUBG BOT</h1>
 <p align="center">
     <a href="https://www.codacy.com/gh/gunyu1019/PUBG-BOT/dashboard"><img src="https://app.codacy.com/project/badge/Grade/8c90b5a8f40e46a097ce2c5dd099d9e0" /></a>
-    <a href="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/overview/master"><img src="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/v1.2" /></a>
+    <a href="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/overview/master"><img src="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/master" /></a>
     <img src="https://img.shields.io/badge/python-3.8-3776AB?style=flat&logo=python&logoColor=ffffff" />
     <img src="https://img.shields.io/badge/release_version-1.1-0080aa?style=flat" />
     <img src="https://img.shields.io/badge/PLT_version-2.0-0080aa?style=flat" />
