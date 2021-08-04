@@ -133,7 +133,6 @@ config/config.ini
 
 # PUBG BOT Logging File
 log/
-log/log.txt
 
 # IDLE(PyCharm) configuration
 .idea/
