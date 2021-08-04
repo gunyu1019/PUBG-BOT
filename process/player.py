@@ -1,13 +1,11 @@
 import discord
 import pymysql
-import json
 
 from module.interaction import SlashContext, ComponentsContext
 from module.message import Message
 from module.components import ActionRow, Button
 from module import pubgpy
 from utils.database import getDatabase
-from utils.directory import directory
 from typing import Union
 
 xbox = discord.PartialEmoji(name="XBOX", id=718482204035907586)

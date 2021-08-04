@@ -72,7 +72,11 @@ class SocketReceive(commands.Cog):
                         await _function.callback(func.get("class"), ctx)
                     except Exception as error:
                         _state.dispatch("command_exception", ctx, error)
-                        return
+                    else:
+                        _state.dispatch("command_complete", ctx)
+                else:
+                    # On PUBG BOT, It won't make.
+                    _state.dispatch("command_permission_error", ctx)
                 break
         return
 

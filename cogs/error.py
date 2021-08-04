@@ -1,11 +1,7 @@
 import logging
-import sys
 
 import discord
 from discord.ext import commands
-
-from module.interaction import SlashContext, Message
-from utils import token
 
 logger = logging.getLogger(__name__)
 
@@ -17,34 +13,7 @@ class Error(commands.Cog):
     def _traceback_msg(self, tb):
         if tb.tb_next is None:
             return f"{tb.tb_frame.f_code.co_filename} {tb.tb_frame.f_code.co_name} {tb.tb_lineno}줄 "
-        return f"{tb.tb_frame.f_code.co_filename} ({tb.tb_frame.f_code.co_name}) {tb.tb_lineno}줄\n{self._traceback_msg(tb.tb_next)} "
-
-    @commands.Cog.listener()
-    async def on_error(self, event, *args, **_):
-        if event == "on_message":
-            message = args[0]
-            exc = sys.exc_info()
-            excname = exc[0].__name__
-            excarglist = [str(x) for x in exc[1].args]
-
-            error_location = self._traceback_msg(exc[2])
-            if not excarglist:
-                errerlog = excname
-            else:
-                errerlog = excname + ": " + ", ".join(excarglist)
-            if message.channel.type != discord.ChannelType.private:
-                logger.error(
-                    f"({message.guild.name},{message.channel.name},{message.author},{message.content}): {errerlog}\n{error_location}")
-            else:
-                logger.error(f"({message.channel},{message.author},{message.content}): {errerlog}\n{error_location}")
-            embed = discord.Embed(title="\U000026A0 에러", color=0x070ff)
-            embed.add_field(name='에러 내용(traceback)', value=f'{errerlog}', inline=False)
-            embed.add_field(name='에러 위치', value=f'{error_location}', inline=False)
-            if message.channel.type != discord.ChannelType.private:
-                embed.add_field(name='서버명', value=f'{message.guild.name}', inline=True)
-                embed.add_field(name='채널명', value=f'{message.channel.name}', inline=True)
-            embed.add_field(name='유저명', value=f'{message.author}', inline=True)
-            embed.add_field(name='메세지', value=f'{message.content}', inline=False)
+        return f"{tb.tb_frame.f_code.co_filename} ({tb.tb_frame.f_code.co_name}) {tb.tb_lineno}줄\n{self._traceback_msg(tb.tb_next)}"
 
     @commands.Cog.listener()
     async def on_command_exception(self, ctx, error):
@@ -72,6 +41,7 @@ class Error(commands.Cog):
             embed.add_field(name='채널명', value=f'{ctx.channel.name}', inline=True)
         embed.add_field(name='유저명', value=f'{ctx.author}', inline=True)
         embed.add_field(name='메세지', value=f'{ctx.content}', inline=False)
+        await self.bot.get_guild(844613188900356157).get_channel(872534703306059806).send(embed=embed)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
