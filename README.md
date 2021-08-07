@@ -1,5 +1,5 @@
 <p align="center">
-    <img src=".github/PUBG_BOT.png" width="30%"/>
+    <img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/PUBG_BOT.png?raw=true" width="30%" alt="PUBG BOT"/>
 </p>
 <h1 align="center">PUBG BOT</h1>
 <p align="center">
@@ -20,9 +20,31 @@
 > (Developer Notes) Discord Introgation(Slash Command, Components)을 직접 구성하였습니다.
 > [모듈 폴더](module) 내에 있는 `components.py`, `interaction.py`, `message.py`를 확인 해주시길 바랍니다.
 
-> **안내사항**:
-> 이 디스코드 봇은 "빗금 명령어(Slash Command)"를 지원합니다.
-> ![slash_command_support.png](.github/slash_command_support.png)
+> **안내 사항**:<br/>
+> 이 디스코드 봇은 "빗금 명령어(Slash Command)"를 지원합니다.<br/>
+> 디스코드의 새로운 기능 빗금 명령어 기능을 `/`을 통하여 체험해 보세요!<br/>
+> <img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/slash_command_support.png?raw=true" width="50%" alt="slash_command_support">
+
+### 전적 기능(/전적, !=전적)
+<img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/command1.png?raw=true" width="50%" alt="command1"><br/>
+전적 기능을 통하여 배틀그라운드 플레이어의 전적을 확인해보세요!
+일반 모드와 경쟁 모드를 보다 편리하게 확인하실 수 있습니다.
+특히 버튼 기능을 활용하여 특정 모드 전적을 세세히 확인할 수 있습니다.
+
+### 매치 히스토리 기능(/매치, !=매치)
+<img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/command2.png?raw=true" width="50%" alt="command2"><br/>
+매치 히스토리 기능을 통하여 플레이 내역을 확인해보세요. 
+누구랑 팀원을 했는지, ~~누가 버스를 안탔는지,~~ 어디서 누구를 잡았는 지등의 다양한 정보를 제공합니다.
+
+### 맵 기능(/<맵 이름>, !=<맵 이름>)
+<img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/command3.png?raw=true" width="50%" alt="command3"><br/>
+맵 기능을 활용하여 배틀그라운드 맵을 미리 확인하세요.
+미리 지도를 확인하고 전략을 짜는 것도 하나의 전략이겠죠?
+
+### 서버 정보 기능(/상태, !=상태)
+<img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/command4.png?raw=true" width="50%" alt="command4"><br/>
+서버 정보 기능을 활용하여 배틀그라운드 스팀 서버의 사용자 수를 확인해보세요.
+사용자 수가 갑작스럽게 내려가거나, 흔히 알고있는 동접자 수보다 낮을때에는 점검 중이라는 것도 짐작할 수 있어요.
 
 # Structure
 PUBG BOT의 구성은 다음과 같습니다.
