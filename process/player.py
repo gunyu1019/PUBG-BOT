@@ -114,7 +114,7 @@ async def player_platform(
             description="플랫폼 정보가 잘못되었습니다. 관리자에게 문의해주시기 바랍니다.",
             color=0xffd619
         )
-        await ctx.edit(embed=embed)
+        await msg.edit(embed=embed)
         return None, None, None
     pubg_client.platform(platform_data)
     try:
@@ -125,7 +125,7 @@ async def player_platform(
             description="사용자를 찾을 수 없습니다. 닉네임을 확인해주세요.",
             color=0xffd619
         )
-        await ctx.edit(embed=embed)
+        await msg.edit(embed=embed)
         return None, None, None
     except pubgpy.TooManyRequests:
         embed = discord.Embed(
@@ -133,7 +133,7 @@ async def player_platform(
             description="너무 많은 요청으로 처리가 지연되고 있습니다. 잠시 후 다시 시도해주세요.",
             color=0xffd619
         )
-        await ctx.edit(embed=embed)
+        await msg.edit(embed=embed)
         return None, None, None
     player_id = player.id
     platform = platform_data
