@@ -1,13 +1,17 @@
 <p align="center">
-    <img src="https://user-images.githubusercontent.com/16767890/127808428-f1cb3adb-f159-43d1-bc33-1a0f6db182bc.png" width="30%"/>
+    <img src=".github/PUBG_BOT.png" width="30%"/>
 </p>
 <h1 align="center">PUBG BOT</h1>
 <p align="center">
-    <a href="https://www.codacy.com/gh/gunyu1019/PUBG-BOT/dashboard"><img src="https://app.codacy.com/project/badge/Grade/8c90b5a8f40e46a097ce2c5dd099d9e0" /></a>
-    <a href="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/overview/master"><img src="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/master" /></a>
-    <img src="https://img.shields.io/badge/python-3.8-3776AB?style=flat&logo=python&logoColor=ffffff" />
-    <img src="https://img.shields.io/badge/release_version-1.1-0080aa?style=flat" />
-    <img src="https://img.shields.io/badge/PLT_version-2.0-0080aa?style=flat" />
+    <img src="https://koreanbots.dev/api/widget/bots/status/704683198164238446.svg?style=classic" alt="Status" >
+    <img src="https://koreanbots.dev/api/widget/bots/servers/704683198164238446.svg?icon=false&style=classic" alt="Server" >
+    <a href="https://www.codacy.com/gh/gunyu1019/PUBG-BOT/dashboard">
+        <img src="https://app.codacy.com/project/badge/Grade/8c90b5a8f40e46a097ce2c5dd099d9e0" alt="Codacy" >
+        </a>
+    <a href="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/overview/master">
+        <img src="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/master" alt="CodeFactor" >
+    </a>
+    <img src="https://img.shields.io/badge/release_version-2.0-0080aa?style=flat" alt="Release" >
 </p>
 
 # Introduce
@@ -15,6 +19,10 @@
 사용자의 전적과 매치 로그를 확인할 수 있습니다.
 > (Developer Notes) Discord Introgation(Slash Command, Components)을 직접 구성하였습니다.
 > [모듈 폴더](module) 내에 있는 `components.py`, `interaction.py`, `message.py`를 확인 해주시길 바랍니다.
+
+> **안내사항**:
+> 이 디스코드 봇은 "빗금 명령어(Slash Command)"를 지원합니다.
+> ![slash_command_support.png](.github/slash_command_support.png)
 
 # Structure
 PUBG BOT의 구성은 다음과 같습니다.
