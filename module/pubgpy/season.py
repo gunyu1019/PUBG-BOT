@@ -48,7 +48,8 @@ def get_season(d_season: int, platform: Platforms):
         f_season = "console"
     else:
         raise TypeError(
-            "Platform information not found. PUBGpy only supports Steam, Kakao, XBOX, PlayStation, and Stadia.")
+            "Platform information not found. PUBGpy only supports Steam, Kakao, XBOX, PlayStation, and Stadia."
+        )
 
     if isinstance(d_season, int):
         d_season = str(d_season)

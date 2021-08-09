@@ -108,7 +108,10 @@ class Command:
             database_platform = {"steam": "Steam", "kakao": "Kakao", "xbox": "XBOX", "psn": "PSN", "stadia": "Stadia"}
             connect.close()
 
-            season = json.loads(season_data.get(database_platform[_platform.value], {})).get("data", [{}])[-1].get("id")
+            seasons = json.loads(season_data.get(database_platform[_platform.value], {}))
+            for s in seasons.get("data", []):
+                if s.get("attributes", {}).get("isCurrentSeason"):
+                    season = s.get("id")
 
         self.pubgpy.platform(_platform)
         status = Status(
