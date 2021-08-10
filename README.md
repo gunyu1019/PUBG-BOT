@@ -90,7 +90,13 @@
 #### 1. MySQL에 `setup.sql` 문을 실행시켜주세요.
 실행 전, 코드 안에 있는 `DISCORD BOT TOKEN`, `PUBG API TOKEN` 를 채워주세요.
 
-#### 2. config 파일을 설정해주세요.
+#### 2. requirements.txt 안에 있는 모듈을 모두 설치해 주세요.
+PUBG BOT이 정상적으로 구동되기 위해 필요한 파일입니다. 꼭 설치해 주세요.
+```commandline
+pip install -r requirements.txt
+```
+
+#### 3. config 파일을 설정해주세요.
 [config_example.ini](config/config_example.ini) 를 `config.ini`로 변경한 후, 파일 내에 설정을 해주세요.
 ```commandline
 cd PUBG_BOT
