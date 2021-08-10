@@ -1,11 +1,13 @@
 import os
 
 import discord
+import pymysql.cursors
 from discord.ext import commands
 
 from config.config import parser
 from config.log_config import log
 
+from utils.database import get_database
 from utils.prefix import get_prefix
 from utils.token import token
 
@@ -18,6 +20,9 @@ if __name__ == "__main__":
         bot = commands.AutoShardedBot(command_prefix=get_prefix, intents=discord.Intents.default())
     else:
         bot = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.default())
+
+    database = get_database()
+    cur = database.cursor(pymysql.cursors.DictCursor)
 
     bot.remove_command("help")
     cogs = ["cogs." + file[:-3] for file in os.listdir(f"{directory}/cogs") if file.endswith(".py")]

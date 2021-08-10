@@ -8,7 +8,7 @@ import pymysql.cursors
 
 from module import commands
 from module.interaction import SlashContext, Message
-from utils.database import getDatabase
+from utils.database import get_database
 
 
 class Command:
@@ -18,7 +18,7 @@ class Command:
 
     @commands.command(name="상태", permission=4)
     async def status(self, ctx: Union[SlashContext, Message]):
-        connect = getDatabase()
+        connect = get_database()
         cur = connect.cursor(pymysql.cursors.DictCursor)
         cur.execute("SELECT id, date, data FROM SERVER_DATA")
         data = cur.fetchall()

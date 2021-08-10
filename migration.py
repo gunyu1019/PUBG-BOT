@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 from typing import Union
 
-from utils.database import getDatabase
+from utils.database import get_database
 
 log = logging.getLogger()
 log.addHandler(logging.StreamHandler())
@@ -32,7 +32,7 @@ def load_data(data: str):
 
 if __name__ == "__main__":
     log.info("Start Migration Database")
-    connect = getDatabase()
+    connect = get_database()
     cursor = connect.cursor(pymysql.cursors.DictCursor)
     command1 = pymysql.escape_string("DELETE FROM PUBG_BOT.player_data")
     command2 = pymysql.escape_string("DELETE FROM PUBG_BOT.season_stats")

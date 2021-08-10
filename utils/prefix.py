@@ -1,16 +1,16 @@
 import pymysql
 import json
 
-from utils.database import getDatabase
+from utils.database import get_database
 from config.config import parser
 
 default_prefixes = list(json.loads(parser.get("DEFAULT", "default_prefixes")))
 
 
-def get_prefix(bot, message):
+def get_prefix(_, message):
     guild = message.guild
     if guild:
-        connect = getDatabase()
+        connect = get_database()
         cur = connect.cursor(pymysql.cursors.DictCursor)
         sql_prefix = pymysql.escape_string(f"select prefix from SERVER_INFO where ID={guild.id}")
         try:
@@ -30,7 +30,7 @@ def get_prefix(bot, message):
 
 def check_prefix(bot, guild):
     if guild is not None:
-        connect = getDatabase()
+        connect = get_database()
         cur = connect.cursor(pymysql.cursors.DictCursor)
         sql_prefix = pymysql.escape_string(f"select EXISTS (select prefix from SERVER_INFO where ID={guild.id}) as success")
         cur.execute(sql_prefix)
@@ -41,7 +41,7 @@ def check_prefix(bot, guild):
 
 def set_prefix(bot, guild, prefix):
     if guild is not None:
-        connect = getDatabase()
+        connect = get_database()
         cur = connect.cursor(pymysql.cursors.DictCursor)
         if check_prefix(bot, guild):
             sql_prefix = pymysql.escape_string("update SERVER_INFO set prefix=%s where ID=%s")

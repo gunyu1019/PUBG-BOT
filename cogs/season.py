@@ -6,7 +6,7 @@ import json
 from discord.ext import tasks, commands
 
 from module.pubgpy import Api, Platforms, APIException
-from utils.database import getDatabase
+from utils.database import get_database
 from utils.token import PUBG_API
 
 log = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class Task(commands.Cog):
     @tasks.loop(minutes=120)
     async def check_season(self):
         time_now = datetime.datetime.now()
-        connect = getDatabase()
+        connect = get_database()
 
         cur = connect.cursor()
         sql = "SELECT last_update, Steam FROM SEASON_STATUS"

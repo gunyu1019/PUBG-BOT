@@ -1,6 +1,6 @@
 import json
 
-from utils.database import getDatabase
+from utils.database import get_database
 
 from config.config import parser
 
@@ -29,7 +29,7 @@ def is_admin(author):
 
 
 def is_banned(user_id):
-    connect = getDatabase()
+    connect = get_database()
     cur = connect.cursor()
     sql = "select * from BLACKLIST"
     cur.execute(sql)

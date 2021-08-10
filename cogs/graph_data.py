@@ -5,7 +5,7 @@ import aiohttp
 
 from discord.ext import tasks, commands
 
-from utils.database import getDatabase
+from utils.database import get_database
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class Task(commands.Cog):
     @tasks.loop(minutes=10)
     async def check_player(self):
         time_now = datetime.datetime.now()
-        connect = getDatabase()
+        connect = get_database()
         cur = connect.cursor()
 
         sql_v2_ck = "SELECT date FROM SERVER_DATA WHERE ID=12"

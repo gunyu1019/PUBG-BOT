@@ -5,7 +5,7 @@ from config.config import parser
 log = logging.getLogger(__name__)
 
 
-def getDatabase(database=None):
+def get_database(database=None):
     for tries in ['MySQL1', 'MySQL2']:
         host = parser.get(tries, 'host')
         user = parser.get(tries, 'user')

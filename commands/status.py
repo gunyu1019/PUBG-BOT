@@ -10,7 +10,7 @@ from module import pubgpy
 from module.interaction import SlashContext, Message
 from process import player
 from utils import token
-from utils.database import getDatabase
+from utils.database import get_database
 from process.status import Status
 
 
@@ -100,7 +100,7 @@ class Command:
         if option3 is not None:
             season = pubgpy.get_season(int(option3), _platform)
         else:
-            connect = getDatabase()
+            connect = get_database()
             cur = connect.cursor(pymysql.cursors.DictCursor)
             sql = "SELECT * FROM SEASON_STATUS"
             cur.execute(sql)
@@ -160,7 +160,7 @@ class Command:
 
     @commands.command(name="플랫폼변경", permission=4)
     async def platform_change(self, ctx):
-        connect = getDatabase()
+        connect = get_database()
         cur = connect.cursor(pymysql.cursors.DictCursor)
         command = "{prefix}{command_name} <닉네임>".format(command_name=ctx.name, prefix=ctx.prefix)
         nickname = None

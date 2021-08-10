@@ -5,7 +5,7 @@ from module.interaction import SlashContext, ComponentsContext
 from module.message import Message
 from module.components import ActionRow, Button
 from module import pubgpy
-from utils.database import getDatabase
+from utils.database import get_database
 from typing import Union
 
 xbox = discord.PartialEmoji(name="XBOX", id=718482204035907586)
@@ -30,7 +30,7 @@ async def player_info(
         client: discord.Client,
         pubg_client: pubgpy.Client
 ):
-    connect = getDatabase()
+    connect = get_database()
     cur = connect.cursor(pymysql.cursors.DictCursor)
 
     sql = pymysql.escape_string("SELECT player_id, platform FROM player_data WHERE nickname = %s")

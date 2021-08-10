@@ -1,17 +1,17 @@
 import pymysql
 import json
 from datetime import datetime
-from typing import Union, Type, Optional, List, Tuple
+from typing import Union, Type, Optional, List
 
 from config.config import parser
-from utils.database import getDatabase
+from utils.database import get_database
 from module.pubgpy import player, Client, Season, GameModeReceive, Matches
 from module.errors import InvalidArgument
 
 
 class CacheData:
     def __init__(self, client: Client):
-        self.database = getDatabase()
+        self.database = get_database()
         self.pubg = client
 
     @staticmethod

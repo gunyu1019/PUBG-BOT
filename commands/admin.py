@@ -9,7 +9,7 @@ import discord
 from discord.ext import commands
 
 from module import commands as _command
-from utils.database import getDatabase
+from utils.database import get_database
 from utils.perm import check_perm
 from utils.prefix import get_prefix
 from utils.directory import directory
@@ -177,7 +177,7 @@ class Command:
                 embed = discord.Embed(title="Blacklist!", description="봇 관리자의 권한을 가지고 있는 사용자는 블랙리스트에 등재할 수 없습니다.", color=self.color)
                 await ctx.send(embed=embed)
                 return
-            connect = getDatabase()
+            connect = get_database()
             cur = connect.cursor()
             sql_Black = "insert into BLACKLIST(ID) value(%s)"
             if 9 == check_perm(member):
@@ -212,7 +212,7 @@ class Command:
                                       color=self.color)
                 await ctx.send(embed=embed)
                 return
-            connect = getDatabase()
+            connect = get_database()
             cur = connect.cursor()
             sql_delete = "delete from BLACKLIST where ID=%s"
             if 4 >= check_perm(member):
