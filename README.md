@@ -15,8 +15,8 @@
 </p>
 
 # Introduce
-한국어 기반의 배틀그라운드 전적을 알려주는 디스코드 봇입니다. 
-사용자의 전적과 매치 로그를 확인할 수 있습니다.
+
+한국어 기반의 배틀그라운드 전적을 알려주는 디스코드 봇입니다. 사용자의 전적과 매치 로그를 확인할 수 있습니다.
 > (Developer Notes) Discord Introgation(Slash Command, Components)을 직접 구성하였습니다.
 > [모듈 폴더](module) 내에 있는 `components.py`, `interaction.py`, `message.py`를 확인 해주시길 바랍니다.
 
@@ -26,28 +26,88 @@
 > <img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/slash_command_support.png?raw=true" width="50%" alt="slash_command_support">
 
 ### 전적 기능(/전적, !=전적)
+
 <img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/command1.png?raw=true" width="50%" alt="command1"><br/>
 전적 기능을 통하여 배틀그라운드 플레이어의 전적을 확인해보세요!
-일반 모드와 경쟁 모드를 보다 편리하게 확인하실 수 있습니다.
-특히 버튼 기능을 활용하여 특정 모드 전적을 세세히 확인할 수 있습니다.
+일반 모드와 경쟁 모드를 보다 편리하게 확인하실 수 있습니다. 특히 버튼 기능을 활용하여 특정 모드 전적을 세세히 확인할 수 있습니다.
 
 ### 매치 히스토리 기능(/매치, !=매치)
+
 <img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/command2.png?raw=true" width="50%" alt="command2"><br/>
-매치 히스토리 기능을 통하여 플레이 내역을 확인해보세요. 
-누구랑 팀원을 했는지, ~~누가 버스를 안탔는지,~~ 어디서 누구를 잡았는 지등의 다양한 정보를 제공합니다.
+매치 히스토리 기능을 통하여 플레이 내역을 확인해보세요. 누구랑 팀원을 했는지, ~~누가 버스를 안탔는지,~~ 어디서 누구를 잡았는 지등의 다양한 정보를 제공합니다.
 
 ### 맵 기능(/<맵 이름>, !=<맵 이름>)
+
 <img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/command3.png?raw=true" width="50%" alt="command3"><br/>
-맵 기능을 활용하여 배틀그라운드 맵을 미리 확인하세요.
-미리 지도를 확인하고 전략을 짜는 것도 하나의 전략이겠죠?
+맵 기능을 활용하여 배틀그라운드 맵을 미리 확인하세요. 미리 지도를 확인하고 전략을 짜는 것도 하나의 전략이겠죠?
 
 ### 서버 정보 기능(/상태, !=상태)
+
 <img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/command4.png?raw=true" width="50%" alt="command4"><br/>
-서버 정보 기능을 활용하여 배틀그라운드 스팀 서버의 사용자 수를 확인해보세요.
-사용자 수가 갑작스럽게 내려가거나, 흔히 알고있는 동접자 수보다 낮을때에는 점검 중이라는 것도 짐작할 수 있어요.
+서버 정보 기능을 활용하여 배틀그라운드 스팀 서버의 사용자 수를 확인해보세요. 사용자 수가 갑작스럽게 내려가거나, 흔히 알고있는 동접자 수보다 낮을때에는 점검 중이라는 것도 짐작할 수 있어요.
+
+# Clone
+본 프로젝트를 사용하기 위해서는 [라이센스](License)를 지킨다는 조건 아래에 사용이 가능합니다.
+
+<table>
+    <thead>
+        <tr>
+            <th>NAME</th>
+            <th>VERSION</th>
+            <th>TESTED</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Windows</td>
+            <td>Windows 10 20H2</td>
+            <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Development)</td>
+        </tr>
+        <tr>
+            <td>Raspbian</td>
+            <td>Raspbian GNU/Linux 10</td>
+            <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Production)</td>
+        </tr>
+        <tr>
+            <td>Python</td>
+            <td>v3.8.6</td>
+            <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Development)</td>
+        </tr>
+        <tr>
+            <td>Python</td>
+            <td>v3.7.3</td>
+            <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Production)</td>
+        </tr>
+            <tr>
+            <td>MariaDB</td>
+                <td>10.3.23-MariaDB</td>
+            <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji></td>
+        </tr>
+    </tbody>
+</table>
+
+사용 전, 아래 과정을 거쳐주세요.
+#### 1. MySQL에 `setup.sql` 문을 실행시켜주세요.
+실행 전, 코드 안에 있는 `DISCORD BOT TOKEN`, `PUBG API TOKEN` 를 채워주세요.
+
+#### 2. config 파일을 설정해주세요.
+[config_example.ini](config/config_example.ini) 를 `config.ini`로 변경한 후, 파일 내에 설정을 해주세요.
+```commandline
+cd PUBG_BOT
+mv config/config_example.ini config/config.ini
+```
+
+설정 파일을 올바르게 수정해주세요.
+*  `MySQL1`, `MySQL2` 를 굳이 다 채우지 않으셔도 됩니다. 
+   `MySQL1`이(가) 우선 실행됩니다. 
+   그러나 `MySQL1`이 정상적으로 작동하지 않을 경우, `MySQL2`가 실행됩니다.
+* `token`, `PUBG_API`를 채우실 필요는 없습니다. (MySQL 값을 채우지 않았을 때에만 작동합니다.)
+* `inspection` 값을 활성화 하시면 점검 모드가 활성화 됩니다.
 
 # Structure
+
 PUBG BOT의 구성은 다음과 같습니다.
+
 * [assets](assets) : PUBG BOT의 에셋 파일입니다.
 * [cogs](cogs) : `discord.py`에서 제공하는 `cogs`입니다.
 * [commands](commands) : PUBG BOT 에서 직접 구성한 `cogs` 체계입니다. 빗금명령어와 일반명령어를 동시에 사용할 수 있습니다.
@@ -57,15 +117,20 @@ PUBG BOT의 구성은 다음과 같습니다.
 * [utils](utils) : PUBG BOT이 정상적으로 구동되기 위한 모듈 입니다.
 
 # License
+
 프로젝트의 라이센스의 구성은 다음과 같습니다.
 
 ### MIT License
+
 아래의 파일들은 MIT License가 적용됩니다.
+
 * [module/*](module)
 * [PUBGpy](module/pubgpy)
 
 ### GNU General Public License v3.0
+
 아래의 파일들은 GNU(General Public License v3.0)가 적용됩니다.
+
 * [assets/_resource](assets/_resource)
 * [cogs/*](cogs)
 * [commands/*](commands)
@@ -74,8 +139,10 @@ PUBG BOT의 구성은 다음과 같습니다.
 * [main.py](main.py)
 
 ### [PLAYERUNKNOWN’S BATTLEGROUNDS](https://github.com/pubg/api-assets) 저작권
-아래의 파일들은 펍지 주식회사(이하 "회사")가 소유권(지식재산권)을 보유하고있습니다.
-해당 디스코드 봇은 [이용약관](https://developer.pubg.com/tos) 과 [이용자 제작 콘텐츠 규칙](https://asia.battlegrounds.pubg.com/ko/player-created-content/) 준수하였습니다.
+
+아래의 파일들은 펍지 주식회사(이하 "회사")가 소유권(지식재산권)을 보유하고있습니다. 해당 디스코드 봇은 [이용약관](https://developer.pubg.com/tos)
+과 [이용자 제작 콘텐츠 규칙](https://asia.battlegrounds.pubg.com/ko/player-created-content/) 준수하였습니다.
+
 * [assets/Icon](assets/Icon)
 * [assets/Insignias](assets/Insignias)
 * [assets/Maps](assets/Maps)
