@@ -11,6 +11,7 @@
     <a href="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/overview/master">
         <img src="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/master" alt="CodeFactor" >
     </a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT.svg?type=shield"/></a>
     <img src="https://img.shields.io/badge/release_version-2.0-0080aa?style=flat" alt="Release" >
 </p>
 
@@ -125,6 +126,9 @@ PUBG BOT의 구성은 다음과 같습니다.
 # License
 
 프로젝트의 라이센스의 구성은 다음과 같습니다.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT?ref=badge_large)
 
 ### MIT License
 
