@@ -20,8 +20,6 @@ cycler==0.10.0
     # via matplotlib
 dbskr==2.0
     # via -r requirements.in
-discord==1.7.3
-    # via -r requirements.in
 discord.py==1.7.3
     # via discord
 idna==3.2
