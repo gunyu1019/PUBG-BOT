@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS PUBG_BOT (
     PUBG_API   varchar(300)    not null,
     KoreanBots_token   varchar(300)    null,
     topgg_token   varchar(300)    null,
-    UniqueBots_token   varchar(300)    null,
+    UniqueBots_token   varchar(300)    null
 );
 CREATE TABLE IF NOT EXISTS BLACKLIST (
     ID  bigint(20)  null
@@ -16,8 +16,8 @@ INSERT INTO PUBG_BOT(token, PUBG_API) value ('DISCORD BOT TOKEN', 'PUBG API TOKE
 
 CREATE TABLE IF NOT EXISTS SERVER_DATA (
     id  bigint(2)   not null,
-    date    date   null,
-    data    int(10) null,
+    date    datetime   null,
+    data    int(10) null
 );
 CREATE TABLE IF NOT EXISTS SEASON_STATUS (
     Steam   json    null  default '{}',
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS SEASON_STATUS (
     PSN   json    null  default '{}',
     Stadia   json    null  default '{}',
     last_update   json    null  default '{}',
-    ID   tinyint(1)    null  default '{}',
+    ID   tinyint(1)    null  default '{}'
 );
 CREATE TABLE IF NOT EXISTS matches (
     match_id   varchar(40) not null,
