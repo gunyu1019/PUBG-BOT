@@ -208,14 +208,9 @@ class CacheMatchesList(CacheData):
     ):
         player_id = player_id.id if isinstance(player_id, player.Player) else player_id
         cur = self.database.cursor(pymysql.cursors.DictCursor)
-        if update:
-            command = pymysql.escape_string(
-                "UPDATE player_data SET matches_data=%s WHERE player_id=%s"
-            )
-        else:
-            command = pymysql.escape_string(
-                "INSERT INTO player_data(matches_data, player_id) value (%s, %s)"
-            )
+        command = pymysql.escape_string(
+            "UPDATE player_data SET matches_data=%s WHERE player_id=%s"
+        )
         cur.execute(command, (self._dump_dict(data), player_id))
         self.commit()
         cur.close()
@@ -244,13 +239,8 @@ class CacheMatchesList(CacheData):
         last_update = self.get_lastupdate(player_id=player_id, cls=player.Player)
         if data is None or data == [] or data == {} or (datetime.now() - last_update).days >= 2:
             _player: List[player.Player] = await self.pubg.players(ids=[player_id])
-            new_data = True if data is None or data else False
             data = _player[0].matches
-
-            if new_data:
-                self.save_matches_lists(player_id=player_id, data=data, update=False)
-            else:
-                self.save_matches_lists(player_id=player_id, data=data, update=True)
+            self.save_matches_lists(player_id=player_id, data=data)
 
             self.save_lastupdate(player_id=player_id, cls=player.Player, dt=datetime.now())
         return data

@@ -88,6 +88,9 @@ class SocketReceive(commands.Cog):
                         await inspection(ctx)
                         return
                     try:
+                        # Timeout Error continuously occurs
+                        if isinstance(ctx, SlashContext):
+                            await ctx.defer()
                         await _function.callback(func.get("class"), ctx)
                     except Exception as error:
                         _state.dispatch("command_exception", ctx, error)

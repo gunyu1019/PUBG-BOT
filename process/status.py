@@ -316,7 +316,7 @@ class Status:
         assists = data.assists
         kills = data.kills
         headshot = data.headshot_kills
-        deals = data.damage_dealt / 1 if data.rounds_played == 0 else data.rounds_played
+        deals = data.damage_dealt
         distance = data.ride_distance + data.swim_distance + data.walk_distance
 
         playtime_floated = data.time_survived
@@ -381,7 +381,7 @@ class Status:
         kills = data.kills
         assists = data.assists
         dbnos = data.dbnos
-        deals = data.damage_dealt / 1 if data.rounds_played == 0 else data.rounds_played
+        deals = data.damage_dealt
 
         kill_death_points = self._get_kill_death_points(kills=kills, deaths=losses, assists=assists)
         filename = self._get_rank_file(current_tier)
