@@ -21,7 +21,9 @@ cycler==0.10.0
 dbskr==2.0
     # via -r requirements.in
 discord.py==1.7.3
-    # via discord
+    # via
+    #   -r requirements.in
+    #   dbskr
 idna==3.2
     # via yarl
 kiwisolver==1.3.1
@@ -34,7 +36,7 @@ multidict==5.1.0
     #   yarl
 numpy==1.21.1
     # via matplotlib
-pillow==8.3.1
+pillow==8.3.2
     # via matplotlib
 pymysql==1.0.2
     # via -r requirements.in
