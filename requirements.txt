@@ -38,7 +38,7 @@ numpy==1.21.1
     # via matplotlib
 pillow==8.3.2
     # via matplotlib
-pymysql==1.0.2
+pymysql==0.9.3
     # via -r requirements.in
 pyparsing==2.4.7
     # via matplotlib

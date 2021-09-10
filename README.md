@@ -76,8 +76,13 @@
         </tr>
         <tr>
             <td>Python</td>
-            <td>v3.7.3</td>
+            <td>v3.8.5</td>
             <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Production)</td>
+        </tr>
+        <tr>
+            <td>Python</td>
+            <td>v3.7.3</td>
+            <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2716.png">❌️</g-emoji>( ≤ v2.0 )</td>
         </tr>
             <tr>
             <td>MariaDB</td>
@@ -86,6 +91,8 @@
         </tr>
     </tbody>
 </table>
+
+* `v2.1` 버전 부터 `discord.py`의 요구 사항이 `Python3.8` 이상인 것을 반영하여 `Python3.8` 미만의 버전은 `v2.0` 까지만 사용이 가능합니다.
 
 사용 전, 아래 과정을 거쳐주세요.
 #### 1. MySQL에 `setup.sql` 문을 실행시켜주세요.
