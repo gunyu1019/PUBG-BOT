@@ -10,14 +10,14 @@ CREATE TABLE IF NOT EXISTS BLACKLIST (
 );
 CREATE TABLE IF NOT EXISTS SERVER_INFO (
     id  bigint(20)  not null,
-    prefix  varcher(30)  null
+    prefix  varchar(30)  null
 );
 INSERT INTO PUBG_BOT(token, PUBG_API) value ('DISCORD BOT TOKEN', 'PUBG API TOKEN');
 
 CREATE TABLE IF NOT EXISTS SERVER_DATA (
     id  bigint(2)   not null,
     date    datetime   null,
-    data    int(10) null
+    data    bigint(10) null
 );
 CREATE TABLE IF NOT EXISTS SEASON_STATUS (
     Steam   json    null  default '{}',
