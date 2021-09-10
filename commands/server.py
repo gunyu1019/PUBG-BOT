@@ -25,6 +25,7 @@ from typing import Union
 
 import pymysql.cursors
 
+from config.config import parser
 from module import commands
 from module.interaction import SlashContext, Message
 from utils.database import get_database
@@ -33,7 +34,10 @@ from utils.database import get_database
 class Command:
     def __init__(self, bot):
         self.client = bot
-        self.color = 0xffd619
+
+        self.color = int(parser.get("Color", "default"), 16)
+        self.error_color = int(parser.get("Color", "error"), 16)
+        self.warning_color = int(parser.get("Color", "warning"), 16)
 
     @commands.command(name="상태", permission=4)
     async def status(self, ctx: Union[SlashContext, Message]):
@@ -56,7 +60,7 @@ class Command:
         buf.seek(0)
         file = discord.File(buf, filename="status.png")
 
-        embed = discord.Embed(color=0xffd619)
+        embed = discord.Embed(color=self.color)
         embed.add_field(name="동접자수:", value="{}명 유저가 플레이 중입니다.".format(players[0]), inline=True)
         embed.set_image(url="attachment://status.png")
         await ctx.send(file=file, embed=embed)

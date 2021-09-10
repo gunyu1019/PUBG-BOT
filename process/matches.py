@@ -25,6 +25,7 @@ from typing import Union
 from pytz import timezone
 from aiohttp import ClientSession
 
+from config.config import parser
 from module import pubgpy
 from module.components import ActionRow, Button, Selection
 from module.interaction import SlashContext, Message, ComponentsContext
@@ -74,6 +75,10 @@ class Match:
         self.init_button()
 
         self.before_func = None
+
+        self.color = int(parser.get("Color", "default"), 16)
+        self.error_color = int(parser.get("Color", "error"), 16)
+        self.warning_color = int(parser.get("Color", "warning"), 16)
 
     def init_button(self):
         self.status_btn = Button(
@@ -182,7 +187,7 @@ class Match:
         embed = discord.Embed(
             title="매치 선택",
             description="검색하실 매치를 선택해주세요. 목록을 업데이트 할 경우 업데이트를 선택해주세요.",
-            color=0xffd619
+            color=self.color
         )
         last_update = self.database2.get_lastupdate(player_id=self.player_id, cls=pubgpy.Player)
         embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
@@ -226,7 +231,7 @@ class Match:
         deals = round(player_data.damage_dealt, 2)
         rank = player_data.win_place
 
-        embed = discord.Embed(color=0xffd619)
+        embed = discord.Embed(color=self.color)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 플레이 내역")
         embed.add_field(name="팀원:", value=", ".join(team_member), inline=False)
         embed.add_field(name="결과:", value=f'{death_tp}({rank}위)', inline=True)
@@ -261,7 +266,7 @@ class Match:
         player_data: pubgpy.Participant = data.get_player_id(player_id=self.player_id)
         team_data: pubgpy.Roster = data.get_team(player_id=player_data.id)
 
-        embed = discord.Embed(color=0xffd619)
+        embed = discord.Embed(color=self.color)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 플레이 내역")
         team_member = [data.filter(filter_id=i, base_model=pubgpy.Participant) for i in team_data.teams]
         for member in team_member:
@@ -306,7 +311,7 @@ class Match:
         buf = self.image.save()
         file = discord.File(buf, filename="map_death.png")
 
-        embed = discord.Embed(color=0xffd619)
+        embed = discord.Embed(color=self.color)
         embed.description = "<:death:871414282435321868>: 죽음\n<:kill:871414283047678012>: 킬"
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 플레이 내역")
         embed.set_image(url="attachment://map_death.png")
@@ -340,7 +345,7 @@ class Match:
         buf = self.image.save()
         file = discord.File(buf, filename="map_total.png")
 
-        embed = discord.Embed(color=0xffd619)
+        embed = discord.Embed(color=self.color)
         embed.description = "<:death:871414282435321868>: 죽음\n<:kill:871414283047678012>: " \
                             "킬\n<:revive:871414282770849852>: 회복\n<:care_package:871414282527584317>: 보급 상자\n "
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 플레이 내역")

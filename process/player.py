@@ -20,6 +20,7 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 import discord
 import pymysql
 
+from config.config import parser
 from module.interaction import SlashContext, ComponentsContext
 from module.message import Message
 from module.components import ActionRow, Button
@@ -41,6 +42,10 @@ game_enums = [
     pubgpy.Platforms.PLAYSTATION,
     pubgpy.Platforms.STADIA,
 ]
+
+color = int(parser.get("Color", "default"), 16)
+error_color = int(parser.get("Color", "error"), 16)
+warning_color = int(parser.get("Color", "warning"), 16)
 
 
 async def player_info(
@@ -82,7 +87,7 @@ async def player_platform(
     embed = discord.Embed(
         title="플랫폼 선택!",
         description="해당 계정의 플랫폼을 선택해주세요.\n초기에 한번만 눌러주시면 됩니다.",
-        color=0xffd619
+        color=color
     )
     components = [
         ActionRow(components=[
@@ -123,7 +128,7 @@ async def player_platform(
     embed = discord.Embed(
         title="플랫폼 선택!",
         description="{}가 선택되었습니다.\n값이 잘못되었을 경우 `플랫폼변경` 명령어를 사용해주세요.".format(new_platform),
-        color=0xffd619
+        color=color
     )
     await result.update(embed=embed, components=[])
     platform_data = pubgpy.get_enum(pubgpy.Platforms, new_platform)
@@ -131,7 +136,7 @@ async def player_platform(
         embed = discord.Embed(
             title="에러",
             description="플랫폼 정보가 잘못되었습니다. 관리자에게 문의해주시기 바랍니다.",
-            color=0xffd619
+            color=error_color
         )
         await msg.edit(embed=embed)
         return None, None, None
@@ -142,7 +147,7 @@ async def player_platform(
         embed = discord.Embed(
             title="에러",
             description="사용자를 찾을 수 없습니다. 닉네임을 확인해주세요.",
-            color=0xffd619
+            color=error_color
         )
         await msg.edit(embed=embed)
         return None, None, None
@@ -150,7 +155,7 @@ async def player_platform(
         embed = discord.Embed(
             title="에러",
             description="너무 많은 요청으로 처리가 지연되고 있습니다. 잠시 후 다시 시도해주세요.",
-            color=0xffd619
+            color=error_color
         )
         await msg.edit(embed=embed)
         return None, None, None

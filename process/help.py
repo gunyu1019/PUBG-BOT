@@ -20,6 +20,7 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 import json
 import discord
 
+from config.config import parser
 from typing import Union
 from module.components import ActionRow, Button
 from module.interaction import SlashContext, Message, ComponentsContext
@@ -45,6 +46,10 @@ class Help:
         self.right_btn = None
         self.init_button()
         self.prefix = self.ctx.prefix
+
+        self.color = int(parser.get("Color", "default"), 16)
+        self.error_color = int(parser.get("Color", "error"), 16)
+        self.warning_color = int(parser.get("Color", "warning"), 16)
 
     def init_button(self):
         self.left_btn = Button(
@@ -100,7 +105,7 @@ class Help:
                         "PUBG BOT은 오픈 소스로 제작되었으며 [링크](https://github.com/gunyu1019/PUBG-BOT)를 클릭하여 "
                         "소스를 확인하실 수 있습니다.\n\nPUBG BOT은 {}서버와 함께하고 있습니다.\n "
                         "아래의 버튼을 클릭하여 명령어를 알아보세요!".format(len(self.client.guilds)),
-            color=0xffd619)
+            color=self.color)
         embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar_url_as(format="png"))
         embed.set_footer(text="{}/{} 페이지".format(1, len(self._commands) + 1))
         self.current_button()
@@ -124,7 +129,7 @@ class Help:
 
     async def main_page(self, page: int = 1, b_msg: Message = None):
         self.page = page
-        embed = discord.Embed(color=0xffd619)
+        embed = discord.Embed(color=self.color)
         embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar_url_as(format="png"))
         embed.description = "† 붙은 명령어는 슬래시 명령어를 지원하지 않습니다."
         embed.set_footer(text="{}/{} 페이지".format(page + 1, len(self._commands) + 1))

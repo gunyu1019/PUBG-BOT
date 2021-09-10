@@ -21,6 +21,7 @@ import discord
 
 from typing import Optional
 
+from config.config import parser
 from module import commands
 from module import pubgpy
 from module.interaction import SlashContext, Message
@@ -32,7 +33,11 @@ from utils import token
 class Command:
     def __init__(self, bot):
         self.client = bot
-        self.color = 0xffd619
+
+        self.color = int(parser.get("Color", "default"), 16)
+        self.error_color = int(parser.get("Color", "error"), 16)
+        self.warning_color = int(parser.get("Color", "warning"), 16)
+
         self.pubgpy = pubgpy.Client(token=token.PUBG_API)
 
     async def _option_error(self, ctx, message):

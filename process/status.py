@@ -22,6 +22,7 @@ import discord
 from pytz import timezone
 from datetime import datetime
 from typing import Union, Optional
+from config.config import parser
 from module import pubgpy
 from module.components import ActionRow, Button
 from module.interaction import SlashContext, Message, ComponentsContext
@@ -66,6 +67,10 @@ class Status:
         self.squad_player_btn = None
         self.update_btn = None
         self.init_button()
+
+        self.color = int(parser.get("Color", "default"), 16)
+        self.error_color = int(parser.get("Color", "error"), 16)
+        self.warning_color = int(parser.get("Color", "warning"), 16)
 
     def init_button(self):
         self.total_player_btn = Button(
@@ -192,7 +197,7 @@ class Status:
         self.before_func = self.normal_total
         self.before_mode = fpp
         section = await self._normal_data(self.player_id)
-        embed = discord.Embed(color=0xffd619)
+        embed = discord.Embed(color=self.color)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 전적")
 
         if not fpp:
@@ -248,7 +253,7 @@ class Status:
         self.before_func = self.ranked_total
         self.before_mode = fpp
         section = await self._ranked_data(self.player_id)
-        embed = discord.Embed(color=0xffd619)
+        embed = discord.Embed(color=self.color)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 전적")
 
         if not fpp:
@@ -304,7 +309,7 @@ class Status:
         self.before_func = self.normal_mode
         self.before_mode = mode
         section = await self._normal_data(self.player_id)
-        embed = discord.Embed(color=0xffd619)
+        embed = discord.Embed(color=self.color)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 전적")
 
         data: pubgpy.SeasonStats = getattr(section, mode)
@@ -362,7 +367,7 @@ class Status:
         self.before_func = self.ranked_mode
         self.before_mode = mode
         section = await self._ranked_data(self.player_id)
-        embed = discord.Embed(color=0xffd619)
+        embed = discord.Embed(color=self.color)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 전적")
 
         data: pubgpy.RankedStats = getattr(section, mode)
