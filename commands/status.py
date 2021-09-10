@@ -125,7 +125,7 @@ class Command:
                     await self._option_error(ctx, "명령어를 실행하기 위한 닉네임/유형을 찾을 수 없습니다.")
                     return
                 options = message.content.split()
-                if len(options) > 3 or len(options) == 0:
+                if len(options) > 2 or len(options) == 0:
                     await self._option_error(
                         ctx,
                         "유형 선택이 잘못되었습니다. {0} 내에서 만 선택해제세요"
