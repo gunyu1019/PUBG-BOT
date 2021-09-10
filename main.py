@@ -14,19 +14,17 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
+along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import os
 
 import discord
-import pymysql.cursors
 from discord.ext import commands
 
 from config.config import parser
 from config.log_config import log
 
-from utils.database import get_database
 from utils.prefix import get_prefix
 from utils.token import token
 
@@ -36,12 +34,17 @@ if __name__ == "__main__":
     log.info("PUBG BOT을 불러오는 중입니다.")
     if parser.getboolean("DEFAULT", "AutoShard"):
         log.info("Config 파일에서 AutoShard가 켜져있습니다. AutoShard 기능을 킵니다.")
-        bot = commands.AutoShardedBot(command_prefix=get_prefix, intents=discord.Intents.default())
+        bot = commands.AutoShardedBot(
+            command_prefix=get_prefix,
+            intents=discord.Intents.default(),
+            enable_debug_events=True
+        )
     else:
-        bot = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.default())
-
-    database = get_database()
-    cur = database.cursor(pymysql.cursors.DictCursor)
+        bot = commands.Bot(
+            command_prefix=get_prefix,
+            intents=discord.Intents.default(),
+            enable_debug_events=True
+        )
 
     bot.remove_command("help")
     cogs = ["cogs." + file[:-3] for file in os.listdir(f"{directory}/cogs") if file.endswith(".py")]

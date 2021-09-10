@@ -20,6 +20,7 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import pymysql
 import json
+import datetime
 
 from discord.ext import tasks, commands
 
@@ -31,7 +32,7 @@ log = logging.getLogger(__name__)
 platform_site = [i for i in Platforms]
 
 
-class Task(commands.Cog):
+class SeasonTask(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -95,4 +96,4 @@ class Task(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Task(client))
+    client.add_cog(SeasonTask(client))

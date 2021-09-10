@@ -29,7 +29,7 @@ from utils.database import get_database
 log = logging.getLogger(__name__)
 
 
-class Task(commands.Cog):
+class GraphTask(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -79,4 +79,4 @@ class Task(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Task(client))
+    client.add_cog(GraphTask(client))

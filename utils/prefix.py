@@ -26,7 +26,7 @@ from config.config import parser
 default_prefixes = list(json.loads(parser.get("DEFAULT", "default_prefixes")))
 
 
-def get_prefix(_, message):
+def get_prefix(bot, message):
     guild = message.guild
     if guild:
         connect = get_database()

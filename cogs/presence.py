@@ -26,7 +26,7 @@ from discord.ext import tasks, commands
 log = logging.getLogger(__name__)
 
 
-class Task(commands.Cog):
+class PresenceTask(commands.Cog):
     def __init__(self, bot):
         self.client = bot
         self.presence.start()
@@ -74,4 +74,4 @@ class Task(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Task(client))
+    client.add_cog(PresenceTask(client))

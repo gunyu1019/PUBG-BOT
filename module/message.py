@@ -33,7 +33,7 @@ from utils.prefix import get_prefix
 
 
 def _files_to_form(files: list, payload: dict):
-    form = [{'name': 'payload_json', 'value': discord.utils.to_json(payload)}]
+    form = [{'name': 'payload_json', 'value': getattr(discord.utils, "_to_json")(payload)}]
     if len(files) == 1:
         file = files[0]
         form.append(

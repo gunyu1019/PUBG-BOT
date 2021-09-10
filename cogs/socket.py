@@ -14,11 +14,12 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
+along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import logging
 import inspect
+import discord
 import importlib
 import os
 
@@ -47,7 +48,7 @@ class SocketReceive(commands.Cog):
         cogs = ["commands." + file[:-3] for file in os.listdir(f"{directory}/commands") if file.endswith(".py")]
         for cog in cogs:
             module = importlib.import_module(cog)
-            _class = module.setup(self.bot)
+            _class = getattr(module, "setup")(self.bot)
             for func, attr in inspect.getmembers(_class):
                 if isinstance(attr, Command):
                     self.func.append({"class": _class, "func": attr})
@@ -94,13 +95,56 @@ class SocketReceive(commands.Cog):
                     else:
                         _state.dispatch("command_complete", ctx)
                 else:
-                    # On PUBG BOT, It won't make.
                     _state.dispatch("command_permission_error", ctx)
                 break
         return
 
     @commands.Cog.listener()
-    async def on_socket_response(self, payload: dict):
+    async def on_interaction_components(self, components: ComponentsContext):
+        listeners = getattr(self.bot, "_listeners", {}).get("components", [])
+        find_interaction = None
+        for index, (future, check) in enumerate(listeners):
+            removed = []
+            if future.cancelled():
+                removed.append(index)
+                continue
+
+            try:
+                result = check(components)
+            except Exception as exc:
+                future.set_exception(exc)
+                removed.append(index)
+            else:
+                if result:
+                    find_interaction = components
+                    future.set_result(components)
+                    removed.append(index)
+
+                if len(removed) == len(listeners):
+                    getattr(self.bot, "_listeners", {}).pop("components")
+                else:
+                    for idx in reversed(removed):
+                        del listeners[idx]
+
+        for event in self.bot.extra_events.get("on_components", []):
+            getattr(self.bot, "_schedule_event")(event, "on_components", components)
+
+        if find_interaction is None:
+            await components.send("DEBUG - CANCELED")
+        return
+
+    @commands.Cog.listener()
+    async def on_socket_raw_receive(self, msg):
+        if type(msg) is bytes:
+            self.bot._buffer.extend(msg)
+
+            if len(msg) < 4 or msg[-4:] != b'\x00\x00\xff\xff':
+                return
+            msg = getattr(self.bot, "_zlib").decompress(self.bot._buffer)
+            msg = msg.decode('utf-8')
+            self.bot._buffer = bytearray()
+        payload = getattr(discord.utils, "_from_json")(msg)
+
         data = payload.get("d", {})
         t = payload.get("t", "")
         op = payload.get("op", "")
@@ -117,7 +161,7 @@ class SocketReceive(commands.Cog):
                 state.dispatch('interaction_command', result)
             elif data.get("type") == 3:
                 result = ComponentsContext(data, self.bot)
-                state.dispatch('components', result)
+                state.dispatch('interaction_components', result)
             return
         elif t == "MESSAGE_CREATE":
             channel, _ = getattr(state, "_get_guild_channel")(data)
