@@ -149,9 +149,9 @@ class Status:
     def _get_rank_file(tier: pubgpy.Rank):
         if tier.tier is None:
             return "Unranked.png"
-        elif tier.subtier is not None:
-            return f"{tier.tier}-{tier.subtier}.png"
-        return f"{tier.tier}.png"
+        elif tier.tier == "Master":
+            return f"{tier.tier}.png"
+        return f"{tier.tier}-{tier.subtier}.png"
 
     @staticmethod
     def _rank_point(tier: pubgpy.Rank):
@@ -321,7 +321,7 @@ class Status:
         assists = data.assists
         kills = data.kills
         headshot = data.headshot_kills
-        deals = data.damage_dealt
+        deals = data.damage_dealt / (1 if data.rounds_played == 0 else data.rounds_played)
         distance = data.ride_distance + data.swim_distance + data.walk_distance
 
         playtime_floated = data.time_survived
@@ -337,7 +337,7 @@ class Status:
         embed.add_field(name="dBNOs:", value=f"{dbnos}회", inline=True)
         embed.add_field(name="여포:", value=f"{max_kill_streaks}회", inline=True)
         embed.add_field(name="헤드샷:", value=f"{headshot}%", inline=True)
-        embed.add_field(name="딜량:", value=f"{deals}", inline=True)
+        embed.add_field(name="딜량:", value=f"{round(deals, 2)}", inline=True)
         embed.add_field(name="거리:", value=f"{distance}m", inline=True)
 
         last_update = self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
@@ -381,12 +381,12 @@ class Status:
         best_rank = self._rank(best_tier)
 
         wins = data.wins
-        losses = data.deaths
-        top10s = data.top10s
+        top10s = data.top10s - wins
+        losses = data.rounds_played - (wins + top10s)
         kills = data.kills
         assists = data.assists
         dbnos = data.dbnos
-        deals = data.damage_dealt
+        deals = data.damage_dealt / (1 if data.rounds_played == 0 else data.rounds_played)
 
         kill_death_points = self._get_kill_death_points(kills=kills, deaths=losses, assists=assists)
         filename = self._get_rank_file(current_tier)
@@ -399,7 +399,7 @@ class Status:
         embed.add_field(name="어시:", value=f"{assists}회", inline=True)
         embed.add_field(name="dBNOs:", value=f"{dbnos}회", inline=True)
         embed.add_field(name="평균 순위:", value=f"{avg_rank}등", inline=True)
-        embed.add_field(name="딜량:", value=f"{deals}", inline=True)
+        embed.add_field(name="딜량:", value=f"{round(deals, 2)}", inline=True)
         embed.set_thumbnail(url=f"attachment://{filename}")
 
         last_update = self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)

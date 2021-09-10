@@ -380,7 +380,7 @@ class RankedStats(BaseModel):
         self.kills: int = data.get("kills", 0)
         self.rounds_played: int = data.get("roundsPlayed", 0)
         self.top10_ratio: float = data.get("top10Ratio", 0.0)
-        self.top10s = int(self.rounds_played * self.top10_ratio)
+        self.top10s = int(round(self.rounds_played * self.top10_ratio, 0))
         self.win_ratio: float = data.get("winRatio", 0.0)
         self.wins: int = data.get("wins", 0)
 

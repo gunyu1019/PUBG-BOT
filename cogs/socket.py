@@ -31,7 +31,7 @@ from config.config import parser
 from module.interaction import SlashContext, ComponentsContext
 from module.message import Message
 from module.commands import Command
-from process.discord_exception import inspection
+from process.discord_exception import inspection, canceled
 from utils.directory import directory
 from utils.prefix import get_prefix
 from utils.perm import permission
@@ -130,7 +130,7 @@ class SocketReceive(commands.Cog):
             getattr(self.bot, "_schedule_event")(event, "on_components", components)
 
         if find_interaction is None:
-            await components.send("DEBUG - CANCELED")
+            await canceled(components)
         return
 
     @commands.Cog.listener()
