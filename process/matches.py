@@ -73,6 +73,7 @@ class Match:
         self.team_status_btn = None
         self.map_death_btn = None
         self.map_total_btn = None
+        self.cancel_btn = None
         self.init_button()
 
         self.before_func = None
@@ -102,6 +103,11 @@ class Match:
             emoji=discord.PartialEmoji(id=871401991937605652, name="map_icon"),
             custom_id="map_total"
         )
+        self.cancel_btn = Button(
+            style=1,
+            emoji=discord.PartialEmoji(name="\U0000274C"),
+            custom_id="cancel"
+        )
 
     @property
     def platform(self):
@@ -116,7 +122,8 @@ class Match:
             self.status_btn,
             self.team_status_btn,
             self.map_death_btn,
-            self.map_total_btn
+            self.map_total_btn,
+            self.cancel_btn
         ]
 
     def current_button(self, data):
@@ -163,6 +170,8 @@ class Match:
             await self.map_death(match_id=match_id, b_msg=b_msg)
         elif custom_id == "map_total":
             await self.map_total(match_id=match_id, b_msg=b_msg)
+        elif custom_id == "cancel":
+            return
         return
 
     async def choice_match(self, b_msg: Message = None):
@@ -183,6 +192,12 @@ class Match:
             "value": "update",
             "description": "전적 정보를 업데이트 합니다.",
             "emoji": discord.PartialEmoji(id=868344053262061578, name="update").to_dict()
+        })
+        options.append({
+            "label": "취소",
+            "value": "cancel",
+            "description": "선택을 취소합니다.",
+            "emoji": discord.PartialEmoji(name="\U0000274C").to_dict()
         })
 
         embed = discord.Embed(
@@ -216,6 +231,15 @@ class Match:
 
         if "update" in resp.values:
             return await self.choice_match(b_msg=b_msg)
+        elif "cancel" in resp.values:
+            embed = discord.Embed(
+                title="매치 선택",
+                description="~~검색하실 매치를 선택해주세요. 목록을 업데이트 할 경우 업데이트를 선택해주세요.~~\n"
+                            "사용자 요청에 의하여 취소되었습니다.",
+                color=self.color
+            )
+            await b_msg.edit(embed=embed, components=[])
+            return None, None
         else:
             return b_msg, int(resp.values[0])
 

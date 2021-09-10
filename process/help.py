@@ -44,6 +44,7 @@ class Help:
         self._commands = list(commands.keys())
 
         self.left_btn = None
+        self.cancel_btn = None
         self.right_btn = None
         self.init_button()
         self.prefix = self.ctx.prefix
@@ -58,6 +59,11 @@ class Help:
             emoji=discord.PartialEmoji(name="\U00002B05"),
             custom_id="left_page"
         )
+        self.cancel_btn = Button(
+            style=1,
+            emoji=discord.PartialEmoji(name="\U0000274C"),
+            custom_id="cancel"
+        )
         self.right_btn = Button(
             style=1,
             emoji=discord.PartialEmoji(name="\U000027A1"),
@@ -68,6 +74,7 @@ class Help:
     def button(self):
         return [
             self.left_btn,
+            self.cancel_btn,
             self.right_btn
         ]
 
@@ -86,6 +93,8 @@ class Help:
         return
 
     async def response(self, b_msg: Message, custom_id: str):
+        if custom_id == "cancel":
+            return
         now_page = self.page
         if custom_id == "left_page":
             now_page -= 1
@@ -107,7 +116,7 @@ class Help:
                         "소스를 확인하실 수 있습니다.\n\nPUBG BOT은 {}서버와 함께하고 있습니다.\n "
                         "아래의 버튼을 클릭하여 명령어를 알아보세요!".format(len(self.client.guilds)),
             color=self.color)
-        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar_url_as(format="png"))
+        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar.url)
         embed.set_footer(text="{}/{} 페이지".format(1, len(self._commands) + 1))
         self.current_button()
 
@@ -135,7 +144,7 @@ class Help:
     async def main_page(self, page: int = 1, b_msg: Message = None):
         self.page = page
         embed = discord.Embed(color=self.color)
-        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar_url_as(format="png"))
+        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar.url)
         embed.description = "† 붙은 명령어는 슬래시 명령어를 지원하지 않습니다."
         embed.set_footer(text="{}/{} 페이지".format(page + 1, len(self._commands) + 1))
 

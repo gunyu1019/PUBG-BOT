@@ -54,7 +54,7 @@ class Command:
         embed = discord.Embed(
             title="에러",
             description="{message}".format(message=message),
-            color=self.color
+            color=self.warning_color
         )
         await ctx.send(embed=embed)
         return
@@ -116,12 +116,16 @@ class Command:
                 await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
                 return
 
-            option3 = options.get("시즌")
+            option3: Optional[str] = options.get("시즌")
         player_id, _platform = await player.player_info(option2, ctx, self.client, self.pubgpy)
         if player_id is None:
             return
 
         if option3 is not None:
+            option3 = option3.strip("시즌")
+            if not option3.isdecimal():
+                await self._option_error(ctx, "**{}**\n 올바른 정수 값을 입력해주세요. \n시즌13, 13시즌 (X) | 13 (O)".format(command))
+                return
             season = pubgpy.get_season(int(option3), _platform)
         else:
             connect = get_database()

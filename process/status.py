@@ -67,6 +67,7 @@ class Status:
         self.duo_player_btn = None
         self.squad_player_btn = None
         self.update_btn = None
+        self.cancel_btn = None
         self.init_button()
 
         self.color = int(parser.get("Color", "default"), 16)
@@ -99,6 +100,11 @@ class Status:
             style=1,
             emoji=discord.PartialEmoji(id=868344053262061578, name="update"),
             custom_id="update"
+        )
+        self.cancel_btn = Button(
+            style=1,
+            emoji=discord.PartialEmoji(name="\U0000274C"),
+            custom_id="cancel"
         )
 
     @property
@@ -182,6 +188,8 @@ class Status:
                 await self.before_func(fpp=self.before_mode, b_msg=b_msg)
             else:
                 await self.before_func(mode=self.before_mode, b_msg=b_msg)
+        elif custom_id == "cancel":
+            return
 
         if ranked:
             if custom_id == "total":

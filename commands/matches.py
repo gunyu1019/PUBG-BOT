@@ -89,6 +89,8 @@ class Command:
         msg = None
         if option2 is None:
             msg, option2 = await match.choice_match()
+            if msg is None:
+                return
         match_list = match.database2.get_matches_lists(player_id=player_id)
         if len(match_list) < option2:
             await self._option_error(
