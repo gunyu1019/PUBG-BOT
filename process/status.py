@@ -26,7 +26,8 @@ from typing import Union, Optional
 from config.config import parser
 from module import pubgpy
 from module.components import ActionRow, Button
-from module.interaction import SlashContext, Message, ComponentsContext
+from module.interaction import SlashContext, ComponentsContext
+from module.message import Message, MessageCommand
 from utils.cache import CachePlayData
 from utils.directory import directory
 from utils.time import get_time_to_string
@@ -43,7 +44,7 @@ image_name = {
 class Status:
     def __init__(
             self,
-            ctx: Union[SlashContext, Message],
+            ctx: Union[SlashContext, MessageCommand],
             client: discord.Client,
             pubg: pubgpy.Client,
             player: str,
@@ -184,11 +185,13 @@ class Status:
                 await self._ranked_update_data(self.player_id)
             else:
                 await self._normal_update_data(self.player_id)
+
             if isinstance(self.before_mode, bool):
                 await self.before_func(fpp=self.before_mode, b_msg=b_msg)
             else:
                 await self.before_func(mode=self.before_mode, b_msg=b_msg)
-        elif custom_id == "cancel":
+            return
+        if custom_id == "cancel":
             return
 
         if ranked:

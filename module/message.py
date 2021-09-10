@@ -68,6 +68,25 @@ def _allowed_mentions(state, allowed_mentions):
     return allowed_mentions
 
 
+def _get_payload(
+        content=None,
+        embed=None,
+        tts: bool = False,
+        allowed_mentions=None,
+        components=None
+) -> dict:
+    payload = {'tts': tts}
+    if content:
+        payload['content'] = content
+    if embed:
+        payload['embeds'] = embed
+    if allowed_mentions:
+        payload['allowed_mentions'] = allowed_mentions
+    if components:
+        payload['components'] = components
+    return payload
+
+
 class Message(discord.Message):
     def __init__(
             self,
@@ -82,41 +101,9 @@ class Message(discord.Message):
         self.components = from_payload(data.get("components", []))
         self.http = HttpClient(http=self._state.http)
 
-        options = self.content.split()
-
-        if len(options) >= 1:
-            self.name = options[0]
-        else:
-            self.name = None
-
-        if len(options) >= 2:
-            self.options = self.content.split()[1:]
-        else:
-            self.options = []
-
     @property
     def prefix(self):
         return get_prefix(None, self)[0]
-
-    @staticmethod
-    def _get_payload(
-            content=None,
-            embed=None,
-            tts: bool = False,
-            allowed_mentions=None,
-            components=None
-    ) -> dict:
-
-        payload = {'tts': tts}
-        if content:
-            payload['content'] = content
-        if embed:
-            payload['embeds'] = embed
-        if allowed_mentions:
-            payload['allowed_mentions'] = allowed_mentions
-        if components:
-            payload['components'] = components
-        return payload
 
     async def send(
             self,
@@ -130,41 +117,17 @@ class Message(discord.Message):
             allowed_mentions: discord.AllowedMentions = None,
             components: List[Union[ActionRow, Button, Selection]] = None
     ):
-        if file is not None and files is not None:
-            raise InvalidArgument()
-        if embed is not None and embeds is not None:
-            raise InvalidArgument()
-
-        content = str(content) if content is not None else None
-        if embed is not None:
-            embeds = [embed]
-        if embeds is not None:
-            embeds = [embed.to_dict() for embed in embeds]
-        if file:
-            files = [file]
-        if components is not None:
-            components = [i.to_all_dict() if isinstance(i, ActionRow) else i.to_dict() for i in components]
-        allowed_mentions = _allowed_mentions(self._state, allowed_mentions)
-
-        payload = self._get_payload(
+        channel = MessageSendable(state=self._state, channel=self.channel)
+        return await channel.send(
             content=content,
             tts=tts,
-            embed=embeds,
+            embed=embed,
+            embeds=embeds,
+            file=file,
+            files=files,
             allowed_mentions=allowed_mentions,
-            components=components,
+            components=components
         )
-
-        if files:
-            form = _files_to_form(files=files, payload=payload)
-            resp = await self.http.create_message(form=form, files=files, channel_id=self.channel.id)
-        else:
-            resp = await self.http.create_message(payload=payload, channel_id=self.channel.id)
-        ret = Message(state=self._state, channel=self.channel, data=resp)
-
-        if files:
-            for i in files:
-                i.close()
-        return ret
 
     async def edit(
             self,
@@ -194,7 +157,7 @@ class Message(discord.Message):
 
         allowed_mentions = _allowed_mentions(self._state, allowed_mentions)
 
-        payload = self._get_payload(
+        payload = _get_payload(
             content=content,
             embed=embeds,
             allowed_mentions=allowed_mentions,
@@ -216,3 +179,81 @@ class Message(discord.Message):
             for file in files:
                 file.close()
         return
+
+
+class MessageCommand(Message):
+    def __init__(
+            self,
+            *,
+            state: ConnectionState,
+            channel: Union[discord.TextChannel, discord.DMChannel, discord.GroupChannel],
+            data: dict
+    ):
+        super().__init__(state=state, channel=channel, data=data)
+
+        options = self.content.split()
+
+        if len(options) >= 1:
+            self.name = options[0]
+        else:
+            self.name = None
+
+        if len(options) >= 2:
+            self.options = self.content.split()[1:]
+        else:
+            self.options = []
+
+
+class MessageSendable:
+    def __init__(self, state: ConnectionState, channel):
+        self._state = state
+        self.http = HttpClient(http=self._state.http)
+        self.channel = channel
+
+    async def send(
+            self,
+            content=None,
+            *,
+            tts: bool = False,
+            embed: discord.Embed = None,
+            embeds: List[discord.Embed] = None,
+            file: discord.File = None,
+            files: List[discord.File] = None,
+            allowed_mentions: discord.AllowedMentions = None,
+            components: List[Union[ActionRow, Button, Selection]] = None
+    ):
+        if file is not None and files is not None:
+            raise InvalidArgument()
+        if embed is not None and embeds is not None:
+            raise InvalidArgument()
+
+        content = str(content) if content is not None else None
+        if embed is not None:
+            embeds = [embed]
+        if embeds is not None:
+            embeds = [embed.to_dict() for embed in embeds]
+        if file:
+            files = [file]
+        if components is not None:
+            components = [i.to_all_dict() if isinstance(i, ActionRow) else i.to_dict() for i in components]
+        allowed_mentions = _allowed_mentions(self._state, allowed_mentions)
+
+        payload = _get_payload(
+            content=content,
+            tts=tts,
+            embed=embeds,
+            allowed_mentions=allowed_mentions,
+            components=components,
+        )
+
+        if files:
+            form = _files_to_form(files=files, payload=payload)
+            resp = await self.http.create_message(form=form, files=files, channel_id=self.channel.id)
+        else:
+            resp = await self.http.create_message(payload=payload, channel_id=self.channel.id)
+        ret = Message(state=self._state, channel=self.channel, data=resp)
+
+        if files:
+            for i in files:
+                i.close()
+        return ret

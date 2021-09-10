@@ -27,7 +27,8 @@ import pymysql.cursors
 from config.config import parser
 from module import commands
 from module import pubgpy
-from module.interaction import SlashContext, Message
+from module.interaction import SlashContext
+from module.message import MessageCommand
 from process import player
 from utils import token
 from utils.database import get_database
@@ -60,7 +61,7 @@ class Command:
         return
 
     @commands.command(name="전적", aliases=["전적솔로", "전적듀오", "전적스쿼드"], permission=4)
-    async def status(self, ctx: Union[SlashContext, Message]):
+    async def status(self, ctx: Union[SlashContext, MessageCommand]):
         if ctx.name == "전적듀오":
             all_option, all_option_comment = self._choose_to_option1(ranked=False)
         else:
@@ -70,7 +71,7 @@ class Command:
         option1 = None
         option2 = None
         option3 = None
-        if isinstance(ctx, Message):
+        if isinstance(ctx, MessageCommand):
             options = ctx.options
             if len(options) < 1:
                 await self._option_error(
@@ -194,7 +195,7 @@ class Command:
         cur = connect.cursor(pymysql.cursors.DictCursor)
         command = "{prefix}{command_name} <닉네임>".format(command_name=ctx.name, prefix=ctx.prefix)
         nickname = None
-        if isinstance(ctx, Message):
+        if isinstance(ctx, MessageCommand):
             options = ctx.options
 
             if len(options) < 1:

@@ -24,7 +24,8 @@ from typing import Optional
 from config.config import parser
 from module import commands
 from module import pubgpy
-from module.interaction import SlashContext, Message
+from module.interaction import SlashContext
+from module.message import MessageCommand
 from process import player
 from process.matches import Match
 from utils import token
@@ -55,7 +56,7 @@ class Command:
         option1 = None
         option2 = None
         option3 = False
-        if isinstance(ctx, Message):
+        if isinstance(ctx, MessageCommand):
             options = ctx.options
 
             if len(options) < 1:

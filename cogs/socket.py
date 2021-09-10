@@ -29,7 +29,7 @@ from typing import Union, List, Dict
 
 from config.config import parser
 from module.interaction import SlashContext, ComponentsContext
-from module.message import Message
+from module.message import MessageCommand, Message
 from module.commands import Command
 from process.discord_exception import inspection, canceled
 from utils.directory import directory
@@ -54,15 +54,15 @@ class SocketReceive(commands.Cog):
                     self.func.append({"class": _class, "func": attr})
 
     @staticmethod
-    def check_interaction(ctx: Union[SlashContext, Message], func: Command):
+    def check_interaction(ctx: Union[SlashContext, MessageCommand], func: Command):
         if isinstance(ctx, SlashContext):
             return func.interaction
-        elif isinstance(ctx, Message):
+        elif isinstance(ctx, MessageCommand):
             return func.message
 
     @commands.Cog.listener()
-    async def on_interaction_command(self, ctx: Union[SlashContext, Message]):
-        if isinstance(ctx, Message):
+    async def on_interaction_command(self, ctx: Union[SlashContext, MessageCommand]):
+        if isinstance(ctx, MessageCommand):
             prefixes = get_prefix(self.bot, ctx)
             name = ""
             for prefix in prefixes:
@@ -166,6 +166,9 @@ class SocketReceive(commands.Cog):
         elif t == "MESSAGE_CREATE":
             channel, _ = getattr(state, "_get_guild_channel")(data)
             message = Message(state=state, data=data, channel=channel)
+            command = MessageCommand(state=state, data=data, channel=channel)
+            state.dispatch('interaction_message', message)
+            state.dispatch('interaction_command', command)
             state.dispatch('interaction_command', message)
             return
         return

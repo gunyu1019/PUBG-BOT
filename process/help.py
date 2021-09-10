@@ -24,7 +24,8 @@ import asyncio
 from config.config import parser
 from typing import Union
 from module.components import ActionRow, Button
-from module.interaction import SlashContext, Message, ComponentsContext
+from module.interaction import SlashContext, ComponentsContext
+from module.message import Message, MessageCommand
 from utils.directory import directory
 
 with open(f"{directory}/data/command.json", "r", encoding='utf-8') as f:
@@ -34,7 +35,7 @@ with open(f"{directory}/data/command.json", "r", encoding='utf-8') as f:
 class Help:
     def __init__(
             self,
-            ctx: Union[SlashContext, Message],
+            ctx: Union[SlashContext, MessageCommand],
             client: discord.Client,
     ):
         self.ctx = ctx

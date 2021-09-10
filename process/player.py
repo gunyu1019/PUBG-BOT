@@ -23,7 +23,7 @@ import pymysql
 
 from config.config import parser
 from module.interaction import SlashContext, ComponentsContext
-from module.message import Message
+from module.message import MessageCommand
 from module.components import ActionRow, Button
 from module import pubgpy
 from utils.database import get_database
@@ -51,7 +51,7 @@ warning_color = int(parser.get("Color", "warning"), 16)
 
 async def player_info(
         nickname: str,
-        ctx: Union[SlashContext, Message],
+        ctx: Union[SlashContext, MessageCommand],
         client: discord.Client,
         pubg_client: pubgpy.Client
 ):
@@ -90,7 +90,7 @@ async def player_info(
 
 async def player_platform(
         nickname: str,
-        ctx: Union[SlashContext, Message],
+        ctx: Union[SlashContext, MessageCommand],
         client: discord.Client,
         pubg_client: pubgpy.Client
 ):
