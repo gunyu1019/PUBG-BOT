@@ -24,7 +24,7 @@ import discord
 from discord.ext import commands
 from typing import Union
 
-from module.interaction import SlashContext
+from module.interaction import ApplicationContext
 from module.message import MessageCommand
 from utils import token
 
@@ -82,7 +82,7 @@ class Events(commands.Cog):
         return
 
     @commands.Cog.listener()
-    async def on_command(self, ctx: Union[SlashContext, MessageCommand]):
+    async def on_command(self, ctx: Union[ApplicationContext, MessageCommand]):
         if ctx.guild is not None:
             logger_command.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) {ctx.content}")
         else:

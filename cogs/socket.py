@@ -28,7 +28,7 @@ from discord.state import ConnectionState
 from typing import Union, List, Dict
 
 from config.config import parser
-from module.interaction import SlashContext, ComponentsContext
+from module.interaction import ApplicationContext, ComponentsContext
 from module.message import MessageCommand, Message
 from module.commands import Command
 from process.discord_exception import inspection, canceled
@@ -54,14 +54,14 @@ class SocketReceive(commands.Cog):
                     self.func.append({"class": _class, "func": attr})
 
     @staticmethod
-    def check_interaction(ctx: Union[SlashContext, MessageCommand], func: Command):
-        if isinstance(ctx, SlashContext):
+    def check_interaction(ctx: Union[ApplicationContext, MessageCommand], func: Command):
+        if isinstance(ctx, ApplicationContext):
             return func.interaction
         elif isinstance(ctx, MessageCommand):
             return func.message
 
     @commands.Cog.listener()
-    async def on_interaction_command(self, ctx: Union[SlashContext, MessageCommand]):
+    async def on_interaction_command(self, ctx: Union[ApplicationContext, MessageCommand]):
         if isinstance(ctx, MessageCommand):
             prefixes = get_prefix(self.bot, ctx)
             name = ""
@@ -157,7 +157,7 @@ class SocketReceive(commands.Cog):
         state: ConnectionState = getattr(self.bot, "_connection")
         if t == "INTERACTION_CREATE":
             if data.get("type") == 2:
-                result = SlashContext(data, self.bot)
+                result = ApplicationContext(data, self.bot)
                 state.dispatch('interaction_command', result)
             elif data.get("type") == 3:
                 result = ComponentsContext(data, self.bot)
@@ -169,7 +169,6 @@ class SocketReceive(commands.Cog):
             command = MessageCommand(state=state, data=data, channel=channel)
             state.dispatch('interaction_message', message)
             state.dispatch('interaction_command', command)
-            state.dispatch('interaction_command', message)
             return
         return
 

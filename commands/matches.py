@@ -24,7 +24,7 @@ from typing import Optional
 from config.config import parser
 from module import commands
 from module import pubgpy
-from module.interaction import SlashContext
+from module.interaction import ApplicationContext
 from module.message import MessageCommand
 from process import player
 from process.matches import Match
@@ -64,14 +64,26 @@ class Command:
                 return
             option1 = options[0]
             option2 = options[1] - 1 if len(options) > 2 else None
-        elif isinstance(ctx, SlashContext):
-            options = ctx.options
-            option1: Optional[str] = options.get("닉네임")
-            if option1 is None:
-                await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
+        elif isinstance(ctx, ApplicationContext):
+            if ctx.application_type == 1:
+                options = ctx.options
+                option1: Optional[str] = options.get("닉네임")
+                if option1 is None:
+                    await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
+                    return
+                option2 = options.get("매치_순서") - 1 if options.get("매치_순서") is not None else None
+                option3 = options.get("업데이트", False)
+            elif ctx.application_type == 3:
+                message = ctx.target(target_type="message")
+                if message.content is None:
+                    await self._option_error(ctx, "닉네임을 찾을 수 없습니다.")
+                    return
+                option1 = message.content
+                if len(option1.split()) > 1:
+                    await self._option_error(ctx, "올바른 사용방법이 아닙니다. 닉네임만 작성해주세요.")
+                    return
+            else:
                 return
-            option2 = options.get("매치_순서") - 1 if options.get("매치_순서") is not None else None
-            option3 = options.get("업데이트", False)
         player_id, _platform = await player.player_info(option1, ctx, self.client, self.pubgpy)
         if player_id is None:
             return

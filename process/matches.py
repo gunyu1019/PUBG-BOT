@@ -29,7 +29,7 @@ from aiohttp import ClientSession
 from config.config import parser
 from module import pubgpy
 from module.components import ActionRow, Button, Selection
-from module.interaction import SlashContext, ComponentsContext
+from module.interaction import ApplicationContext, ComponentsContext
 from module.message import Message, MessageCommand
 from utils.cache import CacheMatches, CacheMatchesList
 from utils.directory import directory
@@ -53,7 +53,7 @@ image_name = {
 class Match:
     def __init__(
             self,
-            ctx: Union[SlashContext, MessageCommand],
+            ctx: Union[ApplicationContext, MessageCommand],
             client: discord.Client,
             pubg: pubgpy.Client,
             player: str,
@@ -179,8 +179,8 @@ class Match:
         matches = await self.database2.get_matches(self.player_id)
 
         options = []
-        if len(matches) > 24:
-            matches = matches[0:24]
+        if len(matches) > 23:
+            matches = matches[0:23]
 
         for i, n in enumerate(matches):
             options.append({

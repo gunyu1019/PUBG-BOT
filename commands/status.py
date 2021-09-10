@@ -27,7 +27,7 @@ import pymysql.cursors
 from config.config import parser
 from module import commands
 from module import pubgpy
-from module.interaction import SlashContext
+from module.interaction import ApplicationContext
 from module.message import MessageCommand
 from process import player
 from utils import token
@@ -61,7 +61,7 @@ class Command:
         return
 
     @commands.command(name="전적", aliases=["전적솔로", "전적듀오", "전적스쿼드"], permission=4)
-    async def status(self, ctx: Union[SlashContext, MessageCommand]):
+    async def status(self, ctx: Union[ApplicationContext, MessageCommand]):
         if ctx.name == "전적듀오":
             all_option, all_option_comment = self._choose_to_option1(ranked=False)
         else:
@@ -103,21 +103,56 @@ class Command:
                 return
             option2 = options[1]
             option3 = options[2] if len(options) > 2 else None
-        elif isinstance(ctx, SlashContext):
-            options = ctx.options
-            option1 = options.get("유형")
-            if option1 is None or 0 > options.get("유형", -1) or options.get("유형", 5) > 4:
-                await self._option_error(
-                    ctx, "**{}**\n {} 중에서만 선택하여 주세요.".format(command, ", ".join(all_option_comment))
-                )
-                return
+        elif isinstance(ctx, ApplicationContext):
+            if ctx.application_type == 1:
+                options = ctx.options
+                option1 = options.get("유형")
+                if option1 is None or 0 > options.get("유형", -1) or options.get("유형", 5) > 4:
+                    await self._option_error(
+                        ctx, "**{}**\n {} 중에서만 선택하여 주세요.".format(command, ", ".join(all_option_comment))
+                    )
+                    return
 
-            option2: Optional[str] = options.get("닉네임")
-            if option2 is None:
-                await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
-                return
+                option2: Optional[str] = options.get("닉네임")
+                if option2 is None:
+                    await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
+                    return
 
-            option3: Optional[str] = options.get("시즌")
+                option3: Optional[str] = options.get("시즌")
+            elif ctx.application_type == 3:
+                message = ctx.target(target_type="message")
+                if message.content is None:
+                    await self._option_error(ctx, "명령어를 실행하기 위한 닉네임/유형을 찾을 수 없습니다.")
+                    return
+                options = message.content.split()
+                if len(options) > 3 or len(options) == 0:
+                    await self._option_error(
+                        ctx,
+                        "유형 선택이 잘못되었습니다. {0} 내에서 만 선택해제세요"
+                        "<유형(선택)> <닉네임> 또는 닉네임만 작성해주세요.".format(", ".join(all_option_comment))
+                    )
+                    return
+                elif len(options) == 2:
+                    _option1 = options[0]
+                    if _option1 not in all_option:
+                        await self._option_error(
+                            ctx,
+                            "올바른 사용방법이 아닙니다. <유형(선택)> <닉네임>과 같이 작성해주세요. (ex. \"경쟁 kimblue\")\n"
+                            "또는 닉네임만 작성해주세요. 이 경우 유형은 일반으로 자동 선택됩니다."
+                        )
+                    if _option1 == "1인칭":
+                        option1 = 0
+                    elif _option1 == "3인칭" or _option1 == "일반":
+                        option1 = 1
+                    elif _option1 == "1인칭경쟁":
+                        option1 = 2
+                    elif _option1 == "3인칭경쟁" or _option1 == "경쟁" or _option1 == "랭크":
+                        option1 = 3
+                    option2: Optional[str] = options[1]
+                elif len(options) == 1:
+                    option1 = 1
+                    option2: Optional[str] = options[0]
+
         player_id, _platform = await player.player_info(option2, ctx, self.client, self.pubgpy)
         if player_id is None:
             return
@@ -202,11 +237,14 @@ class Command:
                 await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
                 return
             nickname = options[0]
-        elif isinstance(ctx, SlashContext):
-            options = ctx.options
-            nickname: Optional[str] = options.get("닉네임")
-            if nickname is None:
-                await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
+        elif isinstance(ctx, ApplicationContext):
+            if ctx.application_type == 1:
+                options = ctx.options
+                nickname: Optional[str] = options.get("닉네임")
+                if nickname is None:
+                    await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
+                    return
+            else:
                 return
         player_id, _, platform_id = await player.player_platform(nickname, ctx, self.client, self.pubgpy)
         if player_id is None:

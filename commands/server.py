@@ -27,7 +27,7 @@ import pymysql.cursors
 
 from config.config import parser
 from module import commands
-from module.interaction import SlashContext
+from module.interaction import ApplicationContext
 from module.message import MessageCommand
 from utils.database import get_database
 
@@ -41,7 +41,7 @@ class Command:
         self.warning_color = int(parser.get("Color", "warning"), 16)
 
     @commands.command(name="상태", permission=4)
-    async def status(self, ctx: Union[SlashContext, MessageCommand]):
+    async def status(self, ctx: Union[ApplicationContext, MessageCommand]):
         connect = get_database()
         cur = connect.cursor(pymysql.cursors.DictCursor)
         cur.execute("SELECT id, date, data FROM SERVER_DATA")

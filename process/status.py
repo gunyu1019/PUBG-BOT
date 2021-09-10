@@ -26,7 +26,7 @@ from typing import Union, Optional
 from config.config import parser
 from module import pubgpy
 from module.components import ActionRow, Button
-from module.interaction import SlashContext, ComponentsContext
+from module.interaction import ApplicationContext, ComponentsContext
 from module.message import Message, MessageCommand
 from utils.cache import CachePlayData
 from utils.directory import directory
@@ -44,7 +44,7 @@ image_name = {
 class Status:
     def __init__(
             self,
-            ctx: Union[SlashContext, MessageCommand],
+            ctx: Union[ApplicationContext, MessageCommand],
             client: discord.Client,
             pubg: pubgpy.Client,
             player: str,
@@ -176,7 +176,7 @@ class Status:
         if self.before_func == self.ranked_total or self.before_func == self.normal_total:
             self.total_player_btn.style = 3
         elif isinstance(self.before_mode, str):
-            getattr(self, "{}_player_btn".format(self.before_mode), Button()).style = 3
+            getattr(self, "{}_player_btn".format(self.before_mode.rstrip("_fpp")), Button()).style = 3
         return
 
     async def response(self, b_msg: Message, custom_id: str, fpp: bool = False, ranked: bool = False):
