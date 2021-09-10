@@ -124,7 +124,9 @@ class Command:
         if option3 is not None:
             option3 = option3.strip("시즌")
             if not option3.isdecimal():
-                await self._option_error(ctx, "**{}**\n 올바른 정수 값을 입력해주세요. \n시즌13, 13시즌 (X) | 13 (O)".format(command))
+                await self._option_error(
+                    ctx, "**{}**\n 올바른 정수 값을 입력해주세요. \n> 시즌13, 13시즌 (X) | 13 (O)".format(command)
+                )
                 return
             season = pubgpy.get_season(int(option3), _platform)
         else:

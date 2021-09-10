@@ -67,10 +67,19 @@ async def player_info(
             connect.close()
             return None, None
 
-        sql = pymysql.escape_string(
-            "INSERT INTO player_data(player_id, nickname, platform) VALUE (%s, %s, %s)"
-        )
-        cur.execute(sql, (player_id, nickname, int(platform_id)))
+        sql = pymysql.escape_string("select EXISTS (select nickname from player_data where player_id=%s) as success")
+        cur.execute(sql, player_id)
+        result = cur.fetchone()
+        result = result.get("success", False)
+        if not result:
+            sql = pymysql.escape_string(
+                "INSERT INTO player_data(nickname, platform, player_id) VALUE (%s, %s, %s)"
+            )
+        else:
+            sql = pymysql.escape_string(
+                "UPDATE player_data SET nickname = %s, platform = %s WHERE player_id = %s"
+            )
+        cur.execute(sql, (nickname, int(platform_id), player_id))
         connect.commit()
     else:
         player_id = player_data['player_id']
