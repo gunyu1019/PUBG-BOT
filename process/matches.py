@@ -19,6 +19,7 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 
 import discord
 import json
+import asyncio
 
 from datetime import datetime
 from typing import Union
@@ -205,7 +206,12 @@ class Match:
             b_msg = await self.ctx.send(embed=embed, components=components)
         else:
             await b_msg.edit(embed=embed, components=components)
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg, Selection()))
+        try:
+            resp: ComponentsContext = await self.client.wait_for(
+                "components", check=self.check(b_msg, Selection()), timeout=300
+            )
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
 
         if "update" in resp.values:
@@ -254,7 +260,11 @@ class Match:
                     ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg, Button()))
+
+        try:
+            resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg, Button()), timeout=300)
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, match_id=match_id)
         return
@@ -295,7 +305,11 @@ class Match:
                     ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg, Button()))
+
+        try:
+            resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg, Button()), timeout=300)
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, match_id=match_id)
         return
@@ -329,7 +343,11 @@ class Match:
                     ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg, Button()))
+
+        try:
+            resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg, Button()), timeout=300)
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, match_id=match_id)
         return
@@ -364,7 +382,10 @@ class Match:
                     ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg, Button()))
+        try:
+            resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg, Button()), timeout=300)
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, match_id=match_id)
         return

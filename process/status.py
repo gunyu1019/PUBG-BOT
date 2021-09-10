@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
+import asyncio
 
 import discord
 
@@ -244,7 +245,11 @@ class Status:
                     ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg))
+
+        try:
+            resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg), timeout=300)
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=fpp)
         return
@@ -300,7 +305,11 @@ class Status:
                     ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg))
+
+        try:
+            resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg), timeout=300)
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=fpp, ranked=True)
         return
@@ -358,7 +367,11 @@ class Status:
                     ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg))
+
+        try:
+            resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg), timeout=300)
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=mode.endswith("_fpp"))
         return
@@ -421,7 +434,10 @@ class Status:
                     ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg))
+        try:
+            resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg), timeout=300)
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=mode.endswith("_fpp"), ranked=True)
         return

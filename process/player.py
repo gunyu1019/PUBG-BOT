@@ -18,6 +18,7 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import discord
+import asyncio
 import pymysql
 
 from config.config import parser
@@ -123,7 +124,10 @@ async def player_platform(
     def check(component: ComponentsContext):
         return component.component_type == 2 and msg.id == component.message.id and ctx.author == component.author
 
-    result: ComponentsContext = await client.wait_for("components", check=check)
+    try:
+        result: ComponentsContext = await client.wait_for("components", check=check, timeout=300)
+    except asyncio.TimeoutError:
+        return
     new_platform = game_ids[int(result.custom_id)]
     embed = discord.Embed(
         title="플랫폼 선택!",

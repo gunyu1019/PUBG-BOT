@@ -19,6 +19,7 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
 import discord
+import asyncio
 
 from config.config import parser
 from typing import Union
@@ -122,7 +123,11 @@ class Help:
                     ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg))
+
+        try:
+            resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg), timeout=300)
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id)
         return
@@ -179,7 +184,11 @@ class Help:
                     ActionRow(components=self.button)
                 ]
             )
-        resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg))
+
+        try:
+            resp: ComponentsContext = await self.client.wait_for("components", check=self.check(b_msg), timeout=300)
+        except asyncio.TimeoutError:
+            return
         await resp.defer_update()
         await self.response(b_msg=b_msg, custom_id=resp.custom_id)
         return
