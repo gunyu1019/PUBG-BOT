@@ -29,7 +29,7 @@ from utils.prefix import get_prefix, set_prefix
 
 class Command:
     def __init__(self, bot):
-        self.client = bot
+        self.client: discord.Client = bot
 
         self.color = int(parser.get("Color", "default"), 16)
         self.error_color = int(parser.get("Color", "error"), 16)
@@ -128,7 +128,7 @@ class Command:
         embed.add_field(name='<:user:735138021850087476>서버수 / 유저수', value=f'{len(self.client.guilds)}서버/{total}명', inline=True)
         embed.add_field(name='PUBG BOT 버전', value=f'{parser.get("DEFAULT","version")}', inline=True)
         embed.add_field(name='<:discord:735135879990870086>discord.py 버전', value=f'v{discord.__version__}', inline=True)
-        embed.set_thumbnail(url=self.client.user.avatar_url)
+        embed.set_thumbnail(url=self.client.user.avatar.url)
         await ctx.send(embed=embed)
         return
 

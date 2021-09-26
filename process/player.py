@@ -136,7 +136,7 @@ async def player_platform(
     try:
         result: ComponentsContext = await client.wait_for("components", check=check, timeout=300)
     except asyncio.TimeoutError:
-        return
+        return None, None, None
     new_platform = game_ids[int(result.custom_id)]
     embed = discord.Embed(
         title="플랫폼 선택!",
