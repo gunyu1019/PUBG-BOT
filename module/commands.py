@@ -44,6 +44,8 @@ class Command:
         self.interaction: bool = kwargs.get('interaction', True)
         self.message: bool = kwargs.get('message', True)
 
+        self.parents = None
+
 
 def command(
         name: str = None,

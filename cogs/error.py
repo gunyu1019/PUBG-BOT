@@ -46,7 +46,7 @@ class Error(commands.Cog):
 
         error_location = self._traceback_msg(error.__traceback__)
 
-        if ctx.channel.type != discord.ChannelType.private:
+        if ctx.guild is not None:
             logger.error(
                 f"({ctx.guild.name},{ctx.channel.name},{ctx.author},{ctx.content}): {errerlog}\n{error_location}"
             )
@@ -55,7 +55,7 @@ class Error(commands.Cog):
         embed = discord.Embed(title="\U000026A0 에러", color=0x070ff)
         embed.add_field(name='에러 내용(traceback)', value=f'{errerlog}', inline=False)
         embed.add_field(name='에러 위치', value=f'{error_location}', inline=False)
-        if ctx.channel.type != discord.ChannelType.private:
+        if ctx.guild is not None:
             embed.add_field(name='서버명', value=f'{ctx.guild.name}', inline=True)
             embed.add_field(name='채널명', value=f'{ctx.channel.name}', inline=True)
         embed.add_field(name='유저명', value=f'{ctx.author}', inline=True)
