@@ -16,56 +16,115 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
-
+import discord
 import pymysql
 import json
 
+from discord.ext.commands.context import Context
+from typing import Union, List
+from module.interaction import ApplicationContext
+from module.message import Message
 from utils.database import get_database
 from config.config import parser
 
-default_prefixes = list(json.loads(parser.get("DEFAULT", "default_prefixes")))
 
+class PrefixClass:
+    def __init__(self, bot: discord.Client):
+        self.bot = bot
 
-def get_prefix(bot, message):
-    guild = message.guild
-    if guild:
+        self.default_prefixes = list(
+            json.loads(
+                parser.get("DEFAULT", "default_prefixes")
+            )
+        )
+
+        self.prefix_caches = {}
+
+    def bot_prefix(
+            self,
+            bot: discord.Client,
+            context: Union[discord.Message, ApplicationContext, Message, Context]
+    ):
+        if context.guild is not None:
+            if context.guild.id in self.prefix_caches:
+                return self.prefix_caches[context.guild.id]
+            return self.load_prefix(guild=context.guild, caching=True)
+        return self.default_prefixes
+
+    def load_prefixes(self) -> None:
         connect = get_database()
         cur = connect.cursor(pymysql.cursors.DictCursor)
-        sql_prefix = pymysql.escape_string(f"select prefix from SERVER_INFO where ID={guild.id}")
-        try:
-            cur.execute(sql_prefix)
-            prefix = cur.fetchone()
-            if prefix is not None:
-                a_prefix = prefix['prefix']
-            else:
-                a_prefix = default_prefixes[0]
-        except pymysql.err.InternalError:
-            a_prefix = default_prefixes[0]
+
+        command = pymysql.escape_string(f"select id, prefix from SERVER_INFO")
+        cur.execute(command)
+        prefixes = cur.fetchall()
+        for data in prefixes:
+            guild_id = data.get("id")
+            prefix = data.get("prefix")
+            self.prefix_caches[int(guild_id)] = [prefix]
+        cur.close()
         connect.close()
-        return [a_prefix]
-    else:
-        return default_prefixes
 
+        for guild in self.bot.guilds:
+            if not self.check_prefix(guild):
+                self.prefix_caches[int(guild.id)] = self.default_prefixes
+        return
 
-def check_prefix(bot, guild):
-    if guild is not None:
+    def load_prefix(
+            self,
+            guild: discord.Guild,
+            caching: bool = False
+    ) -> List[str]:
         connect = get_database()
         cur = connect.cursor(pymysql.cursors.DictCursor)
-        sql_prefix = pymysql.escape_string(f"select EXISTS (select prefix from SERVER_INFO where ID={guild.id}) as success")
-        cur.execute(sql_prefix)
-        True_or_False = cur.fetchone()['success']
-        connect.close()
-        return bool(True_or_False)
 
-
-def set_prefix(bot, guild, prefix):
-    if guild is not None:
-        connect = get_database()
-        cur = connect.cursor(pymysql.cursors.DictCursor)
-        if check_prefix(bot, guild):
-            sql_prefix = pymysql.escape_string("update SERVER_INFO set prefix=%s where ID=%s")
+        command = pymysql.escape_string(f"select prefix from SERVER_INFO WHERE id = %s")
+        cur.execute(command, guild.id)
+        data = cur.fetchone()
+        if data is None or data == {}:
+            prefix = self.default_prefixes
         else:
-            sql_prefix = pymysql.escape_string("insert into SERVER_INFO(prefix, ID) values (%s, %s)")
-        cur.execute(sql_prefix, (prefix, guild.id))
-        connect.commit()
-        connect.close()
+            prefix = [data.get("prefix")]
+
+        if caching:
+            if not self.check_prefix(guild):
+                self.prefix_caches[int(guild.id)] = [prefix]
+        return prefix
+
+    @staticmethod
+    def check_prefix_in_database(guild: discord.Guild) -> bool:
+        if guild is not None:
+            connect = get_database()
+            cur = connect.cursor(pymysql.cursors.DictCursor)
+            sql_prefix = pymysql.escape_string(
+                f"select EXISTS (select prefix from SERVER_INFO where ID=%s) as success"
+            )
+            cur.execute(sql_prefix, guild)
+            result = cur.fetchone()['success']
+            connect.close()
+            return bool(result)
+        return False
+
+    def check_prefix(self, guild: discord.Guild) -> bool:
+        if guild is not None:
+            return int(guild.id) in self.prefix_caches
+        return False
+
+    def set_prefix(
+            self,
+            guild: discord.Guild,
+            prefix
+    ):
+        if guild is not None:
+            connect = get_database()
+            cur = connect.cursor(pymysql.cursors.DictCursor)
+            if self.check_prefix_in_database(guild):
+                sql_prefix = pymysql.escape_string("update SERVER_INFO set prefix=%s where ID=%s")
+            else:
+                sql_prefix = pymysql.escape_string("insert into SERVER_INFO(prefix, ID) values (%s, %s)")
+            cur.execute(sql_prefix, (prefix, guild.id))
+            connect.commit()
+            connect.close()
+
+            self.prefix_caches[int(guild.id)] = prefix
+        return

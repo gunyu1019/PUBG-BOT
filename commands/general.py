@@ -24,7 +24,6 @@ import discord
 from config.config import parser
 from module import commands
 from process.help import Help
-from utils.prefix import get_prefix, set_prefix
 
 
 class Command:
@@ -65,7 +64,7 @@ class Command:
     @commands.command(aliases=['접두어'], interaction=False, permission=4)
     async def prefix(self, ctx):
         list_message = ctx.options
-        prefix = get_prefix(bot=self.client, message=ctx)[0]
+        prefix = ctx.command_prefix
 
         def help_message(msg: str = ""):
             return f"{prefix}접두어 <설정|초기화|정보> <접두어(옵션)>: {msg}\n접두어 설정은 \\n,\\t,(공백) 사용금지, 20자 미만으로 설정이 가능합니다."
@@ -86,7 +85,7 @@ class Command:
                     color=self.color)
                 await ctx.send(embed=embed)
             elif mode == "초기화":
-                set_prefix(self.client, ctx.guild, "=")
+                self.client.prefix_class.set_prefix(self.client, ctx.guild, "!=")
                 embed = discord.Embed(title="접두어", description="성공적으로 접두어를 초기화 하였습니다.", color=self.color)
                 await ctx.send(embed=embed)
             elif mode == "설정":
@@ -103,7 +102,7 @@ class Command:
                     embed = discord.Embed(title="에러", description=help_message("20자 이내로 설정해주세요."), color=self.color)
                     await ctx.send(embed=embed)
                     return
-                set_prefix(self.client, ctx.guild, new_prefix)
+                self.client.prefix_class.set_prefix(self.client, ctx.guild, new_prefix)
                 embed = discord.Embed(title="접두어", description=f"성공적으로 접두어를 {new_prefix}로 설정 하였습니다.", color=self.color)
                 await ctx.send(embed=embed)
             else:

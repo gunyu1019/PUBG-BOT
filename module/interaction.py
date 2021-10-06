@@ -32,13 +32,14 @@ from module.errors import InvalidArgument
 from module.message import Message
 from module.message import _files_to_form, _allowed_mentions
 from module.http import HttpClient, InteractionData
-from utils.prefix import get_prefix
 
 log = logging.getLogger()
 
 
 class InteractionContext:
     def __init__(self, payload: dict, client: discord.Client):
+        self.prefix: Optional[str] = None
+
         self.client = client
         self.id: int = getattr(discord.utils, "_get_as_snowflake")(payload, "id")
         self.version = payload.get("version")
@@ -69,10 +70,6 @@ class InteractionContext:
 
         data = InteractionData(interaction_token=self.token, interaction_id=self.id, application_id=self.application)
         self.http = HttpClient(http=self.client.http, data=data)
-
-    @property
-    def prefix(self):
-        return get_prefix(None, self)[0]
 
     @staticmethod
     def _get_payload(

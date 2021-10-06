@@ -36,24 +36,27 @@ class Error(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_exception(self, ctx, error):
-        excname = str(type(error))
-        excarglist = [str(x) for x in error.args]
+        exc_name = str(type(error))
+        exc_list = [str(x) for x in error.args]
 
-        if not excarglist:
-            errerlog = excname
+        if not exc_list:
+            exc_log = exc_name.__class__.__module__
         else:
-            errerlog = excname + ": " + ", ".join(excarglist)
+            exc_log = "{exc_name}: {exc_list}".format(
+                exc_name=exc_name.__class__.__module__,
+                exc_list=", ".join(exc_list)
+            )
 
         error_location = self._traceback_msg(error.__traceback__)
 
         if ctx.guild is not None:
             logger.error(
-                f"({ctx.guild.name},{ctx.channel.name},{ctx.author},{ctx.content}): {errerlog}\n{error_location}"
+                f"({ctx.guild.name},{ctx.channel.name},{ctx.author},{ctx.content}): {exc_log}\n{error_location}"
             )
         else:
-            logger.error(f"({ctx.channel},{ctx.author},{ctx.content}): {errerlog}\n{error_location}")
+            logger.error(f"({ctx.channel},{ctx.author},{ctx.content}): {exc_log}\n{error_location}")
         embed = discord.Embed(title="\U000026A0 에러", color=0x070ff)
-        embed.add_field(name='에러 내용(traceback)', value=f'{errerlog}', inline=False)
+        embed.add_field(name='에러 내용(traceback)', value=f'{exc_log}', inline=False)
         embed.add_field(name='에러 위치', value=f'{error_location}', inline=False)
         if ctx.guild is not None:
             embed.add_field(name='서버명', value=f'{ctx.guild.name}', inline=True)

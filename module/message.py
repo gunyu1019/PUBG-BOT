@@ -24,12 +24,11 @@ SOFTWARE.
 import discord
 
 from discord.state import ConnectionState
-from typing import List, Union
+from typing import List, Union, Optional
 
 from module.components import ActionRow, Button, Selection, from_payload
 from module.errors import InvalidArgument
 from module.http import HttpClient
-from utils.prefix import get_prefix
 
 
 def _files_to_form(files: list, payload: dict):
@@ -100,10 +99,6 @@ class Message(discord.Message):
         super().__init__(state=state, channel=channel, data=data)
         self.components = from_payload(data.get("components", []))
         self.http = HttpClient(http=self._state.http)
-
-    @property
-    def prefix(self):
-        return get_prefix(None, self)[0]
 
     async def send(
             self,
@@ -191,6 +186,8 @@ class MessageCommand(Message):
     ):
         super().__init__(state=state, channel=channel, data=data)
 
+        self.prefix: Optional[str] = None
+        self.command_prefix: Optional[str] = None
         options = self.content.split()
 
         if len(options) >= 1:

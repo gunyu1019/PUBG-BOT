@@ -65,6 +65,8 @@ class Events(commands.Cog):
             autopost=True
         )
 
+        self.bot.prefix_class.load_prefixes()
+
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         server_number = None

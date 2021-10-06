@@ -31,7 +31,6 @@ from config.config import parser
 from module import commands as _command
 from utils.database import get_database
 from utils.perm import check_perm
-from utils.prefix import get_prefix
 from utils.directory import directory
 
 
@@ -126,9 +125,8 @@ class Command:
     @_command.command(permission=1, interaction=False)
     async def cmd(self, ctx):
         list_message = ctx.options
-        prefix = get_prefix(self.client, ctx)[0]
         if len(list_message) < 1:
-            embed = discord.Embed(title="PUBG BOT 도우미", description=prefix + "cmd <명령어>\n명령어를 입력해주세요!", color=self.color)
+            embed = discord.Embed(title="PUBG BOT 도우미", description=ctx.prefix + "cmd <명령어>\n명령어를 입력해주세요!", color=self.color)
             await ctx.send(embed=embed)
             return
         search = " ".join(list_message[0:])
@@ -151,7 +149,7 @@ class Command:
     @_command.command(name="블랙리스트", permission=9, interaction=False)
     async def blacklist(self, ctx):
         list_message = ctx.options
-        prefix = get_prefix(self.client, ctx)[0]
+        prefix = ctx.command_prefix
         if len(list_message) < 1:
             embed = discord.Embed(title="PUBG BOT 도우미", description=f"{prefix}블랙리스트 <등록/제거/여부> <맨션(선택)> 와 같이 작성해주세요.",
                                   color=self.color)
@@ -272,7 +270,7 @@ class Command:
     @_command.command(permission=2, interaction=False)
     async def echo(self, ctx):
         list_message = ctx.options
-        prefix = get_prefix(self.client, ctx)
+        prefix = ctx.command_prefix
         if len(list_message) < 0:
             embed = discord.Embed(title='PUBG BOT 도우미', description=f'{prefix}echo <내용>\n알맞게 사용해 주시기 바랍니다.',
                                   color=self.color)

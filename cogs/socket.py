@@ -102,8 +102,9 @@ class SocketReceive(commands.Cog):
 
     @commands.Cog.listener()
     async def on_interaction_command(self, ctx: Union[ApplicationContext, MessageCommand]):
+        prefixes = await self.get_prefix(ctx)
+        ctx.prefix = prefixes
         if isinstance(ctx, MessageCommand):
-            prefixes = await self.get_prefix(ctx)
             if isinstance(prefixes, list):
                 if not ctx.content.startswith(tuple(prefixes)):
                     return

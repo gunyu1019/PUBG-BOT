@@ -1,5 +1,6 @@
 discord.py
-pymysql
+pymysql==0.9.3
 DBSkr
 pytz
 matplotlib
+Pillow
