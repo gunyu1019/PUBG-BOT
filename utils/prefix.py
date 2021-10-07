@@ -40,6 +40,12 @@ class PrefixClass:
 
         self.prefix_caches = {}
 
+    @property
+    def default_prefix(self):
+        if len(self.default_prefixes) == 1:
+            return self.default_prefixes[0]
+        return self.default_prefixes
+
     def bot_prefix(
             self,
             bot: discord.Client,
@@ -61,13 +67,13 @@ class PrefixClass:
         for data in prefixes:
             guild_id = data.get("id")
             prefix = data.get("prefix")
-            self.prefix_caches[int(guild_id)] = [prefix]
+            self.prefix_caches[int(guild_id)] = prefix
         cur.close()
         connect.close()
 
         for guild in self.bot.guilds:
             if not self.check_prefix(guild):
-                self.prefix_caches[int(guild.id)] = self.default_prefixes
+                self.prefix_caches[int(guild.id)] = self.default_prefix
         return
 
     def load_prefix(
@@ -82,13 +88,13 @@ class PrefixClass:
         cur.execute(command, guild.id)
         data = cur.fetchone()
         if data is None or data == {}:
-            prefix = self.default_prefixes
+            prefix = self.default_prefix
         else:
-            prefix = [data.get("prefix")]
+            prefix = data.get("prefix")
 
         if caching:
             if not self.check_prefix(guild):
-                self.prefix_caches[int(guild.id)] = [prefix]
+                self.prefix_caches[int(guild.id)] = prefix
         return prefix
 
     @staticmethod
