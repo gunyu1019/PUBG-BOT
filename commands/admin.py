@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
+along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import ast
@@ -82,7 +82,7 @@ class Command:
             cmd = "\n".join(f"    {i}" for i in cmd.splitlines())
             body = f"async def {fn_name}():{cmd}"
             parsed = ast.parse(body)
-            body = parsed.body[0].body
+            body = getattr(parsed.body[0], "body", "")
             insert_returns(body)
             env = {
                 "self": self,
@@ -114,7 +114,7 @@ class Command:
                 embed.set_field_at(2, name="출력(Type)", value=f"```py\n{type(result)}\n```", inline=False)
                 embed.set_field_at(3, name="소요시간", value=f"```\n{second + microsecond}초\n```", inline=False)
                 await msg.edit(embed=embed)
-                await ctx.send(file=discord.File("eval_result.txt"))
+                await ctx.send(file=discord.File("debug_result.txt"))
         except Exception as e:
             embed.set_field_at(1, name="출력", value=f"```pytb\n{traceback.format_exc()}\n```", inline=False)
             embed.set_field_at(2, name="출력(Type)", value=f"```py\n{type(e)}\n```", inline=False)
@@ -126,7 +126,13 @@ class Command:
     async def cmd(self, ctx):
         list_message = ctx.options
         if len(list_message) < 1:
-            embed = discord.Embed(title="PUBG BOT 도우미", description=ctx.prefix + "cmd <명령어>\n명령어를 입력해주세요!", color=self.color)
+            embed = discord.Embed(
+                title="PUBG BOT 도우미",
+                description="{prefix}cmd <명령어>\n명령어를 입력해주세요!".format(
+                    prefix=ctx.prefix[0] if len(ctx.prefix) > 1 else "!="
+                ),
+                color=self.color
+            )
             await ctx.send(embed=embed)
             return
         search = " ".join(list_message[0:])
@@ -161,13 +167,15 @@ class Command:
                 mention = int(list_message[1].replace("<@", "").replace(">", "").replace("!", ""))
                 member = await ctx.guild.fetch_member(mention)
                 if member is None:
-                    embed = discord.Embed(title="PUBG BOT 도우미",
-                                          description=f"올바른 유저를 기재하여 주세요.",
-                                          color=self.color)
+                    embed = discord.Embed(
+                        title="PUBG BOT 도우미",
+                        description=f"올바른 유저를 기재하여 주세요.",
+                        color=self.color
+                    )
                     await ctx.send(embed=embed)
                     return
             else:
-                mention = ctx.author.id
+                member = ctx.author
             result = check_perm(member)
             if 4 >= result:
                 embed = discord.Embed(title="Blacklist!", description="이 사람은 블랙리스트에 등재되어 있지 않습니다.", color=self.color)
@@ -177,9 +185,11 @@ class Command:
             return
         elif mod == "등록":
             if len(list_message) < 2:
-                embed = discord.Embed(title="PUBG BOT 도우미",
-                                      description=f"블랙리스트에 등재할 유저를 기재하여 주세요.",
-                                      color=self.color)
+                embed = discord.Embed(
+                    title="PUBG BOT 도우미",
+                    description=f"블랙리스트에 등재할 유저를 기재하여 주세요.",
+                    color=self.color
+                )
                 await ctx.send(embed=embed)
                 return
             mention = int(list_message[1].replace("<@", "").replace(">", "").replace("!", ""))
@@ -195,12 +205,16 @@ class Command:
                 await ctx.send(embed=embed)
                 return
             if 2 >= check_perm(member):
-                embed = discord.Embed(title="Blacklist!", description="봇 관리자의 권한을 가지고 있는 사용자는 블랙리스트에 등재할 수 없습니다.", color=self.color)
+                embed = discord.Embed(
+                    title="Blacklist!",
+                    description="봇 관리자의 권한을 가지고 있는 사용자는 블랙리스트에 등재할 수 없습니다.",
+                    color=self.color
+                )
                 await ctx.send(embed=embed)
                 return
             connect = get_database()
             cur = connect.cursor()
-            sql_Black = "insert into BLACKLIST(ID) value(%s)"
+            sql_command = "insert into BLACKLIST(ID) value(%s)"
             if 9 == check_perm(member):
                 embed = discord.Embed(title="Blacklist!", description=f"{member}는 이미 등재되어 있습니다.",
                                       color=self.color)
@@ -208,7 +222,7 @@ class Command:
                 connect.commit()
                 connect.close()
                 return
-            cur.execute(sql_Black, mention)
+            cur.execute(sql_command, mention)
             connect.commit()
             connect.close()
             embed = discord.Embed(title="Blacklist!", description=f"{member}가 블랙리스트에 추가되었습니다!", color=self.color)
@@ -216,9 +230,11 @@ class Command:
             return
         elif mod == "제거":
             if len(list_message) < 2:
-                embed = discord.Embed(title="PUBG BOT 도우미",
-                                      description=f"블랙리스트에 등재할 유저를 기재하여 주세요.",
-                                      color=self.color)
+                embed = discord.Embed(
+                    title="PUBG BOT 도우미",
+                    description=f"블랙리스트에 등재할 유저를 기재하여 주세요.",
+                    color=self.color
+                )
                 await ctx.send(embed=embed)
                 return
             mention = int(list_message[1].replace("<@", "").replace(">", "").replace("!", ""))
@@ -262,7 +278,8 @@ class Command:
             if (i+1) % 50 == 0:
                 await ctx.author.send(f"{answer}\n{(i/50)+1}페이지/{int(len(self.client.guilds)/50)+1}페이지")
                 answer = ""
-            answer = answer + f"{i + 1}번: {self.client.guilds[i]}({self.client.guilds[i].id}): {self.client.guilds[i].member_count}명\n"
+            answer = answer + f"{i + 1}번: {self.client.guilds[i]}({self.client.guilds[i].id}): " \
+                              f"{self.client.guilds[i].member_count}명\n"
             total += self.client.guilds[i].member_count
         await ctx.author.send(f"{answer}\n방의 종합 멤버:{total}명\n마지막 페이지")
         return

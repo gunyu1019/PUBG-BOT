@@ -24,11 +24,13 @@ import discord
 from config.config import parser
 from module import commands
 from process.help import Help
+from utils.prefix import PrefixClass
 
 
 class Command:
     def __init__(self, bot):
         self.client: discord.Client = bot
+        self.prefix_class: PrefixClass = getattr(self.client, "prefix_class")
 
         self.color = int(parser.get("Color", "default"), 16)
         self.error_color = int(parser.get("Color", "error"), 16)
@@ -85,7 +87,7 @@ class Command:
                     color=self.color)
                 await ctx.send(embed=embed)
             elif mode == "초기화":
-                self.client.prefix_class.set_prefix(self.client, ctx.guild, "!=")
+                self.prefix_class.set_prefix(ctx.guild, self.prefix_class.default_prefixes[0])
                 embed = discord.Embed(title="접두어", description="성공적으로 접두어를 초기화 하였습니다.", color=self.color)
                 await ctx.send(embed=embed)
             elif mode == "설정":
@@ -102,7 +104,7 @@ class Command:
                     embed = discord.Embed(title="에러", description=help_message("20자 이내로 설정해주세요."), color=self.color)
                     await ctx.send(embed=embed)
                     return
-                self.client.prefix_class.set_prefix(self.client, ctx.guild, new_prefix)
+                self.prefix_class.set_prefix(ctx.guild, new_prefix)
                 embed = discord.Embed(title="접두어", description=f"성공적으로 접두어를 {new_prefix}로 설정 하였습니다.", color=self.color)
                 await ctx.send(embed=embed)
             else:
