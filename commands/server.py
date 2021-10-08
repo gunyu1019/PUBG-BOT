@@ -42,6 +42,7 @@ class Command:
 
     @commands.command(name="상태", permission=4)
     async def status(self, ctx: Union[ApplicationContext, MessageCommand]):
+        await ctx.defer()
         connect = get_database()
         cur = connect.cursor(pymysql.cursors.DictCursor)
         cur.execute("SELECT id, date, data FROM SERVER_DATA")

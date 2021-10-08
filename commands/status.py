@@ -162,10 +162,10 @@ class Command:
                     option1 = 1
                     option2: Optional[str] = options[0]
 
+        await ctx.defer()
         player_id, _platform = await player.player_info(option2, ctx, self.client, self.pubgpy)
         if player_id is None:
             return
-
         if option3 is not None:
             season = pubgpy.get_season(option3, _platform)
         else:

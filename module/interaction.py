@@ -97,7 +97,7 @@ class InteractionContext:
         return payload
 
     async def defer(self, hidden: bool = False):
-        base = {"type": 5}
+        base = {}
         if hidden:
             base["data"] = {"flags": 64}
 

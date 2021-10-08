@@ -84,6 +84,7 @@ class Command:
                     return
             else:
                 return
+        await ctx.defer()
         player_id, _platform = await player.player_info(option1, ctx, self.client, self.pubgpy)
         if player_id is None:
             return

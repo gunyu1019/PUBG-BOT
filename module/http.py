@@ -43,7 +43,8 @@ class HttpClient:
 
     async def post_defer_response(self, payload: dict):
         r = SlashRoute("POST", "/interactions/{id}/{token}/callback", id=self.data.id, token=self.data.token)
-        await self.http.request(r, json=payload)
+        data = {"type": 5, "data": payload}
+        await self.http.request(r, json=data)
 
     async def post_initial_response(self, payload: dict):
         r = SlashRoute("POST", "/interactions/{id}/{token}/callback", id=self.data.id, token=self.data.token)
