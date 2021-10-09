@@ -149,7 +149,7 @@ class InteractionContext:
             form = None
 
         if not self.responded:
-            if files:
+            if files and not self.deferred:
                 await self.defer(hidden=hidden)
 
             if self.deferred:

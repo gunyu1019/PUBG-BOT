@@ -281,7 +281,7 @@ class Match:
             )
         else:
             await b_msg.edit(
-                embed=embed, file=self._platform_file(), components=[
+                embed=embed, attachment=self._platform_file(), components=[
                     ActionRow(components=self.button)
                 ]
             )
@@ -326,7 +326,7 @@ class Match:
             )
         else:
             await b_msg.edit(
-                embed=embed, file=self._platform_file(), components=[
+                embed=embed, attachment=self._platform_file(), components=[
                     ActionRow(components=self.button)
                 ]
             )
@@ -364,7 +364,7 @@ class Match:
             )
         else:
             await b_msg.edit(
-                embed=embed, files=[self._platform_file(), file], components=[
+                embed=embed, attachments=[self._platform_file(), file], components=[
                     ActionRow(components=self.button)
                 ]
             )
@@ -403,7 +403,7 @@ class Match:
             )
         else:
             await b_msg.edit(
-                embed=embed, files=[self._platform_file(), file], components=[
+                embed=embed, attachments=[self._platform_file(), file], components=[
                     ActionRow(components=self.button)
                 ]
             )

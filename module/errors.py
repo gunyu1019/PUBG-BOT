@@ -25,3 +25,8 @@ SOFTWARE.
 class InvalidArgument(Exception):
     """Argument 잘못되었을 리턴되는 예외입니다"""
     pass
+
+
+class AlreadyDeferred(Exception):
+    """이미 defer가 선언된 상태에서 다시 요청할 때 리턴되는 예외입니다"""
+    pass

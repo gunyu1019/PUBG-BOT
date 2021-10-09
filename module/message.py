@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import asyncio
 
 import discord
 
@@ -27,7 +28,7 @@ from discord.state import ConnectionState
 from typing import List, Union, Optional
 
 from module.components import ActionRow, Button, Selection, from_payload
-from module.errors import InvalidArgument
+from module.errors import InvalidArgument, AlreadyDeferred
 from module.http import HttpClient
 
 
@@ -126,18 +127,18 @@ class Message(discord.Message):
 
     async def edit(
             self,
-            content=None,
+            content: Optional[str] = None,
             *,
             embed: discord.Embed = None,
             embeds: List[discord.Embed] = None,
-            file: discord.File = None,
-            files: List[discord.File] = None,
+            attachment: discord.File = None,
+            attachments: List[discord.File] = None,
             allowed_mentions: discord.AllowedMentions = None,
             components: List[Union[ActionRow, Button, Selection]] = None
     ):
-        if file is not None and files is not None:
-            raise InvalidArgument()
         if embed is not None and embeds is not None:
+            raise InvalidArgument()
+        if attachment is not None and attachments is not None:
             raise InvalidArgument()
 
         content = str(content) if content is not None else None
@@ -145,8 +146,8 @@ class Message(discord.Message):
             embeds = [embed]
         if embeds is not None:
             embeds = [embed.to_dict() for embed in embeds]
-        if file:
-            files = [file]
+        if attachment:
+            attachments = [attachment]
         if components is not None:
             components = [i.to_all_dict() if isinstance(i, ActionRow) else i.to_dict() for i in components]
 
@@ -159,20 +160,20 @@ class Message(discord.Message):
             components=components,
         )
 
-        if files:
+        if attachments:
             payload["attachments"] = []
-            form = _files_to_form(files=files, payload=payload)
+            form = _files_to_form(files=attachments, payload=payload)
         else:
             form = None
 
         await self.http.edit_message(
             channel_id=self.channel.id, message_id=self.id,
-            payload=payload, form=form, files=files
+            payload=payload, form=form, files=attachments
         )
 
-        if files:
-            for file in files:
-                file.close()
+        if attachments:
+            for attachment in attachments:
+                attachment.close()
         return
 
 
@@ -199,6 +200,62 @@ class MessageCommand(Message):
             self.options = self.content.split()[1:]
         else:
             self.options = []
+
+        self.deferred = False
+        self.deferred_task: Optional[asyncio.Task] = None
+
+    @staticmethod
+    def _typing_done_callback(fut: asyncio.Future) -> None:
+        # just retrieve any exception and call it a day
+        try:
+            fut.exception()
+        except (asyncio.CancelledError, Exception):
+            pass
+
+    async def _do_deferred(self) -> None:
+        for count in range(0, 300, 5):
+            await super().channel.trigger_typing()
+            if not self.deferred:
+                break
+            await asyncio.sleep(5)
+
+    async def defer(
+            self,
+            _: bool = None
+    ) -> None:
+        # hidden parameter not worked.
+        if self.deferred:
+            raise AlreadyDeferred()
+        self.deferred = True
+        self.deferred_task = self._state.loop.create_task(self._do_deferred())
+        self.deferred_task.add_done_callback(self._typing_done_callback)
+        return
+
+    async def send(
+            self,
+            content=None,
+            *,
+            tts: bool = False,
+            embed: discord.Embed = None,
+            embeds: List[discord.Embed] = None,
+            file: discord.File = None,
+            files: List[discord.File] = None,
+            allowed_mentions: discord.AllowedMentions = None,
+            components: List[Union[ActionRow, Button, Selection]] = None
+    ) -> Optional[Message]:
+        self.deferred = False
+        if not self.deferred_task.cancelled():
+            self.deferred_task.cancel()
+        return await super().send(
+            content=content,
+            tts=tts,
+            embed=embed,
+            embeds=embeds,
+            file=file,
+            files=files,
+            allowed_mentions=allowed_mentions,
+            components=components
+        )
 
 
 class MessageSendable:
