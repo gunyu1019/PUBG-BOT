@@ -154,6 +154,7 @@ class InteractionContext:
 
             if self.deferred:
                 resp = await self.http.edit_initial_response(payload=payload, form=form, files=files)
+                self.deferred = False
             else:
                 await self.http.post_initial_response(payload=payload)
                 resp = await self.http.get_initial_response()
@@ -213,6 +214,8 @@ class InteractionContext:
         else:
             resp = await self.http.edit_followup(message_id, payload=payload, form=form, files=files)
         ret = Message(state=self._state, channel=self.channel, data=resp)
+        if self.deferred:
+            self.deferred = False
 
         if files:
             for file in files:
@@ -363,6 +366,7 @@ class ComponentsContext(InteractionContext):
                     channel_id=self.channel.id, message_id=self.message.id,
                     payload=payload, form=form, files=files
                 )
+                self.deferred = False
             else:
                 await self.http.post_initial_components_response(payload=payload)
             self.responded = True
