@@ -244,8 +244,9 @@ class MessageCommand(Message):
             components: List[Union[ActionRow, Button, Selection]] = None
     ) -> Optional[Message]:
         self.deferred = False
-        if not self.deferred_task.cancelled():
-            self.deferred_task.cancel()
+        if self.deferred_task is not None:
+            if not self.deferred_task.cancelled():
+                self.deferred_task.cancel()
         return await super().send(
             content=content,
             tts=tts,
