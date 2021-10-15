@@ -40,10 +40,10 @@ class Error(commands.Cog):
         exc_list = [str(x) for x in error.args]
 
         if not exc_list:
-            exc_log = exc_name.__class__.__module__
+            exc_log = exc_name.__name__
         else:
             exc_log = "{exc_name}: {exc_list}".format(
-                exc_name=exc_name.__class__.__module__,
+                exc_name=exc_name.__name__,
                 exc_list=", ".join(exc_list)
             )
 
