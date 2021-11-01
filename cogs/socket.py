@@ -22,6 +22,7 @@ import discord
 import importlib
 import importlib.util
 import os
+import sys
 
 from discord.ext import commands
 from discord.state import ConnectionState
@@ -52,19 +53,23 @@ class SocketReceive(commands.Cog):
                 raise discord.ext.commands.errors.ExtensionNotFound(cog)
 
             lib = importlib.util.module_from_spec(spec)
+            sys.modules[cog] = lib
             try:
                 spec.loader.exec_module(lib)  # type: ignore
             except Exception as e:
+                del sys.modules[cog]
                 raise discord.ext.commands.errors.ExtensionFailed(cog, e) from e
 
             try:
                 _setup = getattr(lib, 'setup')
             except AttributeError:
+                del sys.modules[cog]
                 raise discord.ext.commands.errors.NoEntryPointError(cog)
 
             try:
                 _cog = _setup(self.bot)
             except Exception as e:
+                del sys.modules[cog]
                 raise discord.ext.commands.errors.ExtensionFailed(cog, e) from e
 
             for func, attr in inspect.getmembers(_cog):
