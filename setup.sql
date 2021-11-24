@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS SEASON_STATUS (
     PSN   json    null  default '{}',
     Stadia   json    null  default '{}',
     last_update   json    null  default '{}',
-    ID   tinyint(1)    null  default '{}'
+    ID   tinyint(1)    null  default 1
 );
 CREATE TABLE IF NOT EXISTS matches (
     match_id   varchar(40) not null,
