@@ -36,8 +36,10 @@ multidict==5.1.0
     #   yarl
 numpy==1.21.1
     # via matplotlib
-pillow==8.3.2
-    # via matplotlib
+pillow==9.0.0
+    # via
+    #   -r requirements.in
+    #   matplotlib
 pymysql==0.9.3
     # via -r requirements.in
 pyparsing==2.4.7
