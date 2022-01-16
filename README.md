@@ -8,8 +8,8 @@
     <a href="https://www.codacy.com/gh/gunyu1019/PUBG-BOT/dashboard">
         <img src="https://app.codacy.com/project/badge/Grade/8c90b5a8f40e46a097ce2c5dd099d9e0" alt="Codacy" >
         </a>
-    <a href="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/overview/master">
-        <img src="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/master" alt="CodeFactor" >
+    <a href="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/overview/main">
+        <img src="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/main" alt="CodeFactor" >
     </a>
 <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT.svg?type=shield"/></a>
     <img src="https://img.shields.io/badge/release_version-2.3-0080aa?style=flat" alt="Release" >
