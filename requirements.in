@@ -1,0 +1,8 @@
+discord.py
+bs4
+lxml
+pymysql==0.9.3
+DBSkr
+pytz
+matplotlib
+Pillow
