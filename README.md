@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/gunyu1019/PUBG-BOT/blob/master/.github/PUBG_BOT.png?raw=true" width="30%" alt="PUBG BOT"/>
+    <img src="https://github.com/gunyu1019/PUBG-BOT/blob/main/.github/PUBG_BOT.png?raw=true" width="30%" alt="PUBG BOT"/>
 </p>
 <h1 align="center">PUBG BOT</h1>
 <p align="center">
