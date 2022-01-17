@@ -92,6 +92,9 @@ class Events:
 
     @commands.Cog.listener()
     async def on_command(self, ctx: commands.Context):
+        if not isinstance(ctx, commands.Context):
+            return
+
         if ctx.guild is not None:
             logger_command.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) {ctx.message.content}")
         else:

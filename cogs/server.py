@@ -57,6 +57,10 @@ class Server:
         font_path = f"{directory}/assets/Font/NotoSansKR-Bold.otf"
         font_title = font_manager.FontProperties(fname=font_path, size=15)
 
+        ax = plt.axes()
+        ax.tick_params(axis='both', colors='white')
+        ax.set_facecolor('#32353b')
+
         plt.title('실시간 동접자 수', color='white', fontweight="bold", fontproperties=font_title)
         plt.plot(datetime, players, color='#b0beff', marker='o', label='Online Players')
         plt.xlabel('Time', color='white')
@@ -65,10 +69,6 @@ class Server:
         plt.grid(True, axis='both', color="#2f3136", alpha=0.5, linestyle='--')
         plt.xlim([1, len(datetime) - 1])
         plt.ylim(bottom=1)
-
-        ax = plt.axes()
-        ax.tick_params(axis='both', colors='white')
-        ax.set_facecolor('#32353b')
 
         buf = io.BytesIO()
         plt.savefig(buf, format='png', facecolor="#2f3136")

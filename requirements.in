@@ -1,5 +1,5 @@
 discord.py
-bs4
+BeautifulSoup4
 lxml
 pymysql==0.9.3
 DBSkr
