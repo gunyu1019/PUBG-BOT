@@ -116,7 +116,7 @@ class Help:
                         "소스를 확인하실 수 있습니다.\n\nPUBG BOT은 {}서버와 함께하고 있습니다.\n "
                         "아래의 버튼을 클릭하여 명령어를 알아보세요!".format(len(self.client.guilds)),
             color=self.color)
-        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar.url)
+        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar_url)
         embed.set_footer(text="{}/{} 페이지".format(1, len(self._commands) + 1))
         self.current_button()
 
@@ -137,7 +137,11 @@ class Help:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
         await self.response(b_msg=b_msg, custom_id=resp.custom_id)
         return
 
@@ -198,6 +202,10 @@ class Help:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
         await self.response(b_msg=b_msg, custom_id=resp.custom_id)
         return

@@ -260,7 +260,11 @@ class Status:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=fpp)
         return
 
@@ -320,7 +324,11 @@ class Status:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=fpp, ranked=True)
         return
 
@@ -382,7 +390,11 @@ class Status:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=mode.endswith("_fpp"))
         return
 
@@ -448,6 +460,10 @@ class Status:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, fpp=mode.endswith("_fpp"), ranked=True)
         return

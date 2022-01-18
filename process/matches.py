@@ -227,7 +227,11 @@ class Match:
             )
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
 
         if "update" in resp.values:
             return await self.choice_match(b_msg=b_msg)
@@ -289,7 +293,11 @@ class Match:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg, Button), timeout=300)
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, match_id=match_id)
         return
 
@@ -334,7 +342,11 @@ class Match:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg, Button), timeout=300)
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, match_id=match_id)
         return
 
@@ -372,7 +384,11 @@ class Match:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg, Button), timeout=300)
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, match_id=match_id)
         return
 
@@ -410,6 +426,10 @@ class Match:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg, Button), timeout=300)
         except asyncio.TimeoutError:
             return
-        await resp.defer_update()
+
+        try:
+            await resp.defer_update()
+        except discord.NotFound:
+            pass
         await self.response(b_msg=b_msg, custom_id=resp.custom_id, match_id=match_id)
         return
