@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import datetime
 
 
 class APIException(Exception):
@@ -53,4 +54,16 @@ class UnsupportedMediaType(APIException):
 
 class TooManyRequests(APIException):
     """ Too Many Requests"""
-    pass
+    def __init__(self, response, message):
+        super(TooManyRequests, self).__init__(response, message)
+        header = response.headers
+
+        self._reset = float(
+            header.get("X-Ratelimit-Reset", datetime.datetime.now().timestamp())
+        )
+        self.limit = int(header["X-Ratelimit-Limit"])
+        self.remaining = int(header["X-Ratelimit-Remaining"])
+
+    @property
+    def reset(self) -> datetime.datetime:
+        return datetime.datetime.fromtimestamp(self._reset)

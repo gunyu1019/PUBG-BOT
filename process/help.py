@@ -148,7 +148,7 @@ class Help:
     async def main_page(self, page: int = 1, b_msg: Message = None):
         self.page = page
         embed = discord.Embed(color=self.color)
-        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar.url)
+        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar_url)
         embed.description = "† 붙은 명령어는 슬래시 명령어를 지원하지 않습니다."
         embed.set_footer(text="{}/{} 페이지".format(page + 1, len(self._commands) + 1))
 

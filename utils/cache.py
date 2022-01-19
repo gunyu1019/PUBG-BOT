@@ -16,15 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
-
+import asyncio
 import pymysql
 import json
+import inspect
 from datetime import datetime
-from typing import Union, Type, Optional, List
+from typing import Union, Type, Optional, List, Callable
 
 from config.config import parser
 from utils.database import get_database
-from module.pubgpy import player, Client, Season, GameModeReceive, Matches
+from module.pubgpy import player, Client, Season, GameModeReceive, Matches, TooManyRequests
 
 
 class CacheData:
@@ -100,8 +101,9 @@ class CacheData:
 
 
 class CachePlayData(CacheData):
-    def __init__(self, client: Client):
+    def __init__(self, client: Client, too_much_callback: Optional[Callable] = None):
         super().__init__(client)
+        self.too_much_callback = too_much_callback
 
     def save_play_data(
             self,
@@ -150,14 +152,31 @@ class CachePlayData(CacheData):
             player_id: Union[str, player.Player],
             season: Union[str, Season],
             cls: Type[Union[player.SeasonStats, player.RankedStats]]
-    ) -> GameModeReceive:
+    ) -> Optional[GameModeReceive]:
         _player = self.pubg.player_id(player_id)
-        if cls == player.SeasonStats:
-            data = await _player.season_stats(season)
-        elif cls == player.RankedStats:
-            data = await _player.ranked_stats(season)
+        for i in range(5):
+            try:
+                if cls == player.SeasonStats:
+                    data = await _player.season_stats(season)
+                elif cls == player.RankedStats:
+                    data = await _player.ranked_stats(season)
+                else:
+                    raise ValueError("{} is not found".format(cls))
+                break
+            except TooManyRequests as error:
+                timer = (error.reset - datetime.now()).total_seconds()
+                if timer < 0:
+                    continue
+
+                if self.too_much_callback is not None:
+                    if inspect.iscoroutinefunction(self.too_much_callback):
+                        await self.too_much_callback(error=error, index=i)
+                    else:
+                        await self.too_much_callback(error=error, index=i)
+                else:
+                    await asyncio.sleep(error.reset)
         else:
-            raise ValueError("{} is not found".format(cls))
+            return
         return data
 
     async def get_playdata(
@@ -169,9 +188,10 @@ class CachePlayData(CacheData):
         data = self.get_play_data(player_id=player_id, cls=cls, season=season)
         last_update = self.get_lastupdate(player_id=player_id, cls=cls)
         if data is None or data == {} or (datetime.now() - last_update).days >= 2:
-            _player = self.pubg.player_id(player_id)
             new_data = True if data is None or data else False
             data = await self._playdata(player_id=player_id, cls=cls, season=season)
+            if data is None:
+                return
 
             if new_data:
                 self.save_play_data(player_id=player_id, season=season, data=data, update=False)
@@ -190,6 +210,8 @@ class CachePlayData(CacheData):
             cls: Type[Union[player.SeasonStats, player.RankedStats]]
     ):
         data = await self._playdata(player_id=player_id, cls=cls, season=season)
+        if data is None:
+            return
         self.save_play_data(player_id=player_id, season=season, data=data, update=True)
         self.save_lastupdate(player_id=player_id, cls=cls, dt=datetime.now())
         return data

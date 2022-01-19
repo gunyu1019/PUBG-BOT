@@ -103,7 +103,10 @@ class Api:
                     data = await resp.json()
                 else:
                     fp_data = await resp.text()
-                    data = json.loads(fp_data)
+                    if fp_data != "":
+                        data = json.loads(fp_data)
+                    else:
+                        data = {}
 
                 if resp.status == 200:
                     log.debug("Successfully received API results.")

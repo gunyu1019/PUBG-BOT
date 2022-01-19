@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
+import datetime
 
 import discord
 import asyncio
@@ -142,7 +143,10 @@ async def player_platform(
         description="{}가 선택되었습니다.\n값이 잘못되었을 경우 `플랫폼변경` 명령어를 사용해주세요.".format(new_platform),
         color=color
     )
-    await result.update(embed=embed, components=[])
+    try:
+        await result.update(embed=embed, components=[])
+    except discord.NotFound:
+        await msg.edit(embed=embed, components=[])
     platform_data = pubgpy.get_enum(pubgpy.Platforms, new_platform)
     if platform_data is None or platform_data == new_platform:
         embed = discord.Embed(
@@ -153,17 +157,38 @@ async def player_platform(
         await msg.edit(embed=embed)
         return None, None, None
     pubg_client.platform(platform_data)
-    try:
-        player: pubgpy.Player = await pubg_client.player(nickname=nickname)
-    except pubgpy.NotFound:
-        embed = discord.Embed(
-            title="에러",
-            description="사용자를 찾을 수 없습니다. 닉네임을 확인해주세요.",
-            color=error_color
-        )
-        await msg.edit(embed=embed)
-        return None, None, None
-    except pubgpy.TooManyRequests:
+    for i in range(5):
+        try:
+            player: pubgpy.Player = await pubg_client.player(nickname=nickname)
+        except pubgpy.NotFound:
+            embed = discord.Embed(
+                title="에러",
+                description="사용자를 찾을 수 없습니다. 닉네임을 확인해주세요.",
+                color=error_color
+            )
+            await msg.edit(embed=embed)
+            return None, None, None
+        except pubgpy.TooManyRequests as error:
+            timer = (error.reset - datetime.datetime.now()).total_seconds()
+            if timer < 0:
+                continue
+            v = int(timer / 5)
+            if timer % 5 >= 1:
+                v += 1
+
+            for count in range(v):
+                embed = discord.Embed(
+                    title="대기열",
+                    description="너무 많은 요청으로 처리가 지연되고 있습니다. {0}초 후 다시 시도합니다.".format((v - count) * 5),
+                    color=warning_color
+                )
+                if i >= 1:
+                    embed.description += " (재시도: {0}/5회)".format(i+1)
+                await msg.edit(embed=embed)
+                await asyncio.sleep(5)
+        else:
+            break
+    else:
         embed = discord.Embed(
             title="에러",
             description="너무 많은 요청으로 처리가 지연되고 있습니다. 잠시 후 다시 시도해주세요.",

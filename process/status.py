@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
 import asyncio
-
+import copy
 import discord
 
 from pytz import timezone
@@ -53,7 +53,7 @@ class Status:
         self.ctx = ctx
         self.client = client
         self.pubg = pubg
-        self.database = CachePlayData(self.pubg)
+        self.database = CachePlayData(self.pubg, too_much_callback=self.too_many_request)
         self.player_nickname = player
         self.player_id = player_id
         self.player = self.pubg.player_id(self.player_id)
@@ -61,6 +61,7 @@ class Status:
 
         self.before_func = None
         self.before_mode: Optional[Union[bool, str]] = None
+        self.before_response = None
 
         self.total_player_btn = None
         self.solo_player_btn = None
@@ -106,6 +107,40 @@ class Status:
             emoji=discord.PartialEmoji(name="\U0000274C"),
             custom_id="cancel"
         )
+
+    async def too_many_request(self, error, index):
+        timer = (error.reset - datetime.now()).total_seconds()
+        if timer < 0:
+            return
+        v = int(timer / 5)
+        if timer % 5 >= 1:
+            v += 1
+
+        for count in range(v):
+            if self.before_response is not None:
+                embed = discord.Embed(
+                    description="너무 많은 요청으로 처리가 지연되고 있습니다. {0}초 후 다시 시도합니다.".format((v - count) * 5),
+                    color=self.warning_color
+                )
+                embed.set_author(
+                    icon_url="attachment://" + image_name[self.platform],
+                    name=f"{self.player_nickname}님의 전적 | 대기열"
+                )
+                if index >= 1:
+                    embed.description += " (재시도: {0}/5회)".format(index+1)
+
+                button = copy.copy(self.button)
+                for _index, _ in enumerate(button):
+                    button[_index].disabled = True
+
+                await self.before_response.edit(
+                    embed=embed,
+                    components=[
+                        ActionRow(components=button)
+                    ]
+                )
+            await asyncio.sleep(5)
+        return
 
     @property
     def button(self):
@@ -180,6 +215,7 @@ class Status:
 
     async def response(self, b_msg: Message, custom_id: str, fpp: bool = False, ranked: bool = False):
         if custom_id == "update":
+            self.before_response = b_msg
             if ranked:
                 await self._ranked_update_data(self.player_id)
             else:
@@ -207,7 +243,10 @@ class Status:
     async def normal_total(self, fpp: bool = False, b_msg: Message = None):
         self.before_func = self.normal_total
         self.before_mode = fpp
+        self.before_response = b_msg
         section = await self._normal_data(self.player_id)
+        if section is None:
+            return
         embed = discord.Embed(color=self.color)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 전적")
 
@@ -248,6 +287,7 @@ class Status:
                     ActionRow(components=self.button)
                 ]
             )
+            self.before_response = b_msg
         else:
             await b_msg.edit(
                 attachment=self._platform_file(), embed=embed,
@@ -271,7 +311,10 @@ class Status:
     async def ranked_total(self, fpp: bool = False, b_msg: Message = None):
         self.before_func = self.ranked_total
         self.before_mode = fpp
+        self.before_response = b_msg
         section = await self._ranked_data(self.player_id)
+        if section is None:
+            return
         embed = discord.Embed(color=self.color)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 전적")
 
@@ -312,6 +355,7 @@ class Status:
                     ActionRow(components=self.button)
                 ]
             )
+            self.before_response = b_msg
         else:
             await b_msg.edit(
                 attachment=self._platform_file(), embed=embed,
@@ -335,7 +379,10 @@ class Status:
     async def normal_mode(self, mode: str, b_msg: Message = None):
         self.before_func = self.normal_mode
         self.before_mode = mode
+        self.before_response = b_msg
         section = await self._normal_data(self.player_id)
+        if section is None:
+            return
         embed = discord.Embed(color=self.color)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 전적")
 
@@ -378,6 +425,7 @@ class Status:
                     ActionRow(components=self.button)
                 ]
             )
+            self.before_response = b_msg
         else:
             await b_msg.edit(
                 attachment=self._platform_file(), embed=embed,
@@ -401,7 +449,10 @@ class Status:
     async def ranked_mode(self, mode: str, b_msg: Message = None):
         self.before_func = self.ranked_mode
         self.before_mode = mode
+        self.before_response = b_msg
         section = await self._ranked_data(self.player_id)
+        if section is None:
+            return
         embed = discord.Embed(color=self.color)
         embed.set_author(icon_url="attachment://" + image_name[self.platform], name=f"{self.player_nickname}님의 전적")
 
@@ -449,6 +500,7 @@ class Status:
                     ActionRow(components=self.button)
                 ]
             )
+            self.before_response = b_msg
         else:
             await b_msg.edit(
                 attachments=[self._platform_file(), file], embed=embed,
