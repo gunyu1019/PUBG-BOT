@@ -74,35 +74,35 @@ class Matches:
     @permission(4)
     async def match(self, ctx, option1: str, option2: int = None, option3: bool = False):
         await ctx.defer()
-        player_id, _platform = await player.player_info(option1, ctx, self.client, self.pubgpy)
-        if player_id is None:
+        player_info = await player.player_info(option1, ctx, self.client, self.pubgpy)
+        if player_info is None:
             return
         match = Match(
                 ctx=ctx,
                 client=self.client,
                 pubg=self.pubgpy,
-                player_id=player_id,
+                player_id=player_info.id,
                 player=option1
         )
-        self.pubgpy.platform(_platform)
+        self.pubgpy.platform(player_info.platform)
 
         if option3:
-            await match.database2.update_matches(player_id=player_id)
+            await match.database2.update_matches(player_id=player_info.id)
 
         msg = None
         if option2 is None:
             msg, option2 = await match.choice_match()
             if msg is None:
                 return
-        match_list = match.database2.get_matches_lists(player_id=player_id)
+        match_list = match.database2.get_matches_lists(player_id=player_info.id)
         if len(match_list) < option2:
             await self._option_error(
-                ctx, "해당 순서의 매치를 찾을 수 없습니다. (발견된 매치 갯수: {})".format(command, len(match_list))
+                ctx, "해당 순서의 매치를 찾을 수 없습니다. (발견된 매치 갯수: {})".format(len(match_list))
             )
             return
         elif 0 > option2:
             await self._option_error(
-                ctx, "매치 순서값으로 음수 값을 줄 수 없습니다.".format(command)
+                ctx, "매치 순서값으로 음수 값을 줄 수 없습니다."
             )
             return
         await match.match_stats(match_list[option2], msg)

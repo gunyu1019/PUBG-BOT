@@ -21,13 +21,14 @@ import datetime
 import discord
 import asyncio
 import pymysql
+from collections import namedtuple
 
 from config.config import parser
 from discord.ext import interaction
 from discord.ext.interaction import ApplicationContext, ComponentsContext, ActionRow, Button
 from module import pubgpy
 from utils.database import get_database
-from typing import Union
+from typing import Optional
 
 xbox = discord.PartialEmoji(name="XBOX", id=718482204035907586)
 playstation = discord.PartialEmoji(name="PS", id=718482204417720400)
@@ -48,13 +49,16 @@ color = int(parser.get("Color", "default"), 16)
 error_color = int(parser.get("Color", "error"), 16)
 warning_color = int(parser.get("Color", "warning"), 16)
 
+Player = namedtuple('Player', ['id', 'platform'])
+PlatformSelection = namedtuple('Player', ['player', 'platform_id'])
+
 
 async def player_info(
         nickname: str,
         ctx: ApplicationContext,
         client: discord.Client,
         pubg_client: pubgpy.Client
-):
+) -> Optional[Player]:
     connect = get_database()
     cur = connect.cursor(pymysql.cursors.DictCursor)
 
@@ -62,13 +66,13 @@ async def player_info(
     cur.execute(sql, nickname)
     player_data = cur.fetchone()
     if player_data is None:
-        player_id, platform, platform_id = await player_platform(nickname, ctx, client, pubg_client)
-        if player_id is None:
+        _player_platform = await player_platform(nickname, ctx, client, pubg_client)
+        if _player_platform is None:
             connect.close()
-            return None, None
+            return None
 
         sql = pymysql.escape_string("select EXISTS (select nickname from player_data where player_id=%s) as success")
-        cur.execute(sql, player_id)
+        cur.execute(sql, _player_platform.player.id)
         result = cur.fetchone()
         result = result.get("success", False)
         if not result:
@@ -79,13 +83,15 @@ async def player_info(
             sql = pymysql.escape_string(
                 "UPDATE player_data SET nickname = %s, platform = %s WHERE player_id = %s"
             )
-        cur.execute(sql, (nickname, int(platform_id), player_id))
+        cur.execute(sql, (nickname, int(_player_platform.platform_id), _player_platform.player.id))
         connect.commit()
+        connect.close()
+        return _player_platform.player
     else:
         player_id = player_data['player_id']
         platform = game_enums[player_data['platform']]
     connect.close()
-    return player_id, platform
+    return Player(player_id, platform)
 
 
 async def player_platform(
@@ -93,7 +99,7 @@ async def player_platform(
         ctx: ApplicationContext,
         client: interaction.Client,
         pubg_client: pubgpy.Client
-):
+) -> Optional[PlatformSelection]:
     embed = discord.Embed(
         title="플랫폼 선택!",
         description="해당 계정의 플랫폼을 선택해주세요.\n초기에 한번만 눌러주시면 됩니다.",
@@ -136,15 +142,18 @@ async def player_platform(
     try:
         result: ComponentsContext = await client.wait_for_global_component(check=check, timeout=300)
     except asyncio.TimeoutError:
-        return None, None, None
+        return None
     new_platform = game_ids[int(result.custom_id)]
     embed = discord.Embed(
         title="플랫폼 선택!",
         description="{}가 선택되었습니다.\n값이 잘못되었을 경우 `플랫폼변경` 명령어를 사용해주세요.".format(new_platform),
         color=color
     )
+    for x in msg.components:
+        x.disabled = True
+
     try:
-        await result.update(embed=embed, components=[])
+        await result.update(embed=embed, components=msg.components)
     except discord.NotFound:
         await msg.edit(embed=embed, components=[])
     platform_data = pubgpy.get_enum(pubgpy.Platforms, new_platform)
@@ -155,7 +164,7 @@ async def player_platform(
             color=error_color
         )
         await msg.edit(embed=embed)
-        return None, None, None
+        return None
     pubg_client.platform(platform_data)
     for i in range(5):
         try:
@@ -167,7 +176,7 @@ async def player_platform(
                 color=error_color
             )
             await msg.edit(embed=embed)
-            return None, None, None
+            return None
         except pubgpy.TooManyRequests as error:
             timer = (error.reset - datetime.datetime.now()).total_seconds()
             if timer < 0:
@@ -195,8 +204,11 @@ async def player_platform(
             color=error_color
         )
         await msg.edit(embed=embed)
-        return None, None, None
+        return None
     player_id = player.id
     platform = platform_data
 
-    return player_id, platform, result.custom_id
+    return PlatformSelection(
+        Player(player_id, platform),
+        result.custom_id
+    )

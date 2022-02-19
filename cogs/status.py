@@ -183,13 +183,14 @@ class Status:
             return
 
         await ctx.defer()
-        player_id, _platform = await player.player_info(option2, ctx, self.client, self.pubgpy)
-        if player_id is None:
+        # player_id, _platform = await player.player_info(option2, ctx, self.client, self.pubgpy)
+        player_info = await player.player_info(option2, ctx, self.client, self.pubgpy)
+        if player_info is None:
             return
 
         season = None
         if option3 is not None:
-            season = pubgpy.get_season(option3, _platform)
+            season = pubgpy.get_season(option3, player_info.platform)
         else:
             connect = get_database()
             cur = connect.cursor(pymysql.cursors.DictCursor)
@@ -199,17 +200,17 @@ class Status:
             database_platform = {"steam": "Steam", "kakao": "Kakao", "xbox": "XBOX", "psn": "PSN", "stadia": "Stadia"}
             connect.close()
 
-            seasons = json.loads(season_data.get(database_platform[_platform.value], {}))
+            seasons = json.loads(season_data.get(database_platform[player_info.platform.value], {}))
             for s in seasons.get("data", []):
                 if s.get("attributes", {}).get("isCurrentSeason"):
                     season = s.get("id")
 
-        self.pubgpy.platform(_platform)
+        self.pubgpy.platform(player_info.platform)
         status = ProcessStatus(
                 ctx=ctx,
                 client=self.client,
                 pubg=self.pubgpy,
-                player_id=player_id,
+                player_id=player_info.id,
                 player=option2,
                 season=season
         )
@@ -258,15 +259,15 @@ class Status:
         if ctx.application_type == 1:
             options = ctx.options
             nickname: str = options.get("닉네임")
-        player_id, _, platform_id = await player.player_platform(nickname, ctx, self.client, self.pubgpy)
-        if player_id is None:
+        result = await player.player_platform(nickname, ctx, self.client, self.pubgpy)
+        if result is None:
             connect.close()
             return
 
         sql = pymysql.escape_string(
             "UPDATE player_data SET platform=%s WHERE player_id=%s and nickname=%s"
         )
-        cur.execute(sql, (int(platform_id), player_id, nickname))
+        cur.execute(sql, (int(result.player.id), result.platform_id, nickname))
         connect.commit()
         connect.close()
         return
