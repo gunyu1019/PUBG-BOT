@@ -15,7 +15,7 @@
     <img src="https://img.shields.io/badge/release_version-2.3-0080aa?style=flat" alt="Release" >
 </p>
 
-> **[Contect]**<br/>
+> **[Contact]**<br/>
 > 해당 프로젝트에 대한 정해진 플랫폼 이외를 통하여 문의하는 것을 일체 금지합니다.<br/>
 > 프로젝트에 관련된 질문은 Github의 [Issues](https://github.com/gunyu1019/PUBG-BOT/issues) 혹은 [포럼 서버](https://yhs.kr/PUBG_BOT/forum.html) 만을 이용해주시기 부탁드립니다.
 
