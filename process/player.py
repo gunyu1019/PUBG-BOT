@@ -21,14 +21,13 @@ import datetime
 import discord
 import asyncio
 import pymysql
-from collections import namedtuple
+from typing import Optional, NamedTuple
 
 from config.config import parser
 from discord.ext import interaction
 from discord.ext.interaction import ApplicationContext, ComponentsContext, ActionRow, Button
 from module import pubgpy
 from utils.database import get_database
-from typing import Optional
 
 xbox = discord.PartialEmoji(name="XBOX", id=718482204035907586)
 playstation = discord.PartialEmoji(name="PS", id=718482204417720400)
@@ -49,8 +48,16 @@ color = int(parser.get("Color", "default"), 16)
 error_color = int(parser.get("Color", "error"), 16)
 warning_color = int(parser.get("Color", "warning"), 16)
 
-Player = namedtuple('Player', ['id', 'platform'])
-PlatformSelection = namedtuple('Player', ['player', 'platform_id'])
+
+class Player(NamedTuple):
+    id: str
+    platform: pubgpy.Platforms
+    message: Optional[interaction.Message] = None
+
+
+class PlatformSelection(NamedTuple):
+    player: Player
+    platform_id: int
 
 
 async def player_info(
@@ -209,6 +216,6 @@ async def player_platform(
     platform = platform_data
 
     return PlatformSelection(
-        Player(player_id, platform),
+        Player(player_id, platform, msg),
         result.custom_id
     )

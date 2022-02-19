@@ -188,6 +188,10 @@ class Status:
         if player_info is None:
             return
 
+        b_msg = None
+        if player_info.message is not None:
+            b_msg = player_info.message
+
         season = None
         if option3 is not None:
             season = pubgpy.get_season(option3, player_info.platform)
@@ -216,38 +220,38 @@ class Status:
         )
         if ctx.name == "전적솔로":
             if option1 == 0:
-                await status.normal_mode(mode="solo_fpp")
+                await status.normal_mode(mode="solo_fpp", b_msg=b_msg)
             elif option1 == 1:
-                await status.normal_mode(mode="solo")
+                await status.normal_mode(mode="solo", b_msg=b_msg)
             elif option1 == 2:
-                await status.ranked_mode(mode="solo_fpp")
+                await status.ranked_mode(mode="solo_fpp", b_msg=b_msg)
             elif option1 == 3:
-                await status.ranked_mode(mode="solo")
+                await status.ranked_mode(mode="solo", b_msg=b_msg)
         elif ctx.name == "전적듀오":
             if option1 == 0:
-                await status.normal_mode(mode="duo_fpp")
+                await status.normal_mode(mode="duo_fpp", b_msg=b_msg)
             elif option1 == 1:
-                await status.normal_mode(mode="duo")
+                await status.normal_mode(mode="duo", b_msg=b_msg)
             elif option1 == 2 or option1 == 3:
                 await self._option_error(ctx, "**{}**\n 경쟁전에서는 듀오모드를 지원하지 않습니다.".format(command))
         elif ctx.name == "전적스쿼드":
             if option1 == 0:
-                await status.normal_mode(mode="squad_fpp")
+                await status.normal_mode(mode="squad_fpp", b_msg=b_msg)
             elif option1 == 1:
-                await status.normal_mode(mode="squad")
+                await status.normal_mode(mode="squad", b_msg=b_msg)
             elif option1 == 2:
-                await status.ranked_mode(mode="squad_fpp")
+                await status.ranked_mode(mode="squad_fpp", b_msg=b_msg)
             elif option1 == 3:
-                await status.ranked_mode(mode="squad")
+                await status.ranked_mode(mode="squad", b_msg=b_msg)
         else:
             if option1 == 0:
-                await status.normal_total(fpp=True)
+                await status.normal_total(fpp=True, b_msg=b_msg)
             elif option1 == 1:
-                await status.normal_total()
+                await status.normal_total(b_msg=b_msg)
             elif option1 == 2:
-                await status.ranked_total(fpp=True)
+                await status.ranked_total(fpp=True, b_msg=b_msg)
             elif option1 == 3:
-                await status.ranked_total()
+                await status.ranked_total(b_msg=b_msg)
         return
 
     @interaction.command(name="플랫폼변경", description='등록된 유저의 플랫폼을 잘못 등록할 경우에 사용하는 기능입니다. 명령어를 이용하여 등록된 사용자의 플랫폼을 변경합니다.')
