@@ -67,8 +67,8 @@ def check_perm(author):
         return 2
     elif is_admin(author):
         return 3
-    elif is_banned(author.id):
-        return 9
+    # elif is_banned(author.id):
+    #     return 9
     else:
         return 4
 

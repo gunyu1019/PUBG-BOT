@@ -19,5 +19,7 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 
 import configparser
 
+from utils.directory import directory
+
 parser = configparser.ConfigParser()
-parser.read("config/config.ini", encoding="utf-8")
+parser.read("{directory}/config/config.ini".format(directory=directory), encoding="utf-8")

@@ -97,12 +97,12 @@ class Matches:
         match_list = match.database2.get_matches_lists(player_id=player_id)
         if len(match_list) < option2:
             await self._option_error(
-                ctx, "**{}**\n 해당 순서의 매치를 찾을 수 없습니다. (발견된 매치 갯수: {})".format(command, len(match_list))
+                ctx, "해당 순서의 매치를 찾을 수 없습니다. (발견된 매치 갯수: {})".format(command, len(match_list))
             )
             return
         elif 0 > option2:
             await self._option_error(
-                ctx, "**{}**\n 매치 순서값으로 음수 값을 줄 수 없습니다.".format(command)
+                ctx, "매치 순서값으로 음수 값을 줄 수 없습니다.".format(command)
             )
             return
         await match.match_stats(match_list[option2], msg)

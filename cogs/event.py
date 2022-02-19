@@ -76,6 +76,14 @@ class Events:
         if server_number is not None:
             logger_guild.info(
                 guild.name + '에 가입이 확인되었습니다. 서버번호: ' + str(server_number) + '번, 서버멤버' + str(guild.member_count) + '명')
+
+        await (
+            self.bot.get_guild(786153760824492062)
+                .get_channel(938656148423344178)
+                .send(
+                "새로운 서버에 추가되었습니다. **(현재 서버수 : {0})**".format(self.bot.guilds)
+            )
+        )
         return
 
     @commands.Cog.listener()
