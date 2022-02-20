@@ -66,38 +66,49 @@ async def player_info(
         client: discord.Client,
         pubg_client: pubgpy.Client
 ) -> Optional[Player]:
-    connect = get_database()
-    cur = connect.cursor(pymysql.cursors.DictCursor)
-
-    sql = pymysql.escape_string("SELECT player_id, platform FROM player_data WHERE nickname = %s")
-    cur.execute(sql, nickname)
-    player_data = cur.fetchone()
+    connect = await get_database()
+    player_data = await connect.query(
+        table="player_data",
+        key_name="nickname",
+        key=nickname,
+        filter_col=["player_id", "platform"]
+    )
     if player_data is None:
         _player_platform = await player_platform(nickname, ctx, client, pubg_client)
         if _player_platform is None:
-            connect.close()
+            await connect.close()
             return None
 
-        sql = pymysql.escape_string("select EXISTS (select nickname from player_data where player_id=%s) as success")
-        cur.execute(sql, _player_platform.player.id)
-        result = cur.fetchone()
-        result = result.get("success", False)
+        result = await connect.is_exist(
+            table="player_data",
+            key_name="player_id",
+            key=_player_platform.player.id
+        )
         if not result:
-            sql = pymysql.escape_string(
-                "INSERT INTO player_data(nickname, platform, player_id) VALUE (%s, %s, %s)"
+            await connect.insert(
+                table="player_data",
+                value={
+                    "nickname": nickname,
+                    "platform": int(_player_platform.platform_id),
+                    "player_id": _player_platform.player.id
+                }
             )
         else:
-            sql = pymysql.escape_string(
-                "UPDATE player_data SET nickname = %s, platform = %s WHERE player_id = %s"
+            await connect.update(
+                table="player_data",
+                key_name="player_id",
+                key=_player_platform.player.id,
+                value={
+                    "nickname": nickname,
+                    "platform": int(_player_platform.platform_id)
+                }
             )
-        cur.execute(sql, (nickname, int(_player_platform.platform_id), _player_platform.player.id))
-        connect.commit()
-        connect.close()
+        await connect.close(check_commit=True)
         return _player_platform.player
     else:
         player_id = player_data['player_id']
         platform = game_enums[player_data['platform']]
-    connect.close()
+    await connect.close()
     return Player(player_id, platform)
 
 

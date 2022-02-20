@@ -255,22 +255,21 @@ class Status:
     @interaction.option(name='닉네임', description='플레이어의 닉네임을 입력해주세요.')
     @permission(4)
     async def platform_change(self, ctx, nickname: str):
-        connect = get_database()
-        cur = connect.cursor(pymysql.cursors.DictCursor)
+        connect = await get_database()
         if ctx.application_type == 1:
             options = ctx.options
             nickname: str = options.get("닉네임")
         result = await player.player_platform(nickname, ctx, self.client, self.pubgpy)
         if result is None:
-            connect.close()
+            await connect.close()
             return
 
-        sql = pymysql.escape_string(
-            "UPDATE player_data SET platform=%s WHERE player_id=%s and nickname=%s"
+        await connect.update(
+            table="player_data", key_name="player_id", key=result.player.id, value={
+                "platform": result.platform_id
+            }
         )
-        cur.execute(sql, (int(result.player.id), result.platform_id, nickname))
-        connect.commit()
-        connect.close()
+        await connect.close(check_commit=True)
         return
 
 

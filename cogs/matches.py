@@ -94,7 +94,7 @@ class Matches:
             msg, option2 = await match.choice_match()
             if msg is None:
                 return
-        match_list = match.database2.get_matches_lists(player_id=player_info.id)
+        match_list = await match.database2.get_matches_lists(player_id=player_info.id)
         if len(match_list) < option2:
             await self._option_error(
                 ctx, "해당 순서의 매치를 찾을 수 없습니다. (발견된 매치 갯수: {})".format(len(match_list))
