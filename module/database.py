@@ -26,6 +26,20 @@ class Database:
         self.is_connect = False
         self.is_commit = False
 
+    @classmethod
+    def connect_inject(cls, connection: aiomysql.Connection):
+        new_cls = cls(
+            ip_address=connection.host,
+            port=connection.port,
+            user=connection.user,
+            password=getattr(connection, "_password"),
+            database=connection.db,
+            charset=connection.charset
+        )
+        new_cls.connection = connection
+        new_cls.is_connect = True
+        return
+
     async def connect(self) -> aiomysql.Connection:
         connection = self.connection = await aiomysql.connect(
             host=self.ip_address,
@@ -129,14 +143,42 @@ class Database:
             await self.close(check_commit=False)
         return result
 
-    def query(self, **kwargs):
+    def query(
+            self,
+            table: Union[classmethod, str],
+            key_name: str = 'id',
+            key: Union[int, str, list, tuple] = None,
+            filter_col: List[str] = None,
+            similar: bool = False,
+            default: Any = None
+    ):
         return self._query_base(
-            fetch_all=False, **kwargs
+            fetch_all=False,
+            table=table,
+            key_name=key_name,
+            key=key,
+            filter_col=filter_col,
+            similar=similar,
+            default=default
         )
 
-    def query_all(self, **kwargs):
+    def query_all(
+            self,
+            table: Union[classmethod, str],
+            key_name: str = 'id',
+            key: Union[int, str, list, tuple] = None,
+            filter_col: List[str] = None,
+            similar: bool = False,
+            default: Any = None
+    ):
         return self._query_base(
-            fetch_all=True, **kwargs
+            fetch_all=True,
+            table=table,
+            key_name=key_name,
+            key=key,
+            filter_col=filter_col,
+            similar=similar,
+            default=default
         )
 
     async def is_exist(

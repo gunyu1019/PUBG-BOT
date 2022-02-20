@@ -18,13 +18,17 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import pymysql
+import aiomysql
 import logging
+from typing import Optional
+
 from config.config import parser
+from module.database import Database
 
 log = logging.getLogger(__name__)
 
 
-def get_database(database=None):
+def get_database_sync(database=None) -> Optional[pymysql.Connection]:
     for tries in ['MySQL1', 'MySQL2']:
         host = parser.get(tries, 'host')
         user = parser.get(tries, 'user')
@@ -36,6 +40,23 @@ def get_database(database=None):
         try:
             log.debug(f"{tries} section을 통하여 로그인을 시도합니다.")
             connection = pymysql.connect(host=host, user=user, password=password, db=database, charset=encoding)
-        except pymysql.err.OperationalError:
+        except pymysql.OperationalError:
             continue
         return connection
+
+
+async def get_database(database=None) -> Optional[Database]:
+    for tries in ['MySQL1', 'MySQL2']:
+        host = parser.get(tries, 'host')
+        user = parser.get(tries, 'user')
+        password = parser.get(tries, 'pass')
+        if database is None:
+            database = parser.get(tries, 'database')
+        encoding = parser.get(tries, 'encoding')
+
+        try:
+            log.debug(f"{tries} section을 통하여 로그인을 시도합니다.")
+            connection = await aiomysql.connect(host=host, user=user, password=password, db=database, charset=encoding)
+        except aiomysql.OperationalError:
+            continue
+        return Database.connect_inject(connection)

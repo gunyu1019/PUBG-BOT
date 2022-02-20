@@ -196,13 +196,10 @@ class Status:
         if option3 is not None:
             season = pubgpy.get_season(option3, player_info.platform)
         else:
-            connect = get_database()
-            cur = connect.cursor(pymysql.cursors.DictCursor)
-            sql = "SELECT * FROM SEASON_STATUS"
-            cur.execute(sql)
-            season_data = cur.fetchone()
+            connect = await get_database()
+            season_data = await connect.query(table="SEASON_STATUS")
             database_platform = {"steam": "Steam", "kakao": "Kakao", "xbox": "XBOX", "psn": "PSN", "stadia": "Stadia"}
-            connect.close()
+            await connect.close()
 
             seasons = json.loads(season_data.get(database_platform[player_info.platform.value], {}))
             for s in seasons.get("data", []):

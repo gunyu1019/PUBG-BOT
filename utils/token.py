@@ -20,9 +20,9 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 import pymysql
 
 from config.config import parser
-from utils.database import get_database
+from utils.database import get_database_sync
 
-connect = get_database()
+connect = get_database_sync()
 
 cur = connect.cursor(pymysql.cursors.DictCursor)
 try:

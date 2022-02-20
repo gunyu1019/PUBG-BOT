@@ -45,13 +45,15 @@ class Server:
     @permission(4)
     async def status(self, ctx: interaction.ApplicationContext):
         await ctx.defer()
-        connect = get_database()
-        cur = connect.cursor(pymysql.cursors.DictCursor)
-        cur.execute("SELECT id, date, data FROM SERVER_DATA")
-        data = cur.fetchall()
+        connect = await get_database()
+        data = await connect.query_all(
+            table="SERVER_DATA",
+            filter_col=['id', 'date', 'data']
+        )
 
         datetime = [i.get("date").strftime('%H:%M') for i in data]
         players = [i.get("data", 0) for i in data]
+        await connect.close()
 
         plt.clf()
         font_path = f"{directory}/assets/Font/NotoSansKR-Bold.otf"
