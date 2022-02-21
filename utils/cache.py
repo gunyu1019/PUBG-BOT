@@ -18,20 +18,25 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
 import asyncio
 import pymysql
+import aiomysql
 import json
 import inspect
 from datetime import datetime
 from typing import Union, Type, Optional, List, Callable
 
 from config.config import parser
+from module.database import Database
 from utils.database import get_database
 from module.pubgpy import player, Client, Season, GameModeReceive, Matches, TooManyRequests
 
 
 class CacheData:
     def __init__(self, client: Client):
-        self.database = get_database()
+        self.database: Optional[Database] = None
         self.pubg = client
+
+    async def get_database(self):
+        self.database = await get_database()
 
     @staticmethod
     def _get_last_update(cls) -> Optional[str]:
@@ -55,7 +60,7 @@ class CacheData:
         return self.database.commit()
 
     def close(self):
-        return self.database.close()
+        return self.database.close(check_commit=True)
 
     @staticmethod
     def _dump_dict(data: Union[dict, list]) -> str:
@@ -67,36 +72,39 @@ class CacheData:
             return {}
         return json.loads(data)
 
-    def save_lastupdate(
+    async def save_lastupdate(
             self,
             player_id: Union[str, player.Player],
             cls: Type[Union[player.SeasonStats, player.RankedStats, player.Player]],
             dt: datetime
     ):
-        cur = self.database.cursor(pymysql.cursors.DictCursor)
         player_id = player_id.id if isinstance(player_id, player.Player) else player_id
-        command = pymysql.escape_string(
-            "UPDATE player_data SET {} = %s WHERE player_id = %s".format(self._get_last_update(cls))
+        await self.database.update(
+            table="player_data",
+            key_name="player_id",
+            key=player_id,
+            value={
+                self._get_last_update(cls): dt.strftime("%Y-%m-%d %H:%M:%S")
+            }
         )
-        cur.execute(command, (dt.strftime("%Y-%m-%d %H:%M:%S"), player_id))
-        self.commit()
-        cur.close()
+        await self.commit()
         return
 
-    def get_lastupdate(
+    async def get_lastupdate(
             self,
             player_id: Union[str, player.Player],
             cls: Type[Union[player.SeasonStats, player.RankedStats, player.Player]]
     ) -> Optional[datetime]:
-        cur = self.database.cursor(pymysql.cursors.DictCursor)
+        if self.database is None:
+            await self.get_database()
         player_id = player_id.id if isinstance(player_id, player.Player) else player_id
-        command = pymysql.escape_string(
-            "SELECT {} FROM player_data WHERE player_id = %s".format(self._get_last_update(cls))
+        data = await self.database.query(
+            table="player_data",
+            key_name="player_id",
+            key=player_id,
+            filter_col=[self._get_last_update(cls)]
         )
-        cur.execute(command, player_id)
-        data = cur.fetchone()
         result = data.get(self._get_last_update(cls)) if data is not None else None
-        cur.close()
         return result
 
 
@@ -105,7 +113,7 @@ class CachePlayData(CacheData):
         super().__init__(client)
         self.too_much_callback = too_much_callback
 
-    def save_play_data(
+    async def save_play_data(
             self,
             player_id: Union[str, player.Player],
             season: Union[str, Season],
@@ -115,7 +123,7 @@ class CachePlayData(CacheData):
         season = season.id if isinstance(season, Season) else season
         player_id = player_id.id if isinstance(player_id, player.Player) else player_id
         cls = data.type_class
-        cur = self.database.cursor(pymysql.cursors.DictCursor)
+        cur = await self.database.get_cursor(aiomysql.cursors.DictCursor)
         if update:
             command = pymysql.escape_string(
                 "UPDATE {} SET player_data=%s WHERE player_id=%s and season = %s".format(self._get_mode(cls))
@@ -124,12 +132,12 @@ class CachePlayData(CacheData):
             command = pymysql.escape_string(
                 "INSERT INTO {}(player_data, player_id, season) value (%s, %s, %s)".format(self._get_mode(cls))
             )
-        cur.execute(command, (self._dump_dict(data.data), player_id, season))
-        self.commit()
-        cur.close()
+        await cur.execute(command, (self._dump_dict(data.data), player_id, season))
+        await self.commit()
+        await cur.close()
         return
 
-    def get_play_data(
+    async def get_play_data(
             self,
             player_id: Union[str, player.Player],
             season: Union[str, Season],
@@ -137,14 +145,14 @@ class CachePlayData(CacheData):
     ):
         season = season.id if isinstance(season, Season) else season
         player_id = player_id.id if isinstance(player_id, player.Player) else player_id
-        cur = self.database.cursor(pymysql.cursors.DictCursor)
+        cur = await self.database.get_cursor(aiomysql.cursors.DictCursor)
         command = pymysql.escape_string(
             "SELECT player_data FROM {} WHERE player_id = %s AND season = %s".format(self._get_mode(cls))
         )
-        cur.execute(command, (player_id, season))
-        data = cur.fetchone()
+        await cur.execute(command, (player_id, season))
+        data = await cur.fetchone()
         result = self._load_dict(data.get("player_data")) if data is not None else None
-        cur.close()
+        await cur.close()
         return result
 
     async def _playdata(
@@ -185,8 +193,10 @@ class CachePlayData(CacheData):
             season: Union[str, Season],
             cls: Type[Union[player.SeasonStats, player.RankedStats]]
     ):
-        data = self.get_play_data(player_id=player_id, cls=cls, season=season)
-        last_update = self.get_lastupdate(player_id=player_id, cls=cls)
+        if self.database is None:
+            await self.get_database()
+        data = await self.get_play_data(player_id=player_id, cls=cls, season=season)
+        last_update = await self.get_lastupdate(player_id=player_id, cls=cls)
         if data is None or data == {} or (datetime.now() - last_update).days >= 2:
             new_data = True if data is None or data else False
             data = await self._playdata(player_id=player_id, cls=cls, season=season)
@@ -194,11 +204,11 @@ class CachePlayData(CacheData):
                 return
 
             if new_data:
-                self.save_play_data(player_id=player_id, season=season, data=data, update=False)
+                await self.save_play_data(player_id=player_id, season=season, data=data, update=False)
             else:
-                self.save_play_data(player_id=player_id, season=season, data=data, update=True)
+                await self.save_play_data(player_id=player_id, season=season, data=data, update=True)
 
-            self.save_lastupdate(player_id=player_id, cls=cls, dt=datetime.now())
+            await self.save_lastupdate(player_id=player_id, cls=cls, dt=datetime.now())
         if isinstance(data, dict):
             data = GameModeReceive(data, cls)
         return data
@@ -209,11 +219,13 @@ class CachePlayData(CacheData):
             season: Union[str, Season],
             cls: Type[Union[player.SeasonStats, player.RankedStats]]
     ):
+        if self.database is None:
+            await self.get_database()
         data = await self._playdata(player_id=player_id, cls=cls, season=season)
         if data is None:
             return
-        self.save_play_data(player_id=player_id, season=season, data=data, update=True)
-        self.save_lastupdate(player_id=player_id, cls=cls, dt=datetime.now())
+        await self.save_play_data(player_id=player_id, season=season, data=data, update=True)
+        await self.save_lastupdate(player_id=player_id, cls=cls, dt=datetime.now())
         return data
 
 
@@ -221,59 +233,66 @@ class CacheMatchesList(CacheData):
     def __init__(self, client: Client):
         super().__init__(client)
 
-    def save_matches_lists(
+    async def save_matches_lists(
             self,
             player_id: Union[str, player.Player],
             data: List[str],
             update: bool = False
     ):
         player_id = player_id.id if isinstance(player_id, player.Player) else player_id
-        cur = self.database.cursor(pymysql.cursors.DictCursor)
-        command = pymysql.escape_string(
-            "UPDATE player_data SET matches_data=%s WHERE player_id=%s"
+        await self.database.update(
+            table="player_data",
+            key_name="player_id",
+            key=player_id,
+            value={
+                "matches_data": self._dump_dict(data)
+            }
         )
-        cur.execute(command, (self._dump_dict(data), player_id))
-        self.commit()
-        cur.close()
+        await self.commit()
         return
 
-    def get_matches_lists(
+    async def get_matches_lists(
             self,
             player_id: Union[str, player.Player]
     ):
+        if self.database is None:
+            await self.get_database()
         player_id = player_id.id if isinstance(player_id, player.Player) else player_id
-        cur = self.database.cursor(pymysql.cursors.DictCursor)
-        command = pymysql.escape_string(
-            "SELECT matches_data FROM player_data WHERE player_id = %s"
+        data = await self.database.query(
+            table="player_data",
+            key_name="player_id",
+            key=player_id,
+            filter_col=["matches_data"]
         )
-        cur.execute(command, player_id)
-        data = cur.fetchone()
         result = self._load_dict(data.get("matches_data")) if data is not None else None
-        cur.close()
         return result
 
     async def get_matches(
             self,
             player_id: Union[str, player.Player]
     ):
-        data = self.get_matches_lists(player_id=player_id)
-        last_update = self.get_lastupdate(player_id=player_id, cls=player.Player)
+        if self.database is None:
+            await self.get_database()
+        data = await self.get_matches_lists(player_id=player_id)
+        last_update = await self.get_lastupdate(player_id=player_id, cls=player.Player)
         if data is None or data == [] or data == {} or (datetime.now() - last_update).days >= 2:
             _player: List[player.Player] = await self.pubg.players(ids=[player_id])
             data = _player[0].matches
-            self.save_matches_lists(player_id=player_id, data=data)
+            await self.save_matches_lists(player_id=player_id, data=data)
 
-            self.save_lastupdate(player_id=player_id, cls=player.Player, dt=datetime.now())
+            await self.save_lastupdate(player_id=player_id, cls=player.Player, dt=datetime.now())
         return data
 
     async def update_matches(
             self,
             player_id: Union[str, player.Player]
     ):
+        if self.database is None:
+            await self.get_database()
         _player: List[player.Player] = await self.pubg.players(ids=[player_id])
         data = _player[0].matches
-        self.save_matches_lists(player_id=player_id, data=data, update=True)
-        self.save_lastupdate(player_id=player_id, cls=player.Player, dt=datetime.now())
+        await self.save_matches_lists(player_id=player_id, data=data, update=True)
+        await self.save_lastupdate(player_id=player_id, cls=player.Player, dt=datetime.now())
         return data
 
 
@@ -281,42 +300,47 @@ class CacheMatches(CacheData):
     def __init__(self, client: Client):
         super().__init__(client)
 
-    def save_matches(
+    async def save_matches(
             self,
             matches_id: str,
             data: Matches
     ):
-        cur = self.database.cursor(pymysql.cursors.DictCursor)
-        command = pymysql.escape_string(
-            "INSERT INTO {}(match_data, included_data, match_id) value (%s, %s, %s)".format(self._get_mode(Matches))
+        await self.database.insert(
+            table=self._get_mode(Matches),
+            value={
+                "match_data": self._dump_dict(data.data),
+                "included_data": self._dump_dict(data.included),
+                "match_id": matches_id
+            }
         )
-        cur.execute(command, (self._dump_dict(data.data), self._dump_dict(data.included), matches_id))
-        self.commit()
-        cur.close()
+        await self.commit()
         return
 
-    def get_matches(
+    async def get_matches(
             self,
             matches_id: str
     ):
-        cur = self.database.cursor(pymysql.cursors.DictCursor)
-        command = pymysql.escape_string(
-            "SELECT match_data, included_data FROM {} WHERE match_id = %s".format(self._get_mode(Matches))
+        if self.database is None:
+            await self.get_database()
+        data = await self.database.query(
+            table=self._get_mode(Matches),
+            key_name="match_id",
+            key=matches_id,
+            filter_col=["match_data", "included_data"]
         )
-        cur.execute(command, matches_id)
-        data = cur.fetchone()
         result1 = self._load_dict(data.get("match_data")) if data is not None else None
         result2 = self._load_dict(data.get("included_data")) if data is not None else None
-        cur.close()
         return {"data": result1, "included": result2}
 
     async def get_match(
             self,
             matches_id: str
     ):
-        data: Optional[dict] = self.get_matches(matches_id=matches_id)
+        if self.database is None:
+            await self.get_database()
+        data: Optional[dict] = await self.get_matches(matches_id=matches_id)
         if data is None or data == {"data": None, "included": None}:
             data: Matches = await self.pubg.matches(matches_id)
-            self.save_matches(matches_id=matches_id, data=data)
+            await self.save_matches(matches_id=matches_id, data=data)
             return data
         return Matches(data["data"], data["included"])

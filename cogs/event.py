@@ -60,12 +60,13 @@ class Events:
         logger.info(f'DBSkr이 실행됩니다.')
         dbs = logging.getLogger("DBSkr")
         dbs.setLevel(logging.DEBUG)
-        DBSkr.Client(
-            self.bot,
-            koreanbots_token=token.koreanBots_token,
-            topgg_token=token.DBL_token,
-            autopost=True
-        )
+        if self.bot.user.id == 704683198164238446:
+            DBSkr.Client(
+                self.bot,
+                koreanbots_token=token.koreanBots_token,
+                topgg_token=token.DBL_token,
+                autopost=True
+            )
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):

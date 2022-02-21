@@ -48,15 +48,15 @@ def is_admin(author):
 
 
 def is_banned(user_id):
-    connect = get_database()
-    cur = connect.cursor()
-    sql = "select * from BLACKLIST"
-    cur.execute(sql)
-    banned_list = cur.fetchall()
-    connect.close()
-    for i in banned_list:
-        if i[0] == int(user_id):
-            return True
+    # connect = get_database()
+    # cur = connect.cursor()
+    # sql = "select * from BLACKLIST"
+    # cur.execute(sql)
+    # banned_list = cur.fetchall()
+    # connect.close()
+    # for i in banned_list:
+    #     if i[0] == int(user_id):
+    #         return True
     return False
 
 

@@ -1,5 +1,7 @@
 discord.py
 BeautifulSoup4
+aiomysql
+aiohttp
 lxml
 pymysql==0.9.3
 DBSkr

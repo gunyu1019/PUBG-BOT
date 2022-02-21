@@ -24,7 +24,7 @@ class Database:
 
         self.connection: Optional[aiomysql.Connection] = None
         self.is_connect = False
-        self.is_commit = False
+        self.is_commit = True
 
     @classmethod
     def connect_inject(cls, connection: aiomysql.Connection):
@@ -38,7 +38,7 @@ class Database:
         )
         new_cls.connection = connection
         new_cls.is_connect = True
-        return
+        return new_cls
 
     async def connect(self) -> aiomysql.Connection:
         connection = self.connection = await aiomysql.connect(
@@ -52,7 +52,7 @@ class Database:
         self.is_connect = True
         return connection
 
-    async def close(self, check_commit: bool = True):
+    async def close(self, check_commit: bool = False):
         if not self.is_connect:
             return
 
@@ -110,7 +110,7 @@ class Database:
             sql_command = pymysql.converters.escape_string("SELECT {0} FROM {1}".format(_filter_col, table))
             await cursor.execute(sql_command)
         elif isinstance(key, list) or isinstance(key, tuple):
-            if not self.is_exist(table=table, key=key, key_name=key_name):
+            if not await self.is_exist(table=table, key=key, key_name=key_name):
                 return default
             sql_command = pymysql.converters.escape_string("SELECT {0} FROM {1} WHERE FIND_IN_SET({2}, %s)".format(
                 _filter_col, table, key_name
@@ -122,7 +122,7 @@ class Database:
             ))
             await cursor.execute(sql_command, key)
         else:
-            if not self.is_exist(table=table, key=key, key_name=key_name):
+            if not await self.is_exist(table=table, key=key, key_name=key_name):
                 return default
             sql_command = pymysql.converters.escape_string("SELECT {0} FROM {1} WHERE {2}=%s".format(
                 _filter_col, table, key_name
@@ -139,6 +139,7 @@ class Database:
                 return [cls(x) for x in result]
             else:
                 return cls(result)
+        await cursor.close()
         if single_connect:
             await self.close(check_commit=False)
         return result
@@ -204,6 +205,7 @@ class Database:
             )
             await cursor.execute(sql_command, key)
         tf = (await cursor.fetchone()).get('success', False)
+        await cursor.close()
         if single_connect:
             await self.close(check_commit=False)
         return bool(tf)
@@ -231,7 +233,7 @@ class Database:
             args.append(value.get(d))
 
         sql_command = pymysql.converters.escape_string(
-            "INSERT INTO {0}({1}) VALUE ({2})".format(table, ', '.join(setup), ', '.join(["%s" * len(args)]))
+            "INSERT INTO {0}({1}) VALUE ({2})".format(table, ', '.join(setup), ', '.join(["%s"] * len(args)))
         )
         await cursor.execute(sql_command, tuple(args))
         self.is_commit = False
@@ -255,7 +257,7 @@ class Database:
         if isinstance(table, str) and value is None:
             return TypeError("Insert data class or data in value")
 
-        if not self.is_exist(table, key, key_name):
+        if not await self.is_exist(table, key, key_name):
             value[key_name] = key
             await self.insert(table, value)
         else:
@@ -295,12 +297,12 @@ class Database:
             sql_command = pymysql.converters.escape_string("DELETE FROM {0} WHERE FIND_IN_SET({1}, %s)".format(
                 table, key_name
             ))
-            if not self.is_exist(table=table, key=key, key_name=key_name) and not force_delete:
+            if not await self.is_exist(table=table, key=key, key_name=key_name) and not force_delete:
                 return
             await cursor.execute(sql_command, ",".join(key))
         else:
             sql_command = pymysql.converters.escape_string("DELETE FROM {0} WHERE {1}=%s".format(table, key_name))
-            if not self.is_exist(table=table, key=key, key_name=key_name) and not force_delete:
+            if not await self.is_exist(table=table, key=key, key_name=key_name) and not force_delete:
                 return
             await cursor.execute(sql_command, key)
         self.is_commit = False

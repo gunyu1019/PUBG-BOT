@@ -42,19 +42,17 @@ class SeasonTask:
     @tasks.loop(minutes=120)
     async def check_season(self):
         time_now = datetime.datetime.now()
-        connect = get_database()
+        connect = await get_database()
 
-        cur = connect.cursor()
-        sql = "SELECT last_update, Steam FROM SEASON_STATUS"
-        cur.execute(sql)
-        cache = cur.fetchone()
-        last_update = cache[0]
-        html1 = cache[1]
+        result = await connect.query(
+            table="SEASON_STATUS", filter_col=["last_update", "Steam"]
+        )
 
-        date_json1 = json.loads(last_update)
-        date_json2 = json.loads(html1)
-        time_last = datetime.datetime(date_json1['years'], date_json1['months'], date_json1['days'],
-                                      date_json1['hours'], date_json1['minutes'])
+        date_json1 = json.loads(result["last_update"])
+        date_json2 = json.loads(result["Steam"])
+        time_last = datetime.datetime(
+            date_json1['years'], date_json1['months'], date_json1['days'], date_json1['hours'], date_json1['minutes']
+        )
         time_delta = time_now - time_last
         if time_delta.days > 2:
             log.info('시즌정보를 체크합니다.')
@@ -85,10 +83,20 @@ class SeasonTask:
                         "hours": time_now.hour,
                         "minutes": time_now.minute
                     }
-                    sql = pymysql.escape_string('UPDATE SEASON_STATUS SET Steam=%s,Kakao=%s,XBOX=%s,psn=%s,Stadia=%s,last_update=%s WHERE id=1')
-                    cur.execute(sql, (steam_s, kakao_s, xbox_s, psn_s, stadia_s, json.dumps(w_time)))
-        connect.commit()
-        connect.close()
+                    await connect.update(
+                        table='SEASON_STATUS',
+                        key_name="id",
+                        key=1,
+                        value={
+                            "Steam": steam_s,
+                            "Kakao": kakao_s,
+                            "XBOX": xbox_s,
+                            "psn": psn_s,
+                            "Stadia": stadia_s,
+                            "last_update": json.dumps(w_time),
+                        }
+                    )
+        await connect.close(check_commit=True)
 
     @check_season.before_loop
     async def before_booting(self):

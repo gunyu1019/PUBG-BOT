@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
+along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import discord
@@ -205,7 +205,7 @@ class Match:
             description="검색하실 매치를 선택해주세요. 목록을 업데이트 할 경우 업데이트를 선택해주세요.",
             color=self.color
         )
-        last_update = self.database2.get_lastupdate(player_id=self.player_id, cls=pubgpy.Player)
+        last_update = await self.database2.get_lastupdate(player_id=self.player_id, cls=pubgpy.Player)
         embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
         components = [
             ActionRow(components=[
@@ -226,6 +226,8 @@ class Match:
                 check=self.check(b_msg, Selection), timeout=300
             )
         except asyncio.TimeoutError:
+            await self.database1.close()
+            await self.database2.close()
             return
 
         try:
@@ -292,6 +294,8 @@ class Match:
         try:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg, Button), timeout=300)
         except asyncio.TimeoutError:
+            await self.database1.close()
+            await self.database2.close()
             return
 
         try:
@@ -341,6 +345,8 @@ class Match:
         try:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg, Button), timeout=300)
         except asyncio.TimeoutError:
+            await self.database1.close()
+            await self.database2.close()
             return
 
         try:
@@ -383,6 +389,8 @@ class Match:
         try:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg, Button), timeout=300)
         except asyncio.TimeoutError:
+            await self.database1.close()
+            await self.database2.close()
             return
 
         try:
@@ -425,6 +433,8 @@ class Match:
         try:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg, Button), timeout=300)
         except asyncio.TimeoutError:
+            await self.database1.close()
+            await self.database2.close()
             return
 
         try:

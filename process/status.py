@@ -276,7 +276,7 @@ class Status:
                 value=f"{wins}승 {top10s}탑 {losses}패\n{playtime}\n킬: {kills}회({kill_death_points}점)",
                 inline=True
             )
-        last_update = self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.SeasonStats)
+        last_update = await self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.SeasonStats)
         embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
         self.current_button()
 
@@ -299,6 +299,7 @@ class Status:
         try:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
         except asyncio.TimeoutError:
+            await self.database.close()
             return
 
         try:
@@ -343,7 +344,7 @@ class Status:
                 value=f"랭크: {rank}({point}점)\n{wins}승 {top10s}탑 {losses}패\n킬: {kills}회({kill_death_points}점)",
                 inline=True
             )
-        last_update = self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
+        last_update = await self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
         embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
         self.current_button()
         self.duo_player_btn.disabled = True
@@ -367,6 +368,7 @@ class Status:
         try:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
         except asyncio.TimeoutError:
+            await self.database.close()
             return
 
         try:
@@ -414,7 +416,7 @@ class Status:
         embed.add_field(name="딜량:", value=f"{round(deals, 2)}", inline=True)
         embed.add_field(name="거리:", value=f"{distance}m", inline=True)
 
-        last_update = self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
+        last_update = await self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
         embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
         self.current_button()
 
@@ -437,6 +439,7 @@ class Status:
         try:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
         except asyncio.TimeoutError:
+            await self.database.close()
             return
 
         try:
@@ -488,7 +491,7 @@ class Status:
         embed.add_field(name="딜량:", value=f"{round(deals, 2)}", inline=True)
         embed.set_thumbnail(url=f"attachment://{filename}")
 
-        last_update = self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
+        last_update = await self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
         embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
         self.current_button()
         self.duo_player_btn.disabled = True
@@ -511,6 +514,7 @@ class Status:
         try:
             resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
         except asyncio.TimeoutError:
+            await self.database.close()
             return
 
         try:

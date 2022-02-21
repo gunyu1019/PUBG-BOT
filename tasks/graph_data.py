@@ -40,30 +40,40 @@ class GraphTask:
     @tasks.loop(minutes=10)
     async def check_player(self):
         time_now = datetime.datetime.now()
-        connect = get_database()
-        cur = connect.cursor()
-
-        sql_v2_ck = "SELECT date FROM SERVER_DATA WHERE ID=12"
-        cur.execute(sql_v2_ck)
-        lasted_update = cur.fetchone()[0]
+        connect = await get_database()
+        lasted_update = (await connect.query(
+            table="SERVER_DATA",
+            key_name='ID', key=12,
+            filter_col=['date']
+        )).get("date")
         if (time_now - lasted_update).seconds >= 3600:
             status, players = await self.client.get_data()
             if status:
                 for i in range(12):
-                    sql_v2_ps = "UPDATE SERVER_DATA SET id=%s WHERE id=%s"
-                    cur.execute(sql_v2_ps, (i, i + 1))
+                    await connect.update(
+                        table="SERVER_DATA",
+                        key_name="id", key=i+1,
+                        value={"id": i}
+                    )
 
-                sql_v2_pd = "DELETE FROM SERVER_DATA WHERE ID=0"
-                sql_v2_pc = pymysql.escape_string("INSERT INTO SERVER_DATA(data, date, id) VALUES(%s, %s, 12)")
-                cur.execute(sql_v2_pd)
-                cur.execute(sql_v2_pc, (int(players), time_now.strftime('%Y-%m-%d %H:%M:%S')))
+                await connect.delete(
+                    table="SERVER_DATA",
+                    key_name="id", key=0
+                )
+                await connect.insert(
+                    table="SERVER_DATA",
+                    value={
+                        "data": int(players),
+                        "date": time_now.strftime('%Y-%m-%d %H:%M:%S'),
+                        "id": 12
+                    }
+                )
                 logging.info("Update of player data successful. Time: {0},Player: {1}".format(
                     time_now.strftime('%H:%M'), players
                 ))
             else:
                 logging.info("Update of player data failed. Time: {0}".format(time_now.strftime('%H:%M')))
-        connect.commit()
-        connect.close()
+        await connect.close(check_commit=True)
 
     @check_player.before_loop
     async def before_booting(self):
