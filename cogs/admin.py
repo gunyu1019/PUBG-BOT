@@ -29,6 +29,7 @@ from discord.ext import commands
 
 from config.config import parser
 from utils.directory import directory
+from utils.permission import permission_cog
 
 
 def insert_returns(body):
@@ -53,7 +54,7 @@ class Admin(commands.Cog):
         self.warning_color = int(parser.get("Color", "warning"), 16)
 
     @commands.command(name="debug")
-    @commands.is_owner()
+    @permission_cog(1)
     async def debug(self, ctx):
         list_message = ctx.message.content.split()
         if len(list_message) < 1:
@@ -121,7 +122,7 @@ class Admin(commands.Cog):
         return
 
     @commands.command(name="cmd")
-    @commands.is_owner()
+    @permission_cog(1)
     async def cmd(self, ctx):
         list_message = ctx.message.content.split()
         if len(list_message) < 1:
@@ -153,7 +154,7 @@ class Admin(commands.Cog):
         return
 
     @commands.command(name="reload", description="PUBG BOT을 재시작합니다.")
-    @commands.is_owner()
+    @permission_cog(1)
     async def reload(self, ctx):
         exts = ["cogs." + file[:-3] for file in os.listdir(f"{directory}/cogs") if file.endswith(".py")]
 

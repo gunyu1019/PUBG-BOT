@@ -19,6 +19,7 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
 from discord.ext import interaction
+from discord.ext import commands
 
 from config.config import parser
 from utils.database import get_database
@@ -77,3 +78,9 @@ def permission(perm):
     def check(ctx):
         return perm >= check_perm(ctx.author)
     return interaction.check(check)
+
+
+def permission_cog(perm):
+    def check(ctx):
+        return perm >= check_perm(ctx.author)
+    return commands.check(check)
