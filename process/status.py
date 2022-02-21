@@ -14,14 +14,15 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
+along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 """
+import operator
 import asyncio
 import copy
 import discord
 
 from pytz import timezone
-from datetime import datetime
+from datetime import datetime, timezone as tz
 from typing import Union, Optional
 from config.config import parser
 from module import pubgpy
@@ -109,7 +110,7 @@ class Status:
         )
 
     async def too_many_request(self, error, index):
-        timer = (error.reset - datetime.now()).total_seconds()
+        timer = (error.reset - datetime.now(tz=timezone('Asia/Seoul')).replace(tzinfo=None)).total_seconds()
         if timer < 0:
             return
         v = int(timer / 5)
@@ -277,7 +278,9 @@ class Status:
                 inline=True
             )
         last_update = await self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.SeasonStats)
-        embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
+        embed.set_footer(
+            text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}"
+        )
         self.current_button()
 
         if b_msg is None:
@@ -345,7 +348,9 @@ class Status:
                 inline=True
             )
         last_update = await self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
-        embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
+        embed.set_footer(
+            text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}"
+        )
         self.current_button()
         self.duo_player_btn.disabled = True
 
@@ -398,7 +403,11 @@ class Status:
         kills = data.kills
         headshot = data.headshot_kills
         deals = data.damage_dealt / (1 if data.rounds_played == 0 else data.rounds_played)
-        distance = data.ride_distance + data.swim_distance + data.walk_distance
+        distance = round((data.ride_distance + data.swim_distance + data.walk_distance) / data.rounds_played, 2)
+        distance_by = sorted(
+            {"차": data.ride_distance, "수영": data.swim_distance, "도보": data.walk_distance}.items(),
+            reverse=True, key=operator.itemgetter(1)
+        )[0]
 
         playtime_floated = data.time_survived
         playtime_datetime = datetime.fromtimestamp(playtime_floated, timezone('UTC'))
@@ -413,11 +422,13 @@ class Status:
         embed.add_field(name="dBNOs:", value=f"{dbnos}회", inline=True)
         embed.add_field(name="여포:", value=f"{max_kill_streaks}회", inline=True)
         embed.add_field(name="헤드샷:", value=f"{headshot}%", inline=True)
-        embed.add_field(name="딜량:", value=f"{round(deals, 2)}", inline=True)
-        embed.add_field(name="거리:", value=f"{distance}m", inline=True)
+        embed.add_field(name="평균 딜량:", value=f"{round(deals, 2)}", inline=True)
+        embed.add_field(name="평균 거리(주요 이동수단):", value=f"{distance}m({distance_by})", inline=True)
 
-        last_update = await self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
-        embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
+        last_update = await self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.SeasonStats)
+        embed.set_footer(
+            text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}"
+        )
         self.current_button()
 
         if b_msg is None:
@@ -488,11 +499,13 @@ class Status:
         embed.add_field(name="어시:", value=f"{assists}회", inline=True)
         embed.add_field(name="dBNOs:", value=f"{dbnos}회", inline=True)
         embed.add_field(name="평균 순위:", value=f"{avg_rank}등", inline=True)
-        embed.add_field(name="딜량:", value=f"{round(deals, 2)}", inline=True)
+        embed.add_field(name="평균 딜량:", value=f"{round(deals, 2)}", inline=True)
         embed.set_thumbnail(url=f"attachment://{filename}")
 
         last_update = await self.database.get_lastupdate(player_id=self.player_id, cls=pubgpy.RankedStats)
-        embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
+        embed.set_footer(
+            text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}"
+        )
         self.current_button()
         self.duo_player_btn.disabled = True
 

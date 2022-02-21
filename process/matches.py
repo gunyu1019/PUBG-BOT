@@ -206,7 +206,9 @@ class Match:
             color=self.color
         )
         last_update = await self.database2.get_lastupdate(player_id=self.player_id, cls=pubgpy.Player)
-        embed.set_footer(text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}")
+        embed.set_footer(
+            text=f"최근 업데이트: {last_update.strftime('%Y년 %m월 %d일 %p %I:%M')}"
+        )
         components = [
             ActionRow(components=[
                 Selection(

@@ -20,7 +20,7 @@ import datetime
 
 import discord
 import asyncio
-import pymysql
+from pytz import timezone
 from typing import Optional, NamedTuple
 
 from config.config import parser
@@ -196,7 +196,9 @@ async def player_platform(
             await msg.edit(embed=embed)
             return None
         except pubgpy.TooManyRequests as error:
-            timer = (error.reset - datetime.datetime.now()).total_seconds()
+            timer = (
+                    error.reset - datetime.datetime.now(tz=timezone('Asia/Seoul')).replace(tzinfo=None)
+            ).total_seconds()
             if timer < 0:
                 continue
             v = int(timer / 5)

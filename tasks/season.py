@@ -41,7 +41,7 @@ class SeasonTask:
 
     @tasks.loop(minutes=120)
     async def check_season(self):
-        time_now = datetime.datetime.now()
+        time_now = datetime.datetime.utcnow()
         connect = await get_database()
 
         result = await connect.query(

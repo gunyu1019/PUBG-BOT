@@ -31,4 +31,4 @@ if __name__ == "__main__":
 
     bot.load_extensions('cogs', directory)
     bot.load_extensions('tasks', directory)
-    bot.run(token)
+    bot.run("OTMxNTIyNjc2NDAzNjM0MTk2.YeFqGA.DoInjlLwYTKlbhIorsuF5v19WcQ")

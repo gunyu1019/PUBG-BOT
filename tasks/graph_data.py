@@ -39,7 +39,7 @@ class GraphTask:
 
     @tasks.loop(minutes=10)
     async def check_player(self):
-        time_now = datetime.datetime.now()
+        time_now = datetime.datetime.utcnow()
         connect = await get_database()
         lasted_update = (await connect.query(
             table="SERVER_DATA",

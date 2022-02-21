@@ -20,7 +20,7 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 import io
 
 import discord
-import pymysql.cursors
+from datetime import timezone
 from discord.ext import interaction
 from matplotlib import font_manager
 from matplotlib import pyplot as plt
@@ -51,7 +51,7 @@ class Server:
             filter_col=['id', 'date', 'data']
         )
 
-        datetime = [i.get("date").strftime('%H:%M') for i in data]
+        datetime = [i.get("date").replace(tzinfo=timezone.utc).astimezone(tz=None).strftime('%H:%M') for i in data]
         players = [i.get("data", 0) for i in data]
         await connect.close()
 

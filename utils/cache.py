@@ -22,6 +22,7 @@ import aiomysql
 import json
 import inspect
 from datetime import datetime
+from pytz import timezone
 from typing import Union, Type, Optional, List, Callable
 
 from config.config import parser
@@ -37,6 +38,10 @@ class CacheData:
 
     async def get_database(self):
         self.database = await get_database()
+
+    @staticmethod
+    def time() -> datetime:
+        return datetime.now(tz=timezone('Asia/Seoul')).replace(tzinfo=None)
 
     @staticmethod
     def _get_last_update(cls) -> Optional[str]:
@@ -172,7 +177,7 @@ class CachePlayData(CacheData):
                     raise ValueError("{} is not found".format(cls))
                 break
             except TooManyRequests as error:
-                timer = (error.reset - datetime.now()).total_seconds()
+                timer = (error.reset - self.time()).total_seconds()
                 if timer < 0:
                     continue
 
@@ -197,7 +202,7 @@ class CachePlayData(CacheData):
             await self.get_database()
         data = await self.get_play_data(player_id=player_id, cls=cls, season=season)
         last_update = await self.get_lastupdate(player_id=player_id, cls=cls)
-        if data is None or data == {} or (datetime.now() - last_update).days >= 2:
+        if data is None or data == {} or (self.time() - last_update).days >= 2:
             new_data = True if data is None or data else False
             data = await self._playdata(player_id=player_id, cls=cls, season=season)
             if data is None:
@@ -208,7 +213,7 @@ class CachePlayData(CacheData):
             else:
                 await self.save_play_data(player_id=player_id, season=season, data=data, update=True)
 
-            await self.save_lastupdate(player_id=player_id, cls=cls, dt=datetime.now())
+            await self.save_lastupdate(player_id=player_id, cls=cls, dt=self.time())
         if isinstance(data, dict):
             data = GameModeReceive(data, cls)
         return data
@@ -225,7 +230,7 @@ class CachePlayData(CacheData):
         if data is None:
             return
         await self.save_play_data(player_id=player_id, season=season, data=data, update=True)
-        await self.save_lastupdate(player_id=player_id, cls=cls, dt=datetime.now())
+        await self.save_lastupdate(player_id=player_id, cls=cls, dt=self.time())
         return data
 
 
@@ -275,12 +280,12 @@ class CacheMatchesList(CacheData):
             await self.get_database()
         data = await self.get_matches_lists(player_id=player_id)
         last_update = await self.get_lastupdate(player_id=player_id, cls=player.Player)
-        if data is None or data == [] or data == {} or (datetime.now() - last_update).days >= 2:
+        if data is None or data == [] or data == {} or (self.time() - last_update).days >= 2:
             _player: List[player.Player] = await self.pubg.players(ids=[player_id])
             data = _player[0].matches
             await self.save_matches_lists(player_id=player_id, data=data)
 
-            await self.save_lastupdate(player_id=player_id, cls=player.Player, dt=datetime.now())
+            await self.save_lastupdate(player_id=player_id, cls=player.Player, dt=self.time())
         return data
 
     async def update_matches(
@@ -292,7 +297,7 @@ class CacheMatchesList(CacheData):
         _player: List[player.Player] = await self.pubg.players(ids=[player_id])
         data = _player[0].matches
         await self.save_matches_lists(player_id=player_id, data=data, update=True)
-        await self.save_lastupdate(player_id=player_id, cls=player.Player, dt=datetime.now())
+        await self.save_lastupdate(player_id=player_id, cls=player.Player, dt=self.time())
         return data
 
 
