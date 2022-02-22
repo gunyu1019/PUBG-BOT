@@ -164,14 +164,16 @@ async def player_platform(
     new_platform = game_ids[int(result.custom_id)]
     embed = discord.Embed(
         title="플랫폼 선택!",
-        description="{}가 선택되었습니다.\n값이 잘못되었을 경우 `플랫폼변경` 명령어를 사용해주세요.".format(new_platform),
+        description="플레이어 정보를 불러오고 있습니다.\n플랫폼 정보가 잘못되었을 경우 `플랫폼변경` 명령어를 사용해주세요.".format(new_platform),
         color=color
     )
+    components = []
     for x in msg.components:
         x.disabled = True
+        components.append(x)
 
     try:
-        await result.update(embed=embed, components=msg.components)
+        await result.update(embed=embed, components=components)
     except discord.NotFound:
         await msg.edit(embed=embed, components=[])
     platform_data = pubgpy.get_enum(pubgpy.Platforms, new_platform)
@@ -190,7 +192,7 @@ async def player_platform(
         except pubgpy.NotFound:
             embed = discord.Embed(
                 title="에러",
-                description="사용자를 찾을 수 없습니다. 닉네임을 확인해주세요.",
+                description="사용자를 찾을 수 없습니다. 닉네임을 확인해주세요.\n닉네임은 대소문자를 구분합니다. 올바르게 작성했는지 다시한 번 확인해주세요.",
                 color=error_color
             )
             await msg.edit(embed=embed)

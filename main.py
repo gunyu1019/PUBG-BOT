@@ -12,7 +12,8 @@ if __name__ == "__main__":
     directory = os.path.dirname(os.path.abspath(__file__))
 
     log.info("PUBG BOT을 불러오는 중입니다.")
-    default_prefix = ('<@!704683198164238446>', '<@704683198164238446>')
+    # default_prefix = ('<@!704683198164238446>', '<@704683198164238446>')
+    default_prefix = "!"
     if parser.getboolean("DEFAULT", "AutoShard"):
         log.info("Config 파일에서 AutoShard가 켜져있습니다. AutoShard 기능을 킵니다.")
         bot = interaction.AutoShardedClient(
@@ -31,4 +32,4 @@ if __name__ == "__main__":
 
     bot.load_extensions('cogs', directory)
     bot.load_extensions('tasks', directory)
-    bot.run("OTMxNTIyNjc2NDAzNjM0MTk2.YeFqGA.DoInjlLwYTKlbhIorsuF5v19WcQ")
+    bot.run("OTMxNTIyNjc2NDAzNjM0MTk2.YeFqGA.LFZJuNBjHY39PjLc_6EFY3_5Org")

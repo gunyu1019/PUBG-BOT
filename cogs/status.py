@@ -20,18 +20,18 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 import discord
 import json
 
-from typing import Optional, Tuple, List
+from typing import Optional, Union, List
+from discord.ext import commands
 from discord.ext import interaction
-
-import pymysql.cursors
 
 from config.config import parser
 from module import pubgpy
+from module.message import MessageCommand
 from process import player
+from process.status import Status as ProcessStatus
 from utils import token
 from utils.database import get_database
-from utils.permission import permission
-from process.status import Status as ProcessStatus
+from utils.permission import permission, permission_cog
 
 
 class Status:
@@ -45,10 +45,9 @@ class Status:
         self.pubgpy = pubgpy.Client(token=token.PUBG_API)
 
     @staticmethod
-    def _choose_to_option1(ranked: bool = True) -> Tuple[List[str], List[str]]:
+    def _choose_to_option1(ranked: bool = True) -> List[str]:
         all_option = ["1인칭", "3인칭", "일반", "3인칭경쟁", "경쟁", "랭크", "1인칭경쟁"]
-        all_option_comment = ["1인칭", "3인칭, 일반", "3인칭경쟁, 경쟁, 랭크", "1인칭경쟁"]
-        return (all_option, all_option_comment) if ranked else (all_option[0:3], all_option_comment[0:1])
+        return all_option if ranked else all_option[0:3]
 
     async def _option_error(self, ctx, message):
         embed = discord.Embed(
@@ -57,6 +56,88 @@ class Status:
             color=self.warning_color
         )
         await ctx.send(embed=embed)
+        return
+
+    def cog_check(self, _):
+        return True
+
+    async def cog_before_invoke(self, ctx):
+        pass
+
+    async def cog_after_invoke(self, ctx):
+        pass
+
+    async def cog_command_error(self, ctx, error):
+        pass
+
+    @commands.command(name="전적")
+    @permission_cog(4)
+    async def status_command(self, ctx):
+        convert_context = MessageCommand(ctx.message, self.client)
+        if convert_context.name is None and ctx.guild.id != 589033421121126400:  # Only Official PUBG Community in Korea
+            return
+        convert_context.name = self.status_command.name
+        convert_context.prefix = ctx.prefix
+        await self._base_status_command(convert_context)
+
+    @commands.command(name="전적솔로")
+    @permission_cog(4)
+    async def status_command_solo(self, ctx):
+        convert_context = MessageCommand(ctx.message, self.client)
+        if convert_context.name is None and ctx.guild.id != 589033421121126400:  # Only Official PUBG Community in Korea
+            return
+        convert_context.name = self.status_command.name
+        convert_context.prefix = ctx.prefix
+        await self._base_status_command(convert_context)
+
+    @commands.command(name="전적듀오")
+    @permission_cog(4)
+    async def status_command_duo(self, ctx):
+        convert_context = MessageCommand(ctx.message, self.client)
+        if convert_context.name is None and ctx.guild.id != 589033421121126400:  # Only Official PUBG Community in Korea
+            return
+        convert_context.name = self.status_command.name
+        convert_context.prefix = ctx.prefix
+        await self._base_status_command(convert_context)
+
+    @commands.command(name="전적스쿼드")
+    @permission_cog(4)
+    async def status_command_squad(self, ctx):
+        convert_context = MessageCommand(ctx.message, self.client)
+        if convert_context.name is None and ctx.guild.id != 589033421121126400:  # Only Official PUBG Community in Korea
+            return
+        convert_context.name = self.status_command.name
+        convert_context.prefix = ctx.prefix
+        await self._base_status_command(convert_context)
+
+    async def _base_status_command(self, convert_context):
+        all_option = self._choose_to_option1()
+        usage_command = "`사용법: {convert_context.prefix}{convert_context.name} <유형> <닉네임>`\n유형: {comment}".format(
+            convert_context=convert_context, comment=",".join(all_option)
+        )
+        if len(convert_context.options) <= 0:
+            await self._option_error(convert_context, "전적의 유형을 선택해주세요.\n{0}".format(usage_command))
+            return
+        if len(convert_context.options) <= 1:
+            await self._option_error(convert_context, "닉네임을 입력해주세요.\n{0}".format(usage_command))
+            return
+        _option1 = convert_context.options[0]
+        if _option1 == "1인칭" or _option1 == "1":
+            option1 = 0
+        elif _option1 == "3인칭" or _option1 == "일반" or _option1 == "일" or _option1 == "3":
+            option1 = 1
+        elif _option1 == "1인칭경쟁" or _option1 == "1랭":
+            option1 = 2
+        elif _option1 == "3인칭경쟁" or _option1 == "경쟁" or _option1 == "랭크" or _option1 == "랭":
+            option1 = 3
+        else:
+            await self._option_error(
+                convert_context,
+                "{1} 중에서 하나만 선택하여 주세요.\n`사용법: {0}`".format(usage_command, ", ".join(all_option))
+            )
+            return
+        option2 = convert_context.options[1]
+        await self.status(convert_context, option1, option2)
         return
 
     @interaction.command(name="전적솔로", description='검색된 사용자의 솔로 전적 정보를 불러옵니다.')
@@ -115,7 +196,7 @@ class Status:
     @interaction.context(name='전적')
     @permission(4)
     async def status_context(self, ctx):
-        all_option, all_option_comment = self._choose_to_option1()
+        all_option = self._choose_to_option1()
         message = ctx.target(target_type="message")
         if message.content is None:
             await self._option_error(ctx, "명령어를 실행하기 위한 닉네임/유형을 찾을 수 없습니다.")
@@ -128,7 +209,7 @@ class Status:
             await self._option_error(
                 ctx,
                 "유형 선택이 잘못되었습니다. {0} 내에서 만 선택해제세요"
-                "<유형(선택)> <닉네임> 또는 닉네임만 작성해주세요.".format(", ".join(all_option_comment))
+                "<유형(선택)> <닉네임> 또는 닉네임만 작성해주세요.".format(", ".join(all_option))
             )
             return
         elif len(options) == 2:
@@ -164,22 +245,28 @@ class Status:
     @interaction.option(name='닉네임', description='플레이어의 닉네임을 입력해주세요.')
     @interaction.option(name='시즌', description='조회하는 전적 정보의 배틀그라운드 시즌 정보가 입력됩니다.', min_value=1)
     @permission(4)
-    async def status(self, ctx: interaction.ApplicationContext, option1: int, option2: str, option3: int = None):
+    async def status(
+            self,
+            ctx: Union[interaction.ApplicationContext, MessageCommand],
+            option1: int,
+            option2: str,
+            option3: int = None
+    ):
         if ctx.name == "전적듀오":
-            all_option, all_option_comment = self._choose_to_option1(ranked=False)
+            all_option = self._choose_to_option1(ranked=False)
         else:
-            all_option, all_option_comment = self._choose_to_option1()
+            all_option = self._choose_to_option1()
         command = "/{command_name} <{comment}> <닉네임> <시즌(선택)>".format(
-            command_name=ctx.name, comment="|".join(all_option_comment)
+            command_name=ctx.name, comment=", ".join(all_option)
         )
 
         if option1 is None or 0 > option1 or option1 > 4:
             await self._option_error(
-                ctx, "**{}**\n {} 중에서만 선택하여 주세요.".format(command, ", ".join(all_option_comment))
+                ctx, "{1} 중에서 하나만 선택하여 주세요.\n`사용법: {0}`".format(command, ", ".join(all_option))
             )
             return
         if option2 is None:
-            await self._option_error(ctx, "**{}**\n 닉네임을 작성하여 주세요.".format(command))
+            await self._option_error(ctx, "닉네임을 작성하여 주세요.\n`사용법: {0}`".format(command))
             return
 
         await ctx.defer()
@@ -230,7 +317,7 @@ class Status:
             elif option1 == 1:
                 await status.normal_mode(mode="duo", b_msg=b_msg)
             elif option1 == 2 or option1 == 3:
-                await self._option_error(ctx, "**{}**\n 경쟁전에서는 듀오모드를 지원하지 않습니다.".format(command))
+                await self._option_error(ctx, "경쟁전에서는 듀오모드를 지원하지 않습니다.\n`사용법: {0}`".format(command))
         elif ctx.name == "전적스쿼드":
             if option1 == 0:
                 await status.normal_mode(mode="squad_fpp", b_msg=b_msg)

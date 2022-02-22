@@ -19,19 +19,20 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 
 import discord
 
-from typing import Optional
 from discord.ext import interaction
+from discord.ext import commands
 
 from config.config import parser
 from module import pubgpy
+from module.message import MessageCommand
 from process import player
 from process.matches import Match
 from utils import token
-from utils.permission import permission
+from utils.permission import permission, permission_cog
 
 
 class Matches:
-    def __init__(self, bot):
+    def __init__(self, bot: interaction.Client):
         self.client = bot
 
         self.color = int(parser.get("Color", "default"), 16)
@@ -42,11 +43,41 @@ class Matches:
 
     async def _option_error(self, ctx, message):
         embed = discord.Embed(
-            title="에러",
+            title="오류",
             description="{message}".format(message=message),
-            color=self.color
+            color=self.warning_color
         )
         await ctx.send(embed=embed)
+        return
+
+    def cog_check(self, _):
+        return True
+
+    async def cog_before_invoke(self, ctx):
+        pass
+
+    async def cog_after_invoke(self, ctx):
+        pass
+
+    async def cog_command_error(self, ctx, error):
+        pass
+
+    @commands.command(name="매치")
+    @permission_cog(4)
+    async def match_command(self, ctx):
+        convert_context = MessageCommand(ctx.message, self.client)
+        if convert_context.name is None and ctx.guild.id != 589033421121126400:  # Only Official PUBG Community in Korea
+            return
+        convert_context.name = self.match_command.name
+        convert_context.prefix = ctx.prefix
+        usage_command = "`사용법: {prefix}매치 <닉네임>`".format(prefix=convert_context.prefix)
+        if len(convert_context.options) <= 0:
+            await self._option_error(ctx, "닉네임을 입력해주세요.\n{0}".format(usage_command))
+            return
+        if len(convert_context.options) > 1:
+            await self._option_error(ctx, "올바른 사용방법이 아닙니다. 닉네임만 작성해주세요.\n{0}".format(usage_command))
+            return
+        await self.match(convert_context, *convert_context.options)
         return
 
     @interaction.context(name='매치')

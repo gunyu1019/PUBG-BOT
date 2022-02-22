@@ -185,4 +185,4 @@ class Admin(commands.Cog):
 
 
 def setup(client):
-    return client.add_cog(Admin(client))
+    return client.add_icog(Admin(client))
