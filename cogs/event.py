@@ -82,7 +82,7 @@ class Events:
             self.bot.get_guild(786153760824492062)
                 .get_channel(938656148423344178)
                 .send(
-                "새로운 서버에 추가되었습니다. **(현재 서버수 : {0})**".format(self.bot.guilds)
+                "새로운 서버에 추가되었습니다. **(현재 서버수 : {0})**".format(len(self.bot.guilds))
             )
         )
         return

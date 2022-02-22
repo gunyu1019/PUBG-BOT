@@ -66,7 +66,7 @@ class Matches:
     @permission_cog(4)
     async def match_command(self, ctx):
         convert_context = MessageCommand(ctx.message, self.client)
-        if convert_context.name is None or ctx.guild.id != 589033421121126400:  # Only Official PUBG Community in Korea
+        if convert_context.name is None:  # Only Official PUBG Community in Korea
             return
         convert_context.name = self.match_command.name
         convert_context.prefix = ctx.prefix

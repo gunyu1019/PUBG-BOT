@@ -74,7 +74,7 @@ class Status:
     @permission_cog(4)
     async def status_command(self, ctx):
         convert_context = MessageCommand(ctx.message, self.client)
-        if convert_context.name is None or ctx.guild.id != 589033421121126400:  # Only Official PUBG Community in Korea
+        if convert_context.name is None:  # Only Official PUBG Community in Korea
             return
         convert_context.name = self.status_command.name
         convert_context.prefix = ctx.prefix
@@ -84,7 +84,7 @@ class Status:
     @permission_cog(4)
     async def status_command_solo(self, ctx):
         convert_context = MessageCommand(ctx.message, self.client)
-        if convert_context.name is None or ctx.guild.id != 589033421121126400:  # Only Official PUBG Community in Korea
+        if convert_context.name is None:  # Only Official PUBG Community in Korea
             return
         convert_context.name = self.status_command.name
         convert_context.prefix = ctx.prefix
@@ -94,7 +94,7 @@ class Status:
     @permission_cog(4)
     async def status_command_duo(self, ctx):
         convert_context = MessageCommand(ctx.message, self.client)
-        if convert_context.name is None or ctx.guild.id != 589033421121126400:  # Only Official PUBG Community in Korea
+        if convert_context.name is None:  # Only Official PUBG Community in Korea
             return
         convert_context.name = self.status_command.name
         convert_context.prefix = ctx.prefix
@@ -104,7 +104,7 @@ class Status:
     @permission_cog(4)
     async def status_command_squad(self, ctx):
         convert_context = MessageCommand(ctx.message, self.client)
-        if convert_context.name is None or ctx.guild.id != 589033421121126400:  # Only Official PUBG Community in Korea
+        if convert_context.name is None:  # Only Official PUBG Community in Korea
             return
         convert_context.name = self.status_command.name
         convert_context.prefix = ctx.prefix
