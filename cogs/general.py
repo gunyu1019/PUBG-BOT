@@ -74,9 +74,14 @@ class General:
         for i in self.client.guilds:
             total += i.member_count
         embed = discord.Embed(title='PUBG BOT', color=self.color)
-        embed.add_field(name='개발', value='[건유1019#0001](https://yhs.kr/YBOT/forum.html)', inline=True)
+        embed.add_field(name='개발', value='[건유1019#0001](https://discord.gg/mr6RpUeG96)', inline=True)
         embed.add_field(name='<:user:735138021850087476>서버수 / 유저수', value=f'{len(self.client.guilds)}서버/{total}명', inline=True)
         embed.add_field(name='PUBG BOT 버전', value=f'{parser.get("DEFAULT","version")}', inline=True)
+        embed.add_field(
+            name='Thanks to Supporters',
+            value="[HKDev Korea:한국 개발자 디스코드 서버](https://discord.gg/hkdev)",
+            inline=False
+        )
         embed.set_thumbnail(url=self.client.user.avatar_url)
         await ctx.send(embed=embed)
         return
