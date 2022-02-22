@@ -403,7 +403,9 @@ class Status:
         kills = data.kills
         headshot = data.headshot_kills
         deals = data.damage_dealt / (1 if data.rounds_played == 0 else data.rounds_played)
-        distance = round((data.ride_distance + data.swim_distance + data.walk_distance) / data.rounds_played, 2)
+        distance = 0
+        if data.rounds_played >= 0:
+            distance = round((data.ride_distance + data.swim_distance + data.walk_distance) / data.rounds_played, 2)
         if data.ride_distance != data.swim_distance != data.walk_distance:
             distance_by = sorted(
                 {"차": data.ride_distance, "수영": data.swim_distance, "도보": data.walk_distance}.items(),

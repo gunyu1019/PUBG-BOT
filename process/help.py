@@ -111,9 +111,10 @@ class Help:
         self.page = 0
         embed = discord.Embed(
             title="소개",
-            description="PUBG BOT을 이용해주셔서 감사합니다. PUBG BOT은 배틀그라운드 게임 정보를 제공하는 봇입니다.\n"
+            description="PUBG BOT을 이용해주셔서 감사합니다. PUBG BOT은 {}서버와 함께 발전해나가며, "
+                        "배틀그라운드 게임 정보를 제공하는 봇입니다.\n"
                         "PUBG BOT은 오픈 소스로 제작되었으며 [링크](https://github.com/gunyu1019/PUBG-BOT)를 클릭하여 "
-                        "소스를 확인하실 수 있습니다.\n\nPUBG BOT은 {}서버와 함께하고 있습니다.\n "
+                        "소스코드를 확인하실 수 있습니다.\n\n "
                         "아래의 버튼을 클릭하여 명령어를 알아보세요!".format(len(self.client.guilds)),
             color=self.color)
         embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar_url)
