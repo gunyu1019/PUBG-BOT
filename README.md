@@ -12,7 +12,7 @@
         <img src="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/main" alt="CodeFactor" >
     </a>
 <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT.svg?type=shield"/></a>
-    <img src="https://img.shields.io/badge/release_version-2.3-0080aa?style=flat" alt="Release" >
+    <img src="https://img.shields.io/badge/release_version-2.3.1-0080aa?style=flat" alt="Release" >
 </p>
 
 > **[Contact]**<br/>
