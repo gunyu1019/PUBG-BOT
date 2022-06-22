@@ -41,7 +41,7 @@ multidict==5.1.0
     # via
     #   aiohttp
     #   yarl
-numpy==1.21.1
+numpy==1.22.0
     # via matplotlib
 pillow==9.0.1
     # via
