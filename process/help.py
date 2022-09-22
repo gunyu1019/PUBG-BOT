@@ -117,7 +117,7 @@ class Help:
                         "소스코드를 확인하실 수 있습니다.\n\n "
                         "아래의 버튼을 클릭하여 명령어를 알아보세요!".format(len(self.client.guilds)),
             color=self.color)
-        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar_url)
+        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar.url)
         embed.set_footer(text="{}/{} 페이지".format(1, len(self._commands) + 1))
         self.current_button()
 
@@ -149,7 +149,7 @@ class Help:
     async def main_page(self, page: int = 1, b_msg: Message = None):
         self.page = page
         embed = discord.Embed(color=self.color)
-        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar_url)
+        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar.url)
         embed.description = "† 붙은 명령어는 슬래시 명령어를 지원하지 않습니다."
         embed.set_footer(text="{}/{} 페이지".format(page + 1, len(self._commands) + 1))
 
