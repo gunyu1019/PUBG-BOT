@@ -36,8 +36,11 @@ class SeasonTask:
     def __init__(self, bot):
         self.bot = bot
 
-        self.check_season.start()
         self.requests = Api(token=PUBG_API)
+        self.bot.add_setup_hook(self.setup_hook)
+
+    async def setup_hook(self):
+        self.check_season.start()
 
     @tasks.loop(minutes=120)
     async def check_season(self):
@@ -104,4 +107,4 @@ class SeasonTask:
 
 
 def setup(client):
-    client.add_icog(SeasonTask(client))
+    client.add_interaction_cog(SeasonTask(client))

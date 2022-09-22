@@ -29,7 +29,7 @@ from utils.permission import permission
 
 class General:
     def __init__(self, bot):
-        self.client: discord.Client = bot
+        self.client: discord.AutoShardedClient = bot
 
         self.color = int(parser.get("Color", "default"), 16)
         self.error_color = int(parser.get("Color", "error"), 16)
@@ -69,7 +69,7 @@ class General:
 
     @interaction.command(name='정보', description='PUBG BOT의 정보를 확인합니다.')
     @permission(4)
-    async def information(self, ctx):
+    async def information(self, ctx: interaction.ApplicationContext):
         total = 0
         for i in self.client.guilds:
             total += i.member_count
@@ -82,7 +82,7 @@ class General:
             value="[HKDev Korea:한국 개발자 디스코드 서버](https://discord.gg/hkdev)",
             inline=False
         )
-        embed.set_thumbnail(url=self.client.user.avatar_url)
+        embed.set_thumbnail(url=self.client.user.avatar.url)
         await ctx.send(embed=embed)
         return
 
@@ -98,4 +98,4 @@ class General:
 
 
 def setup(client):
-    return client.add_icog(General(client))
+    return client.add_interaction_cog(General(client))

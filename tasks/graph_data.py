@@ -21,7 +21,7 @@ import datetime
 import logging
 
 import pymysql
-from discord.ext import tasks
+from discord.ext import tasks, interaction
 
 from module.player_data import PlayerData
 from utils.database import get_database
@@ -30,11 +30,13 @@ log = logging.getLogger(__name__)
 
 
 class GraphTask:
-    def __init__(self, bot):
+    def __init__(self, bot: interaction.Client):
         self.bot = bot
 
         logging.info("Steam Player Data Task has begun.")
-        self.client = PlayerData(loop=self.bot.loop)
+        self.bot.add_setup_hook(self.setup_hook)
+
+    async def setup_hook(self):
         self.check_player.start()
 
     @tasks.loop(minutes=10)
@@ -81,4 +83,4 @@ class GraphTask:
 
 
 def setup(client):
-    client.add_icog(GraphTask(client))
+    client.add_interaction_cog(GraphTask(client))

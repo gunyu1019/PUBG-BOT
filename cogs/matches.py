@@ -141,4 +141,4 @@ class Matches:
 
 
 def setup(client):
-    return client.add_icog(Matches(client))
+    return client.add_interaction_cog(Matches(client))

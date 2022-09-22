@@ -29,27 +29,35 @@ log = logging.getLogger(__name__)
 class PresenceTask:
     def __init__(self, bot):
         self.client = bot
+        self.client.add_setup_hook(self.setup_hook)
+
+    async def setup_hook(self):
         self.presence.start()
 
-    @tasks.loop(seconds=3)
+    @tasks.loop(seconds=21)
     async def presence(self):
         await self.client.change_presence(
             status=discord.Status.online,
             activity=discord.Game("/도움말을 이용하여, 명령어를 알아보세요!"))
         await asyncio.sleep(3.0)
+        await self.client.change_presence(
+            status=discord.Status.online,
+            activity=discord.Game(f"활동중인 서버갯수: {len(self.client.guilds)}개")
+        )
 
+        await asyncio.sleep(3.0)
         shard = self.client.shard_count
-        if shard is None:
+        if shard is not None:
             await self.client.change_presence(
                 status=discord.Status.online,
-                activity=discord.Game("활동중인 서버갯수: " + str(len(self.client.guilds)) + "개")
+                activity=discord.Game(f"활동중인 서버 갯수: {len(self.client.guilds)}개, 샤드 갯수: {shard}개")
             )
         else:
             await self.client.change_presence(
                 status=discord.Status.online,
-                activity=discord.Game("활동중인 서버갯수: " + str(len(self.client.guilds)) + "개, 샤드갯수: " + str(shard) + "개")
+                activity=discord.Game(f"활동중인 서버 갯수: {len(self.client.guilds)}개")
             )
-        await asyncio.sleep(3.0)
+        await asyncio.sleep(6.0)
 
         await self.client.change_presence(
             status=discord.Status.online,
@@ -75,4 +83,4 @@ class PresenceTask:
 
 
 def setup(client):
-    client.add_icog(PresenceTask(client))
+    client.add_interaction_cog(PresenceTask(client))

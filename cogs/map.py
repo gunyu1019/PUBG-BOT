@@ -123,4 +123,4 @@ class Map:
 
 
 def setup(client):
-    return client.add_icog(Map(client))
+    return client.add_interaction_cog(Map(client))

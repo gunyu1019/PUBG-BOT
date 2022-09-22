@@ -45,7 +45,7 @@ def insert_returns(body):
         insert_returns(body[-1].body)
 
 
-class Admin(commands.Cog):
+class Admin:
     def __init__(self, bot):
         self.client = bot
 
@@ -185,4 +185,4 @@ class Admin(commands.Cog):
 
 
 def setup(client):
-    return client.add_icog(Admin(client))
+    return client.add_interaction_cog(Admin(client))

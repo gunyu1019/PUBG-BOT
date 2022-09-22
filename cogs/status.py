@@ -58,18 +58,6 @@ class Status:
         await ctx.send(embed=embed)
         return
 
-    def cog_check(self, _):
-        return True
-
-    async def cog_before_invoke(self, ctx):
-        pass
-
-    async def cog_after_invoke(self, ctx):
-        pass
-
-    async def cog_command_error(self, ctx, error):
-        pass
-
     @commands.command(name="전적")
     @permission_cog(4)
     async def status_command(self, ctx):
@@ -361,4 +349,4 @@ class Status:
 
 
 def setup(client):
-    return client.add_icog(Status(client))
+    return client.add_interaction_cog(Status(client))

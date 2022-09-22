@@ -8,7 +8,6 @@
       "options": [
         {
           "name": "유형",
-          "choices": ["1인칭", "3인칭, 일반", "3인칭경쟁, 경쟁, 랭크", "1인칭경쟁"],
           "required": true
         }, {
           "name": "닉네임",
@@ -26,7 +25,6 @@
       "options": [
         {
           "name": "유형",
-          "choices": ["1인칭", "3인칭, 일반", "3인칭경쟁, 경쟁, 랭크", "1인칭경쟁"],
           "required": true
         }, {
           "name": "닉네임",
@@ -44,7 +42,6 @@
       "options": [
         {
           "name": "유형",
-          "choices": ["1인칭", "3인칭, 일반"],
           "required": true
         }, {
           "name": "닉네임",
@@ -62,7 +59,6 @@
       "options": [
         {
           "name": "유형",
-          "choices": ["1인칭", "3인칭, 일반", "3인칭경쟁, 경쟁, 랭크", "1인칭경쟁"],
           "required": true
         }, {
           "name": "닉네임",
@@ -148,6 +144,12 @@
       "interaction": true,
       "inline": true,
       "options": []
+    }, {
+      "name": "데스턴",
+      "description": "배틀그라운드 데스턴 맵에 대해 볼 수 있습니다.",
+      "interaction": true,
+      "inline": true,
+      "options": []
     }
   ],
   "봇 관련 기능": [
@@ -175,21 +177,6 @@
       "interaction": true,
       "inline": true,
       "options": []
-    }, {
-      "name": "접두어",
-      "description": "PUBG BOT의 접두어를 설정합니다. 슬래시 명령어를 사용할 경우에는 해당되지 않습니다.",
-      "interaction": false,
-      "inline": true,
-      "options": [
-        {
-          "name": "유형",
-          "choices": ["정보", "초기화", "설정"],
-          "required": true
-        }, {
-          "name": "설정할_접두어",
-          "required": false
-        }
-      ]
     }
   ]
 }

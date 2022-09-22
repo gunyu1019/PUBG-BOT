@@ -395,8 +395,8 @@ class Status:
 
         data: pubgpy.SeasonStats = getattr(section, mode)
         wins = data.wins
-        top10s = data.top10s
-        losses = data.losses
+        top10s = data.top10s - wins
+        losses = data.losses - top10s
         dbnos = data.dbnos
         max_kill_streaks = data.max_kill_streaks
         assists = data.assists

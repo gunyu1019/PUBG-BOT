@@ -89,4 +89,4 @@ class Server:
 
 
 def setup(client):
-    return client.add_icog(Server(client))
+    return client.add_interaction_cog(Server(client))

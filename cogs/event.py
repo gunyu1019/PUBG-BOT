@@ -53,7 +53,7 @@ class Events:
         for i in range(len(self.bot.guilds)):
             answer = answer + str(i + 1) + "번째: " + str(self.bot.guilds[i]) + "(" + str(
                 self.bot.guilds[i].id) + "):" + str(
-                self.bot.guilds[i].member_count) + "명\n"
+                self.bot.guilds[i].member_count) + "명, 샤드 번호: " + str(self.bot.guilds[i].shard_id) + "\n"
             total += self.bot.guilds[i].member_count
         logger.info(f"방목록: \n{answer}\n방의 종합 멤버:{total}명")
 
@@ -127,4 +127,4 @@ class Events:
 
 
 def setup(client):
-    client.add_icog(Events(client))
+    client.add_interaction_cog(Events(client))

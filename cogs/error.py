@@ -80,4 +80,4 @@ class Error:
 
 
 def setup(client):
-    client.add_icog(Error(client))
+    client.add_interaction_cog(Error(client))
