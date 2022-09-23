@@ -81,6 +81,7 @@ class MapName(Enum):
     vikendi = "DihorOtok_Main"
     erangel_old = "Erangel_Main"
     haven = "Heaven_Main"
+    deston = "Kiki_Main"
     camp_jackal = "Range_Main"
     sanhok = "Savage_Main"
     karakin = "Summerland_Main"

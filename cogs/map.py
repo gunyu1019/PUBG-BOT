@@ -121,9 +121,9 @@ class Map:
         await ctx.send(file=map_file, embed=self.embed)
         return
 
-    @interaction.command(name="테이고", description="배틀그라운드 데스턴 맵에 대해 볼 수 있습니다.")
+    @interaction.command(name="데스턴", description="배틀그라운드 데스턴 맵에 대해 볼 수 있습니다.")
     @permission(4)
-    async def taego(self, ctx):
+    async def deston(self, ctx):
         map_file = discord.File(directory + "/assets/Maps/Deston_Main_Low_Res.png")
         add_map_file('Deston', self.embed)
         await ctx.send(file=map_file, embed=self.embed)

@@ -18,6 +18,7 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
 import asyncio
 import pymysql
+import pymysql.converters
 import aiomysql
 import json
 import inspect
@@ -130,11 +131,11 @@ class CachePlayData(CacheData):
         cls = data.type_class
         cur = await self.database.get_cursor(aiomysql.cursors.DictCursor)
         if update:
-            command = pymysql.escape_string(
+            command = pymysql.converters.escape_string(
                 "UPDATE {} SET player_data=%s WHERE player_id=%s and season = %s".format(self._get_mode(cls))
             )
         else:
-            command = pymysql.escape_string(
+            command = pymysql.converters.escape_string(
                 "INSERT INTO {}(player_data, player_id, season) value (%s, %s, %s)".format(self._get_mode(cls))
             )
         await cur.execute(command, (self._dump_dict(data.data), player_id, season))
@@ -151,7 +152,7 @@ class CachePlayData(CacheData):
         season = season.id if isinstance(season, Season) else season
         player_id = player_id.id if isinstance(player_id, player.Player) else player_id
         cur = await self.database.get_cursor(aiomysql.cursors.DictCursor)
-        command = pymysql.escape_string(
+        command = pymysql.converters.escape_string(
             "SELECT player_data FROM {} WHERE player_id = %s AND season = %s".format(self._get_mode(cls))
         )
         await cur.execute(command, (player_id, season))
