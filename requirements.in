@@ -3,8 +3,9 @@ BeautifulSoup4
 aiomysql
 aiohttp
 lxml
-pymysql==0.9.3
+pymysql
 DBSkr
 pytz
 matplotlib
 Pillow
+git+https://github.com/gunyu1019/discord-extension-interaction.git@feature/client-independence
