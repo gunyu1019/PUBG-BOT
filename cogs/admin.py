@@ -25,11 +25,11 @@ import platform
 import traceback
 
 import discord
-from discord.ext import commands
+from discord.ext import interaction
 
 from config.config import parser
 from utils.directory import directory
-from utils.permission import permission_cog
+from utils.permission import is_owner
 
 
 def insert_returns(body):
@@ -46,17 +46,38 @@ def insert_returns(body):
 
 
 class Admin:
-    def __init__(self, bot):
+    def __init__(self, bot: interaction.Client):
         self.client = bot
 
         self.color = int(parser.get("Color", "default"), 16)
         self.error_color = int(parser.get("Color", "error"), 16)
         self.warning_color = int(parser.get("Color", "warning"), 16)
 
-    @commands.command(name="debug")
-    @permission_cog(1)
+    @interaction.listener()
+    async def on_interaction_message(self, message: interaction.Message):
+        prefixes = ("!", f"<@{self.client.user.id}>", f"<@!{self.client.user.id}>")
+        if (
+            not message.content.startswith(prefixes) or
+            not is_owner(message.author.id)
+        ):
+            return
+
+        command = ""
+        for prefix in prefixes:
+            if message.content.startswith(prefix):
+                command = message.content[len(prefix):]
+                break
+
+        if command.startswith("debug"):
+            await self.debug(message)
+        elif command.startswith("cmd"):
+            await self.cmd(message)
+        if command.startswith("reload"):
+            await self.reload(message)
+        return
+
     async def debug(self, ctx):
-        list_message = ctx.message.content.split()
+        list_message = ctx.content.split()
         if len(list_message) < 1:
             embed = discord.Embed(title="PUBG BOT 도우미", description='사용하실 커맨드를 작성해주세요.', color=self.color)
             await ctx.send(embed=embed)
@@ -88,7 +109,7 @@ class Admin:
                 "bot": self.client,
                 "discord": discord,
                 "ctx": ctx,
-                "commands": commands,
+                "interaction": interaction,
                 "channel": ctx.channel,
                 "author": ctx.author,
                 "server": ctx.guild,
@@ -121,10 +142,8 @@ class Admin:
             await msg.edit(embed=embed)
         return
 
-    @commands.command(name="cmd")
-    @permission_cog(1)
     async def cmd(self, ctx):
-        list_message = ctx.message.content.split()
+        list_message = ctx.content.split()
         if len(list_message) < 1:
             embed = discord.Embed(
                 title="PUBG BOT 도우미",
@@ -153,8 +172,6 @@ class Admin:
             await ctx.send(embed=embed)
         return
 
-    @commands.command(name="reload", description="PUBG BOT을 재시작합니다.")
-    @permission_cog(1)
     async def reload(self, ctx):
         exts = ["cogs." + file[:-3] for file in os.listdir(f"{directory}/cogs") if file.endswith(".py")]
 
@@ -168,13 +185,13 @@ class Admin:
         for ext in exts:
             try:
                 self.client.reload_extension(ext)
-            except commands.ExtensionNotLoaded:
+            except interaction.ExtensionNotLoaded:
                 e_msg += f"\n{ext}를 불러오지 못했습니다."
                 err[0] += 1
-            except commands.ExtensionNotFound:
+            except interaction.ExtensionNotFound:
                 e_msg += f"\n{ext}를 발견하지 못했습니다."
                 err[1] += 1
-            except commands.ExtensionFailed:
+            except interaction.ExtensionFailed:
                 e_msg += f"\n{ext}에 오류가 발생하였습니다."
                 err[2] += 1
         embed = discord.Embed(title="PUBG BOT", description=f"{len(exts)}개의 command가 재로딩 되었습니다.", colour=self.color)

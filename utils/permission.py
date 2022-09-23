@@ -27,8 +27,8 @@ from utils.database import get_database
 
 def is_owner(user_id):
     owners = parser.get("Permission", "Owner")
-    for i in json.loads(owners):
-        if user_id == i:
+    for owner_id in json.loads(owners):
+        if int(user_id) == int(owner_id):
             return True
     return False
 
@@ -78,9 +78,3 @@ def permission(perm):
     def check(ctx):
         return perm >= check_perm(ctx.author)
     return interaction.check(check)
-
-
-def permission_cog(perm):
-    def check(ctx):
-        return perm >= check_perm(ctx.author)
-    return commands.check(check)

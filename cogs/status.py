@@ -21,7 +21,6 @@ import discord
 import json
 
 from typing import Optional, Union, List
-from discord.ext import commands
 from discord.ext import interaction
 
 from config.config import parser
@@ -31,7 +30,7 @@ from process import player
 from process.status import Status as ProcessStatus
 from utils import token
 from utils.database import get_database
-from utils.permission import permission, permission_cog
+from utils.permission import permission
 
 
 class Status:
@@ -56,76 +55,6 @@ class Status:
             color=self.warning_color
         )
         await ctx.send(embed=embed)
-        return
-
-    @commands.command(name="전적")
-    @permission_cog(4)
-    async def status_command(self, ctx):
-        convert_context = MessageCommand(ctx.message, self.client)
-        if convert_context.name is None:  # Only Official PUBG Community in Korea
-            return
-        convert_context.name = self.status_command.name
-        convert_context.prefix = ctx.prefix
-        await self._base_status_command(convert_context)
-
-    @commands.command(name="전적솔로")
-    @permission_cog(4)
-    async def status_command_solo(self, ctx):
-        convert_context = MessageCommand(ctx.message, self.client)
-        if convert_context.name is None:  # Only Official PUBG Community in Korea
-            return
-        convert_context.name = self.status_command.name
-        convert_context.prefix = ctx.prefix
-        await self._base_status_command(convert_context)
-
-    @commands.command(name="전적듀오")
-    @permission_cog(4)
-    async def status_command_duo(self, ctx):
-        convert_context = MessageCommand(ctx.message, self.client)
-        if convert_context.name is None:  # Only Official PUBG Community in Korea
-            return
-        convert_context.name = self.status_command.name
-        convert_context.prefix = ctx.prefix
-        await self._base_status_command(convert_context)
-
-    @commands.command(name="전적스쿼드")
-    @permission_cog(4)
-    async def status_command_squad(self, ctx):
-        convert_context = MessageCommand(ctx.message, self.client)
-        if convert_context.name is None:  # Only Official PUBG Community in Korea
-            return
-        convert_context.name = self.status_command.name
-        convert_context.prefix = ctx.prefix
-        await self._base_status_command(convert_context)
-
-    async def _base_status_command(self, convert_context):
-        all_option = self._choose_to_option1()
-        usage_command = "`사용법: {convert_context.prefix}{convert_context.name} <유형> <닉네임>`\n유형: {comment}".format(
-            convert_context=convert_context, comment=",".join(all_option)
-        )
-        if len(convert_context.options) <= 0:
-            await self._option_error(convert_context, "전적의 유형을 선택해주세요.\n{0}".format(usage_command))
-            return
-        if len(convert_context.options) <= 1:
-            await self._option_error(convert_context, "닉네임을 입력해주세요.\n{0}".format(usage_command))
-            return
-        _option1 = convert_context.options[0]
-        if _option1 == "1인칭" or _option1 == "1":
-            option1 = 0
-        elif _option1 == "3인칭" or _option1 == "일반" or _option1 == "일" or _option1 == "3":
-            option1 = 1
-        elif _option1 == "1인칭경쟁" or _option1 == "1랭":
-            option1 = 2
-        elif _option1 == "3인칭경쟁" or _option1 == "경쟁" or _option1 == "랭크" or _option1 == "랭":
-            option1 = 3
-        else:
-            await self._option_error(
-                convert_context,
-                "{1} 중에서 하나만 선택하여 주세요.\n`사용법: {0}`".format(usage_command, ", ".join(all_option))
-            )
-            return
-        option2 = convert_context.options[1]
-        await self.status(convert_context, option1, option2)
         return
 
     @interaction.command(name="전적솔로", description='검색된 사용자의 솔로 전적 정보를 불러옵니다.')
