@@ -75,13 +75,24 @@ class General:
             total += i.member_count
         embed = discord.Embed(title='PUBG BOT', color=self.color)
         embed.add_field(name='개발', value='[건유1019#0001](https://discord.gg/mr6RpUeG96)', inline=True)
-        embed.add_field(name='<:user:735138021850087476>서버수 / 유저수', value=f'{len(self.client.guilds)}서버/{total}명', inline=True)
-        embed.add_field(name='PUBG BOT 버전', value=f'{parser.get("DEFAULT","version")}', inline=True)
         embed.add_field(
-            name='Thanks to Supporters',
-            value="[HKDev Korea:한국 개발자 디스코드 서버](https://discord.gg/hkdev)",
-            inline=False
+            name='<:user:735138021850087476>서버수 / 유저수',
+            value=f'{format(len(self.client.guilds), ",")}서버/{format(total, ",")}명',
+            inline=True
         )
+        embed.add_field(name="이용 약관", value=f'[통합 이용약관](https://yhs.kr/term)', inline=True)
+        embed.add_field(name='PUBG BOT 버전', value=f'{parser.get("DEFAULT","version")}', inline=True)
+        if ctx.guild is not None and self.client.shard_count is not None:
+            embed.add_field(
+                name="샤드 ID(샤드 갯수)",
+                value=f'#{ctx.guild.shard_id} ({self.client.shard_count}개)',
+                inline=True
+            )
+        # embed.add_field(
+        #     name='Thanks to Supporters',
+        #     value="[HKDev Korea:한국 개발자 디스코드 서버](https://discord.gg/hkdev)",
+        #     inline=False
+        # )
         embed.set_thumbnail(url=self.client.user.avatar.url)
         await ctx.send(embed=embed)
         return
