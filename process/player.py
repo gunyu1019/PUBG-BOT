@@ -144,11 +144,6 @@ async def player_platform(
                 custom_id="3",
                 style=2,
                 emoji=playstation
-            ),
-            Button(
-                custom_id="4",
-                style=2,
-                emoji=stadia
             )
         ])
     ]

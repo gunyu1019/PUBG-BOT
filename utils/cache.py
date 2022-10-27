@@ -183,10 +183,7 @@ class CachePlayData(CacheData):
                     continue
 
                 if self.too_much_callback is not None:
-                    if inspect.iscoroutinefunction(self.too_much_callback):
-                        await self.too_much_callback(error=error, index=i)
-                    else:
-                        await self.too_much_callback(error=error, index=i)
+                    await self.too_much_callback(error=error, index=i)
                 else:
                     await asyncio.sleep(error.reset)
         else:
