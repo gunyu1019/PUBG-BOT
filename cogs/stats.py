@@ -20,9 +20,12 @@ along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 import discord
 from discord.ext import interaction
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncResult
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import select
 
 from config.config import get_config
+from models import database
 from module.statsType import StatsType
 from module import pubgpy
 from process.player import Player
@@ -67,7 +70,7 @@ class Stats:
         self.error_color = int(parser.get("Color", "error"), 16)
         self.warning_color = int(parser.get("Color", "warning"), 16)
 
-        self.pubgpy = pubgpy.Client(token="#TODO()")
+        self.pubgpy = pubgpy.Client(token=parser.get("Default", "pubg_token"))
 
     @interaction.command(name='전적')
     async def stats(self, ctx: interaction.ApplicationContext):
@@ -124,9 +127,29 @@ class Stats:
         await ctx.defer()
 
         _player = Player(ctx, self.client, self.pubgpy, session, ctx.locale)
+
+        # 배틀그라운드 플레이어 정보 불러오기
         player_info = await _player.player(player)
         if player_info is None:
             return
+
+        # 최신 시즌 정보 불러오기
+        if season is None:
+            query = (
+                select(database.CurrentSeasonInfo).where(database.CurrentSeasonInfo.platform == player_info.platform)
+            )
+            result: AsyncResult = await session.execute(query)
+            season_data: database.CurrentSeasonInfo = await result.fetchone()
+            season = season_data.season
+
+        if stats_type == StatsType.Normal_3rd:
+            pass
+        elif stats_type == StatsType.Normal_1st:
+            pass
+        elif stats_type == StatsType.Ranked_3rd:
+            pass
+        elif stats_type == StatsType.Ranked_1st:
+            pass
         return
 
 

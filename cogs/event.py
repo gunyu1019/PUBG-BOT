@@ -20,9 +20,9 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 
 import discord
-from discord.ext.interaction import listener
 from discord.ext.interaction import ApplicationContext
 from discord.ext.interaction import Client
+from discord.ext.interaction import listener
 from sqlalchemy.orm import sessionmaker
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class Events:
 
         total = 0
         for index, guild in enumerate(self.bot.guilds):
-            answer += f"{index+1}번째: {guild.name} ({guild.id}): {guild.member_count}명\n"
+            answer += f"{index + 1}번째: {guild.name} ({guild.id}): {guild.member_count}명\n"
             total += guild.member_count
         logger.info(f"방목록: \n{answer}\n방의 종합 멤버:{total}명")
 
@@ -61,10 +61,8 @@ class Events:
 
         await (
             self.bot.get_guild(786153760824492062)
-                .get_channel(938656148423344178)
-                .send(
-                "새로운 서버에 추가되었습니다. **(현재 서버수 : {0})**".format(len(self.bot.guilds))
-            )
+            .get_channel(938656148423344178)
+            .send("새로운 서버에 추가되었습니다. **(현재 서버수 : {0})**".format(len(self.bot.guilds)))
         )
         return
 

@@ -67,14 +67,14 @@ class Player:
     async def player(
             self,
             nickname: str
-    ) -> pubgpy.Player:
+    ) -> PlatformSelection:
         query = select(exists(database.Player).where(database.Player.name == nickname))
         data: AsyncResult = await self.database.execute(query)
         if data.one_or_none():
             query = select(database.Player).where(database.Player.name == nickname)
             data: AsyncResult = await self.database.execute(query)
             player_info: database.Player = (await data.fetchone())[0]
-            return self.pubg_client.player_id(player_info.account_id)
+            return PlatformSelection(self.pubg_client.player_id(player_info.account_id), player_info.platform)
         else:
             platform_selection = await self.player_platform(nickname=nickname)
             query = database.Player.insert().values({
@@ -83,7 +83,7 @@ class Player:
             })
             await self.database.execute(query)
             await self.database.commit()
-            return platform_selection.player
+            return platform_selection
 
     async def player_platform(
             self,

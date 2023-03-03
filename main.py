@@ -40,4 +40,5 @@ if __name__ == "__main__":
     factory = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     bot.load_extensions('cogs', directory, factory=factory)
+    bot.load_extensions('tasks', directory, factory=factory)
     bot.run(parser.get("Default", "token"))
