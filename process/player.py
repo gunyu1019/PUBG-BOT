@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
+along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 """
 import asyncio
 from typing import Optional, NamedTuple
@@ -55,13 +55,13 @@ class Player:
             ctx: interaction.ApplicationContext,
             client: interaction.Client,
             pubg_client: pubgpy.Client,
-            database: AsyncSession,
+            session: AsyncSession,
             language: str = 'ko'
     ):
         self.ctx = ctx
         self.client = client
         self.pubg_client = pubg_client
-        self.database = database
+        self.database = session
         self.language = language
 
     async def player(
@@ -72,9 +72,11 @@ class Player:
         data: AsyncResult = await self.database.execute(query)
         if data.one_or_none():
             query = select(database.Player).where(database.Player.name == nickname)
-            data: AsyncResult = await self.database.execute(query)
-            player_info: database.Player = (await data.fetchone())[0]
-            return PlatformSelection(self.pubg_client.player_id(player_info.account_id), player_info.platform)
+            player_info: database.Player = await self.database.scalar(query)
+            player_data = self.pubg_client.player_id(player_info.account_id)
+            player_data.name = player_info.name
+            player_data.client.platform(player_info.platform)
+            return PlatformSelection(player_data, player_info.platform)
         else:
             platform_selection = await self.player_platform(nickname=nickname)
             query = database.Player.insert().values({

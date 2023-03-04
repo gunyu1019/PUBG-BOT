@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import List, Optional
+from typing import Optional
 
 from discord.ext import interaction
 from discord.ext import tasks
@@ -35,7 +35,7 @@ class SeasonTask:
 
         query = select(database.CurrentSeasonInfo)
         data: AsyncResult = await session.execute(query)
-        platform_data: List[database.CurrentSeasonInfo] = data.scalars().all()
+        platform_data: list[database.CurrentSeasonInfo] = data.scalars().all()
         is_commit = False
 
         for platform in platform_data:
@@ -43,7 +43,7 @@ class SeasonTask:
             if (date_today - platform.last_update).days > 2:
                 log.info(f"{platform.platform.value} 시즌 정보를 확인합니다.")
                 self.pubgpy.platform(platform.platform)
-                season_info: List[pubgpy.Season] = await self.pubgpy.seasons()
+                season_info: list[pubgpy.Season] = await self.pubgpy.seasons()
                 current_season: Optional[pubgpy.Season] = None
                 for season in season_info:
                     if season.current:

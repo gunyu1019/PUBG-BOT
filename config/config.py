@@ -1,11 +1,10 @@
 import os
 
-from typing import List
 from configparser import ConfigParser
 from utils.directory import directory
 
 
-def get_config(name: str = "config", path: List[str] = None) -> ConfigParser:
+def get_config(name: str = "config", path: list[str] = None) -> ConfigParser:
     if path is None:
         path = []
     path.append("{0}.ini".format(name))

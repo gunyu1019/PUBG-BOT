@@ -2,6 +2,7 @@ import os
 import discord
 from discord.ext import interaction
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -36,7 +37,10 @@ if __name__ == "__main__":
         "database": parser.get("MySQL", "database"),
         "port": parser.getint("MySQL", "port", fallback=3306)
     }
-    engine = create_async_engine("mysql+aiomysql://{username}:{password}@{host}:{port}/{database}".format(**database))
+    engine = create_async_engine(
+        "mysql+aiomysql://{username}:{password}@{host}:{port}/{database}".format(**database),
+        poolclass=NullPool
+    )
     factory = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     bot.load_extensions('cogs', directory, factory=factory)

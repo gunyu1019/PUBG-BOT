@@ -96,6 +96,7 @@ class Api:
             url = "{}/shards/{}{}" .format(self.BASE_URL, self.platform, path)
         else:
             url = "{}{}" .format(self.BASE_URL, path)
+
         async with aiohttp.ClientSession() as session:
             async with session.request(method, url, headers=header) as resp:
                 log.debug("A request has been received. '{}'".format(url))

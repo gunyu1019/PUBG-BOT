@@ -5,9 +5,12 @@ from sqlalchemy import DateTime
 from sqlalchemy import Float
 from sqlalchemy import Integer
 from sqlalchemy import String
+from sqlalchemy import Boolean
+from sqlalchemy import Enum
 from sqlalchemy.orm import declarative_base
 
 from module.pubgpy import RankedStats as pubgRankedStats
+from module.statsType import StatsPlayType
 
 base = declarative_base()
 
@@ -15,8 +18,10 @@ base = declarative_base()
 class RankedStats(base):
     __tablename__ = "ranked_stats"
 
-    account_id_with_session = Column(String, primary_key=True)
+    account_id_with_season = Column(String, primary_key=True)
     account_id = Column(String)
+    type = Column(Boolean)
+    fpp = Column(Enum(StatsPlayType))
     season = Column(String)
     update_time = Column(DateTime)
     current_tier = Column(String)
@@ -43,12 +48,16 @@ class RankedStats(base):
             player: str,
             season: str,
             stats: pubgRankedStats,
+            play_type: StatsPlayType,
+            fpp: bool,
             update_time: datetime.datetime = datetime.datetime.now()
     ):
-        account_id_with_session = "{}_{}".format(player, season)
+        account_id_with_season = "{}_{}_{}".format(player, season, play_type.value)
         return cls(
-            account_id_with_session=account_id_with_session,
+            account_id_with_season=account_id_with_season,
             account_id=player,
+            type=play_type,
+            fpp=fpp,
             season=season,
             update_time=update_time,
             current_tier=stats.current.tier,

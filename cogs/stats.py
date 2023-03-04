@@ -20,7 +20,6 @@ along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 import discord
 from discord.ext import interaction
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import AsyncResult
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import select
 
@@ -29,6 +28,7 @@ from models import database
 from module.statsType import StatsType
 from module import pubgpy
 from process.player import Player
+from process.stats import Stats as StatsProcess
 
 parser = get_config()
 platform_choices = [
@@ -138,18 +138,23 @@ class Stats:
             query = (
                 select(database.CurrentSeasonInfo).where(database.CurrentSeasonInfo.platform == player_info.platform)
             )
-            result: AsyncResult = await session.execute(query)
-            season_data: database.CurrentSeasonInfo = await result.fetchone()
+            season_data: database.CurrentSeasonInfo = await session.scalar(query)
             season = season_data.season
 
-        if stats_type == StatsType.Normal_3rd:
-            pass
-        elif stats_type == StatsType.Normal_1st:
-            pass
-        elif stats_type == StatsType.Ranked_3rd:
-            pass
-        elif stats_type == StatsType.Ranked_1st:
-            pass
+        stats_session = StatsProcess(ctx, self.client, self.factory, player_info.player, season, fpp=False)
+        await stats_session.update_data(database.NormalStats, session, update=False)
+        # 사용자 정보만 불러오고 닫기
+        await session.close()
+
+        match stats_type:
+            case StatsType.Normal_1st:
+                pass
+            case StatsType.Normal_3rd:
+                pass
+            case StatsType.Ranked_3rd:
+                pass
+            case StatsType.Ranked_1st:
+                pass
         return
 
 

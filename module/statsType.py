@@ -6,3 +6,9 @@ class StatsType(Enum):
     Normal_1st = 1
     Ranked_3rd = 2
     Ranked_1st = 3
+
+
+class StatsPlayType(Enum):
+    SOLO = 'solo'
+    DUO = 'duo'
+    SQUAD = 'squad'
