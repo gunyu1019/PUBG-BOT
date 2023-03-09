@@ -143,6 +143,7 @@ class Stats:
 
         stats_session = StatsProcess(ctx, self.client, self.factory, player_info.player, season, fpp=False)
         await stats_session.update_data(database.NormalStats, session, update=False)
+
         # 사용자 정보만 불러오고 닫기
         await session.close()
 

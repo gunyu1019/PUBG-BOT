@@ -26,6 +26,7 @@ class NormalStats(base):
     deals = Column(Float, default=0.0)
     deaths = Column(Integer, default=0)
     kills = Column(Integer, default=0)
+    max_kills = Column(Integer, default=0)
     assists = Column(Integer, default=0)
     top10s = Column(Integer, default=0)
     losses = Column(Integer, default=0)
@@ -54,6 +55,7 @@ class NormalStats(base):
             deals=stats.damage_dealt,
             deaths=stats.losses,
             kills=stats.kills,
+            max_kills=stats.max_kill_streaks,
             assists=stats.assists,
             top10s=stats.top10s,
             losses=stats.losses,

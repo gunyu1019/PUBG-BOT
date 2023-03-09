@@ -75,7 +75,6 @@ class Stats:
             self.data[data_type] = {}
 
         data_type_game_mode = self.game_type_from_data_type(data_type)
-        print(data_type_game_mode)
         for game_mode in data_type_game_mode:
             _data = getattr(data, game_mode.value + ("_fpp" if self.fpp else ""))
             self.data[data_type][game_mode] = _formatted_data = data_type.from_pubg(

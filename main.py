@@ -30,12 +30,13 @@ if __name__ == "__main__":
         )
 
     # Database
+    database_section = parser.get("Default", "database")
     database = {
-        "username": parser.get("MySQL", "user"),
-        "host": parser.get("MySQL", "host"),
-        "password": parser.get("MySQL", "pass"),
-        "database": parser.get("MySQL", "database"),
-        "port": parser.getint("MySQL", "port", fallback=3306)
+        "username": parser.get(database_section, "user"),
+        "host": parser.get(database_section, "host"),
+        "password": parser.get(database_section, "pass"),
+        "database": parser.get(database_section, "database"),
+        "port": parser.getint(database_section, "port", fallback=3306)
     }
     engine = create_async_engine(
         "mysql+aiomysql://{username}:{password}@{host}:{port}/{database}".format(**database),
