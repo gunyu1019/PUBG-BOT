@@ -133,3 +133,7 @@ dmypy.json
 
 log/*
 config/config.ini
+
+# CP
+assets/background/*
+assets/fonts/*
