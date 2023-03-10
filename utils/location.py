@@ -27,8 +27,9 @@ languages = {}
 comment_files = os.listdir(
     os.path.join(directory, 'config', 'comment')
 )
-for lng in languages:
-    languages[lng.lstrip('language_')] = get_config(lng, path=["comment"])
+for lng in comment_files:
+    lng_file_without_ini = lng.strip('.ini')
+    languages[lng_file_without_ini.lstrip('language_')] = get_config(lng_file_without_ini, path=["comment"])
 
 
 def comment(command_group: str, comment_id: str, language: str):

@@ -111,7 +111,7 @@ class Stats:
 
         query = select(
             # exists(data_type).where(data_type.account_id_with_session == f"{self.player.id}_{self.season.id}_solo")
-            exists(data_type).where(data_type.account_id == self.player.id & data_type.season == self.season)
+            exists(data_type).where((data_type.account_id == self.player.id) & (data_type.season == self.season))
         )
         data: AsyncResult = await session.execute(query)
         if data.one_or_none():
@@ -120,10 +120,10 @@ class Stats:
                 self.data[data_type] = {}
             for game_mode in data_type_game_mode:
 
-                query = select(database.Player).where(
-                    data_type.account_id == self.player.id &
-                    data_type.season == self.season &
-                    data_type.type == game_mode
+                query = select(data_type).where(
+                    (data_type.account_id == self.player.id) &
+                    (data_type.season == self.season) &
+                    (data_type.type == game_mode)
                 )
                 _data: data_type = await session.scalar(query)
                 self.data[data_type][game_mode] = _data

@@ -60,44 +60,49 @@ class ImageProcess:
 
             draw_canvas.rectangle(
                 (
-                    30 + (((canvas.width - 80) / 3) + 30) * category_position,
+                    canvas.width / 6 * (2 * category_position + 1) - 104,
                     158,
-                    (30 + (canvas.width - 80) / 3) * (category_position + 1) + category_position * 10,
+                    canvas.width / 6 * (2 * category_position + 1) + 104,
                     178
                 ), fill="#af2222"
             )
+            deaths = game_data.deaths if game_data.deaths > 0 else 1
+            played = game_data.played if game_data.played > 0 else 1
             deployment = [
                 {
-                    "kda": round((game_data.kills + game_data.assists) / game_data.deaths, 2),
-                    "win_ratio": round(game_data.wins / game_data.played * 100, 1)
+                    "kda": "{}점".format(round((game_data.kills + game_data.assists) / deaths, 2)),
+                    "win_ratio": "{}%".format(round(game_data.wins / played * 100, 1))
                 }, {
-                    "average_deals": round(game_data.deals / game_data.played, 1),
-                    "max_kills": game_data.kills
+                    "average_deals": str(round(game_data.deals / played, 1)),
+                    "max_kills": "{}회".format(game_data.max_kills)
                 }
             ]
             # KDA / Win ratio / Average Deals / Max Kill
             for sub_title_position, item in enumerate(deployment):
                 height = [230, 291]
                 for index, (key, value) in enumerate(item.items()):
-                    sub_title1_w, sub_title1_h = draw_canvas.textsize("KDA", font=self.sub_title_font)
+                    sub_title1_w, sub_title1_h = draw_canvas.textsize(
+                        comment('normal_stats', key, self.language),
+                        font=self.sub_title_font
+                    )
                     draw_canvas.text(
                         (
                             20 * (category_position + 1)
                             + (canvas.width - 80) / 12 * (1 + 2 * (category_position * 2 + sub_title_position))
                             - sub_title1_w / 2,
-                            230 + height[index] * 61
+                            height[index]
                         ),
                         text=comment('normal_stats', key, self.language),
                         fill="#f1ca09",
                         font=self.sub_title_font
                     )
-                    sub_description1_w, sub_description1_h = draw_canvas.textsize("5.08", font=self.sub_title_font)
+                    sub_description1_w, sub_description1_h = draw_canvas.textsize(value, font=self.sub_title_font)
                     draw_canvas.text(
                         (
                             20 * (category_position + 1)
                             + (canvas.width - 80) / 12 * (1 + 2 * (category_position * 2 + sub_title_position))
                             - sub_description1_w / 2,
-                            260 + height[index] * 61
+                            height[index] + 30
                         ),
                         text=value,
                         fill="#ffffff",

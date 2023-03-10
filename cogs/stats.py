@@ -26,9 +26,11 @@ from sqlalchemy.sql import select
 from config.config import get_config
 from models import database
 from module.statsType import StatsType
+from module.image import ImageProcess
 from module import pubgpy
 from process.player import Player
 from process.stats import Stats as StatsProcess
+
 
 parser = get_config()
 platform_choices = [
@@ -142,10 +144,13 @@ class Stats:
             season = season_data.season
 
         stats_session = StatsProcess(ctx, self.client, self.factory, player_info.player, season, fpp=False)
-        await stats_session.update_data(database.NormalStats, session, update=False)
+        await stats_session.load_data(database.NormalStats, session)
 
         # 사용자 정보만 불러오고 닫기
         await session.close()
+
+        image_process = ImageProcess(player_info.player, ctx.locale)
+        image_process.normal_stats(stats_session.data[database.NormalStats])
 
         match stats_type:
             case StatsType.Normal_1st:
