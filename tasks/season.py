@@ -43,7 +43,11 @@ class SeasonTask:
             if (date_today - platform.last_update).days > 2:
                 log.info(f"{platform.platform.value} 시즌 정보를 확인합니다.")
                 self.pubgpy.platform(platform.platform)
-                season_info: list[pubgpy.Season] = await self.pubgpy.seasons()
+                try:
+                    season_info: list[pubgpy.Season] = await self.pubgpy.seasons()
+                except pubgpy.TooManyRequests:
+                    continue
+
                 current_season: Optional[pubgpy.Season] = None
                 for season in season_info:
                     if season.current:

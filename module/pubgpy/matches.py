@@ -95,7 +95,7 @@ class Roster(MatchesBaseModel):
 
 class Participant(MatchesBaseModel):
     """ Asset objects contain a URL string that links to a telemetry.json file, which will contain an array
-     of event objects that provide further insight into a match.
+     of event objects that provide further insignias into a match.
 
     Attributes
     ----------
@@ -209,7 +209,7 @@ class Participant(MatchesBaseModel):
 
 class Assets(MatchesBaseModel):
     """ Asset objects contain a URL string that links to a telemetry.json file, which will contain an array
-     of event objects that provide further insight into a match.
+     of event objects that provide further insignias into a match.
 
     Attributes
     ----------

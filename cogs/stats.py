@@ -26,7 +26,6 @@ from sqlalchemy.sql import select
 from config.config import get_config
 from models import database
 from module.statsType import StatsType
-from module.image import ImageProcess
 from module import pubgpy
 from process.player import Player
 from process.stats import Stats as StatsProcess
@@ -144,23 +143,27 @@ class Stats:
             season = season_data.season
 
         stats_session = StatsProcess(ctx, self.client, self.factory, player_info.player, season, fpp=False)
-        await stats_session.load_data(database.NormalStats, session)
+        await stats_session.load_data(database.RankedStats, session)
 
-        # 사용자 정보만 불러오고 닫기
+        stats_process = StatsProcess(
+            ctx=ctx,
+            client=self.client,
+            factory=self.factory,
+            player=player_info.player,
+            season=season,
+            fpp=stats_type in [StatsType.Normal_1st, StatsType.Ranked_1st]
+        )
+        await stats_process.load_data(
+            database.RankedStats if stats_type in [StatsType.Ranked_1st, StatsType.Ranked_3rd]
+            else database.NormalStats,  # [StatsType.Normal_1st, StatsType.Normal_3rd]
+            session
+        )
         await session.close()
 
-        image_process = ImageProcess(player_info.player, ctx.locale)
-        image_process.normal_stats(stats_session.data[database.NormalStats])
-
-        match stats_type:
-            case StatsType.Normal_1st:
-                pass
-            case StatsType.Normal_3rd:
-                pass
-            case StatsType.Ranked_3rd:
-                pass
-            case StatsType.Ranked_1st:
-                pass
+        if stats_type == StatsType.Normal_1st or stats_type == StatsType.Normal_3rd:
+            await stats_process.normal_stats()
+        elif stats_type == StatsType.Ranked_1st or stats_type == StatsType.Ranked_3rd:
+            await stats_process.ranked_stats()
         return
 
 

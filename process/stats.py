@@ -1,5 +1,6 @@
 from typing import Type
 
+import discord
 from discord.ext import interaction
 from sqlalchemy.ext.asyncio import AsyncResult
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +12,7 @@ from models import database
 from module import pubgpy
 from module import statsType
 from process.request_loop import request_loop
+from process.image import ImageProcess
 
 
 class Stats:
@@ -34,6 +36,43 @@ class Stats:
             Type[database.NormalStats | database.RankedStats],
             dict[statsType.StatsPlayType, database.NormalStats | database.RankedStats]
         ] = {}
+        self.image = ImageProcess(player, self.context.locale)
+
+        self.normal_stats_button = interaction.Button(
+            custom_id="normal_stats_button",
+            emoji=discord.PartialEmoji(name="\U00000031\U0000FE0F\U000020E3"),
+            style=1
+        )
+        self.ranked_stats_button = interaction.Button(
+            custom_id="ranked_stats_button",
+            emoji=discord.PartialEmoji(name="\U00000032\U0000FE0F\U000020E3"),
+            style=1
+        )
+        self.matches_stats_button = interaction.Button(
+            custom_id="matches_stats_button",
+            emoji=discord.PartialEmoji(name="\U00000032\U0000FE0F\U000020E3"),
+            style=1
+        )
+        self.favorite_stats_button = interaction.Button(
+            custom_id="favorite_stats_button",
+            emoji=discord.PartialEmoji(name="\U00002B50"),
+            style=1
+        )
+        self.cancel_stats_button = interaction.Button(
+            custom_id="cancel_stats_button",
+            emoji=discord.PartialEmoji(name="\U0000274C"),
+            style=1
+        )
+
+    @property
+    def buttons(self) -> interaction.ActionRow:
+        return interaction.ActionRow(components=[
+            self.normal_stats_button,
+            self.ranked_stats_button,
+            self.matches_stats_button,
+            self.favorite_stats_button,
+            self.cancel_stats_button
+        ])
 
     @staticmethod
     def game_type_from_data_type(
@@ -42,7 +81,7 @@ class Stats:
         return [
             # statsType.StatsPlayType.SOLO,
             statsType.StatsPlayType.SQUAD
-        ] if isinstance(data_type, database.RankedStats) else list(statsType.StatsPlayType)
+        ] if data_type == database.RankedStats else list(statsType.StatsPlayType)
 
     async def update_data(
             self,
@@ -65,7 +104,7 @@ class Stats:
             case database.RankedStats:
                 data: pubgpy.GameModeReceive = await request_loop(
                     self.context,
-                    self.player.season_stats,
+                    self.player.ranked_stats,
                     season=self.season
                 )
             case _:
@@ -134,8 +173,22 @@ class Stats:
             await session.close()
         return self.data[data_type]
 
-    async def ranked_stats(self):
+    async def ranked_stats(self, component_response: interaction.ComponentsContext | None = None):
+        if database.RankedStats not in self.data.keys():
+            await self.load_data(database.RankedStats)
+        data = self.data[database.RankedStats]
+        image = self.image.ranked_stats(data)
+        file = discord.File(image, filename="{}_normal_stats.png".format(self.player.name))
+        if component_response is None:
+            await self.context.edit(attachments=[file])
         return
 
-    async def normal_stats(self):
+    async def normal_stats(self, component_response: interaction.ComponentsContext | None = None):
+        if database.NormalStats not in self.data.keys():
+            await self.load_data(database.NormalStats)
+        data = self.data[database.NormalStats]
+        image = self.image.normal_stats(data)
+        file = discord.File(image, filename="{}_normal_stats.png".format(self.player.name))
+        if component_response is None:
+            await self.context.edit(attachments=[file])
         return

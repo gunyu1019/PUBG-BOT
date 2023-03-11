@@ -20,8 +20,8 @@ class RankedStats(base):
 
     account_id_with_season = Column(String, primary_key=True)
     account_id = Column(String)
-    type = Column(Boolean)
-    fpp = Column(Enum(StatsPlayType))
+    type = Column(Enum(StatsPlayType))
+    fpp = Column(Boolean)
     season = Column(String)
     update_time = Column(DateTime)
     current_tier = Column(String)
@@ -34,6 +34,7 @@ class RankedStats(base):
     average_rank = Column(Float, default=0.0)
     deals = Column(Float, default=0.0)
     deaths = Column(Integer, default=0)
+    dbnos = Column(Integer, default=0)
     kills = Column(Integer, default=0)
     assists = Column(Integer, default=0)
     top10s = Column(Integer, default=0)
@@ -68,6 +69,7 @@ class RankedStats(base):
             best_point=stats.best.point,
             average_rank=stats.avg_rank,
             deals=stats.damage_dealt,
+            dbnos=stats.dbnos,
             deaths=stats.deaths,
             kills=stats.kills,
             assists=stats.assists,
