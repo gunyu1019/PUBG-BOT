@@ -114,7 +114,7 @@ class Stats:
             exists(data_type).where((data_type.account_id == self.player.id) & (data_type.season == self.season))
         )
         data: AsyncResult = await session.execute(query)
-        if data.one_or_none():
+        if data.scalar_one_or_none():
             data_type_game_mode = self.game_type_from_data_type(data_type)
             if data_type not in self.data:
                 self.data[data_type] = {}

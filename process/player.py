@@ -70,7 +70,8 @@ class Player:
     ) -> PlatformSelection:
         query = select(exists(database.Player).where(database.Player.name == nickname))
         data: AsyncResult = await self.database.execute(query)
-        if data.one_or_none():
+        result = data.scalar_one_or_none()
+        if result:
             query = select(database.Player).where(database.Player.name == nickname)
             player_info: database.Player = await self.database.scalar(query)
             player_data = self.pubg_client.player_id(player_info.account_id)
@@ -79,11 +80,12 @@ class Player:
             return PlatformSelection(player_data, player_info.platform)
         else:
             platform_selection = await self.player_platform(nickname=nickname)
-            query = database.Player.insert().values({
+            query = database.Player(**{
                 "name": platform_selection.player.name,
+                "account_id": platform_selection.player.id,
                 "platform": platform_selection.platform.value
             })
-            await self.database.execute(query)
+            self.database.add(query)
             await self.database.commit()
             return platform_selection
 
