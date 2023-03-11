@@ -15,6 +15,8 @@ class ImageProcess:
         self.background_canvas = Image.open(
             fp=os.path.join(directory, "assets", "background", "background_1.png")
         )
+        self.background_canvas.resize((768, 433))
+
         self.player_name_font = ImageFont.truetype(
             os.path.join(directory, "assets", "fonts", "NotoSansKR-Black.otf"),
             size=36
@@ -37,7 +39,7 @@ class ImageProcess:
         )
 
         canvas.paste(self.background_canvas, (0, 0))
-        canvas.paste(layout_canvas, (0, 0))
+        canvas.paste(layout_canvas, (0, 0), mask=layout_canvas.split()[3])
 
         draw_canvas = ImageDraw.Draw(canvas)
 
@@ -60,9 +62,9 @@ class ImageProcess:
 
             draw_canvas.rectangle(
                 (
-                    canvas.width / 6 * (2 * category_position + 1) - 104,
+                    10 + ((canvas.width - 20) / 6) * (2 * category_position + 1) - 104,
                     158,
-                    canvas.width / 6 * (2 * category_position + 1) + 104,
+                    10 + ((canvas.width - 20) / 6) * (2 * category_position + 1) + 104,
                     178
                 ), fill="#af2222"
             )
