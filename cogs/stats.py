@@ -141,6 +141,8 @@ class Stats:
             )
             season_data: database.CurrentSeasonInfo = await session.scalar(query)
             season = season_data.season
+        else:
+            season = season
 
         stats_session = StatsProcess(ctx, self.client, self.factory, player_info.player, season, fpp=False)
         await stats_session.load_data(database.RankedStats, session)
@@ -158,6 +160,7 @@ class Stats:
             else database.NormalStats,  # [StatsType.Normal_1st, StatsType.Normal_3rd]
             session
         )
+        await stats_process.load_favorite(session)
         await session.close()
 
         if stats_type == StatsType.Normal_1st or stats_type == StatsType.Normal_3rd:

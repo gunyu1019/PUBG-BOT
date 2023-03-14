@@ -24,11 +24,11 @@ class RankedStats(base):
     fpp = Column(Boolean)
     season = Column(String)
     update_time = Column(DateTime)
-    current_tier = Column(String)
-    current_sub_tier = Column(String)
+    current_tier = Column(String, nullable=True)
+    current_sub_tier = Column(String, nullable=True)
     current_point = Column(String)
-    best_tier = Column(String)
-    best_sub_tier = Column(String)
+    best_tier = Column(String, nullable=True)
+    best_sub_tier = Column(String, nullable=True)
     best_point = Column(String)
 
     average_rank = Column(Float, default=0.0)
@@ -63,10 +63,10 @@ class RankedStats(base):
             update_time=update_time,
             current_tier=stats.current.tier,
             current_sub_tier=stats.current.subtier,
-            current_point=stats.current.point,
+            current_point=stats.current.point if stats.current.point is not None else 0,
             best_tier=stats.best.tier,
             best_sub_tier=stats.best.subtier,
-            best_point=stats.best.point,
+            best_point=stats.best.point if stats.best.point is not None else 0,
             average_rank=stats.avg_rank,
             deals=stats.damage_dealt,
             dbnos=stats.dbnos,
