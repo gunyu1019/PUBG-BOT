@@ -29,6 +29,7 @@ from module.statsType import StatsType
 from module import pubgpy
 from process.player import Player
 from process.stats import Stats as StatsProcess
+from process.matches import MatchesProcess
 
 
 parser = get_config()
@@ -154,6 +155,13 @@ class Stats:
             player=player_info.player,
             season=season,
             fpp=stats_type in [StatsType.Normal_1st, StatsType.Ranked_1st]
+        )
+        stats_process.matches_class = MatchesProcess(
+            ctx=stats_process.context,
+            client=stats_process.client,
+            factory=stats_process.factory,
+            player=stats_process.player,
+            stats=stats_process
         )
         await stats_process.load_data(
             database.RankedStats if stats_type in [StatsType.Ranked_1st, StatsType.Ranked_3rd]

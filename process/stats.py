@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import exists
 from sqlalchemy.sql import select
-from sqlalchemy.sql import update as sql_update
 
 from models import database
 from module import pubgpy
@@ -27,8 +26,9 @@ class Stats(ProcessBase):
             client: interaction.Client,
             factory: sessionmaker,
             player: pubgpy.Player,
-            season: str,
-            fpp: bool = False
+            season: str = None,
+            fpp: bool = False,
+            **kwargs
     ):
         self.context = ctx
         self.client = client
@@ -37,7 +37,7 @@ class Stats(ProcessBase):
         self.season = season
         self.fpp = fpp
 
-        self.matches_class = None
+        self.matches_class = kwargs.get('matches')
         super().__init__(self.context, self.factory, self.player)
 
         self.data: dict[
@@ -48,6 +48,12 @@ class Stats(ProcessBase):
 
         self.before_func = None
         self.before_type = None
+
+    async def load_favorite(self, session: AsyncSession = None) -> bool:
+        result = await super(Stats, self).load_favorite(session)
+        if self.matches_class is not None:
+            self.matches_class.is_favorite = result
+        return result
 
     async def response_component(
             self,
@@ -63,7 +69,10 @@ class Stats(ProcessBase):
             case self.ranked_stats_button.custom_id:
                 await self.ranked_stats(context)
             case self.matches_stats_button.custom_id:
-                pass
+                matches_id = await self.matches_class.match_selection()
+                if matches_id is None:
+                    return
+                await self.matches_class.match_info(matches_id=matches_id)
             case self.favorite_stats_button.custom_id:
                 await self.update_favorite()
                 await self.before_func(component_context)

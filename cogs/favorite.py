@@ -29,6 +29,7 @@ from config.config import get_config
 from models import database
 from module import pubgpy
 from process.stats import Stats as StatsProcess
+from process.matches import MatchesProcess
 from utils.location import comment
 
 parser = get_config()
@@ -140,6 +141,13 @@ class Favorite:
             player=player,
             season=season,
             fpp=fpp
+        )
+        stats_process.matches_class = MatchesProcess(
+            ctx=stats_process.context,
+            client=stats_process.client,
+            factory=stats_process.factory,
+            player=stats_process.player,
+            stats=stats_process
         )
         await stats_process.load_data(data_type, session)
         await stats_process.load_favorite(session)

@@ -56,7 +56,7 @@ class ProcessBase(FavoriteBasic):
         )
         self.update_stats_button = interaction.Button(
             custom_id="update_stats_button",
-            emoji=discord.PartialEmoji(name="\U00000033\U0000FE0F\U000020E3"),
+            emoji=discord.PartialEmoji(id=868344053262061578, name="update"),
             style=1
         )
 

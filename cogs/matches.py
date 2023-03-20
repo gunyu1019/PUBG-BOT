@@ -18,13 +18,16 @@ along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from discord.ext import interaction
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import select
 
 from config.config import get_config
 from module import pubgpy
+from models import database
 from process.matches import MatchesProcess
 from process.player import Player
+from process.stats import Stats as StatsProcess
 
 parser = get_config()
 
@@ -59,12 +62,27 @@ class Matches:
         if player_info is None:
             return
 
+        query = (
+            select(database.CurrentSeasonInfo).where(database.CurrentSeasonInfo.platform == player_info.platform)
+        )
+        season_data: database.CurrentSeasonInfo = await session.scalar(query)
+        season = season_data.season
         matches_process = MatchesProcess(
             ctx=ctx,
             client=self.client,
             factory=self.factory,
             player=player_info.player
         )
+        matches_process.stats_class = StatsProcess(
+            ctx=matches_process.context,
+            client=matches_process.client,
+            factory=matches_process.factory,
+            player=matches_process.player,
+            matches=matches_process,
+            season=season
+        )
+        await matches_process.load_favorite(session)
+
         # await matches_process.load_matches_id(session)
         matches_id = await matches_process.match_selection(session)
         await session.close()

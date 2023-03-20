@@ -25,7 +25,8 @@ class MatchesProcess(ProcessBase):
             ctx: interaction.ApplicationContext,
             client: interaction.Client,
             factory: sessionmaker,
-            player: pubgpy.Player
+            player: pubgpy.Player,
+            **kwargs
     ):
         self.context = ctx
         self.client = client
@@ -39,7 +40,7 @@ class MatchesProcess(ProcessBase):
         self.error_color = int(parser.get("Color", "error"), 16)
         self.warning_color = int(parser.get("Color", "warning"), 16)
 
-        self.stats_class = None
+        self.stats_class = kwargs.get('stats')
 
         super().__init__(self.context, self.factory, self.player)
         self._matches_id = None
@@ -65,12 +66,18 @@ class MatchesProcess(ProcessBase):
         )
         match context.custom_id:
             case self.normal_stats_button.custom_id:
-                return
+                await self.stats_class.normal_stats()
             case self.ranked_stats_button.custom_id:
-                return
+                await self.stats_class.ranked_stats()
             case self.favorite_stats_button.custom_id:
                 await self.update_favorite()
                 await self.match_info(kwargs.get('matches_id'), component_context)
+
+    async def load_favorite(self, session: AsyncSession = None) -> bool:
+        result = await super(MatchesProcess, self).load_favorite(session)
+        if self.stats_class is not None:
+            self.stats_class.is_favorite = result
+        return result
 
     async def load_matches_id(self, session: AsyncSession | None = None):
         if len(self.player.matches) == 0:
@@ -166,7 +173,7 @@ class MatchesProcess(ProcessBase):
                 min_values=1, max_values=1
             )
         ])
-        message = await self.context.edit(embed=embed, components=[components])
+        await self.context.edit(embed=embed, components=[components], attachments=[])
 
         try:
             components_response: interaction.ComponentsContext = await self.client.wait_for_global_component(
@@ -216,7 +223,7 @@ class MatchesProcess(ProcessBase):
 
         file = discord.File(image, filename="{}_matches_stats.png".format(self.player.name))
         self.matches_stats_button.style = 3
-        self.normal_stats_button.disabled = True
+        self.matches_stats_button.disabled = True
         self.update_stats_button.disabled = True
         await self.response_component(component_response, attachments=[file])
         return
