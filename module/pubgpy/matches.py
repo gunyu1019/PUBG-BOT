@@ -83,7 +83,7 @@ class Roster(MatchesBaseModel):
 
 #       relationships
         self.relationships = data.get("relationships", {})
-        self.teams = [x.get("id") for x in self.relationships.get("participants", {}).get("data", {})]
+        self.teams = [x.get("id") for x in self.relationships.get("participants", {}).get("data", [])]
 
     def __repr__(self):
         return "Roster(id='{}' type='{}' shard='{}' rank={} team_id={} won='{}' teams='{}') ".format(

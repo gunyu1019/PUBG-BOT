@@ -17,10 +17,10 @@ from module import pubgpy
 from module import statsType
 from process.request_loop import request_loop
 from process.image import ImageProcess
-from process.favorite import FavoriteBasic
+from process.process_base import ProcessBase
 
 
-class Stats(FavoriteBasic):
+class Stats(ProcessBase):
     def __init__(
             self,
             ctx: interaction.ApplicationContext,
@@ -37,6 +37,7 @@ class Stats(FavoriteBasic):
         self.season = season
         self.fpp = fpp
 
+        self.matches_class = None
         super().__init__(self.context, self.factory, self.player)
 
         self.data: dict[
@@ -48,56 +49,6 @@ class Stats(FavoriteBasic):
         self.before_func = None
         self.before_type = None
 
-        self.normal_stats_button: interaction.Button | None = None
-        self.ranked_stats_button: interaction.Button | None = None
-        self.matches_stats_button: interaction.Button | None = None
-        self.favorite_stats_button: interaction.Button | None = None
-        self.update_stats_button: interaction.Button | None = None
-        self.init_button()
-
-    def init_button(self):
-        self.normal_stats_button = interaction.Button(
-            custom_id="normal_stats_button",
-            emoji=discord.PartialEmoji(name="\U00000031\U0000FE0F\U000020E3"),
-            style=1
-        )
-        self.ranked_stats_button = interaction.Button(
-            custom_id="ranked_stats_button",
-            emoji=discord.PartialEmoji(name="\U00000032\U0000FE0F\U000020E3"),
-            style=1
-        )
-        self.matches_stats_button = interaction.Button(
-            custom_id="matches_stats_button",
-            emoji=discord.PartialEmoji(name="\U00000033\U0000FE0F\U000020E3"),
-            style=1
-        )
-        favorite = self.is_favorite
-        if favorite is None:
-            favorite = FavoriteBasic
-        self.favorite_stats_button = interaction.Button(
-            custom_id="favorite_stats_button",
-            emoji=discord.PartialEmoji(
-                name="\U00002B50" if not favorite
-                else "\U0001F31F"
-            ),
-            style=1
-        )
-        self.update_stats_button = interaction.Button(
-            custom_id="update_stats_button",
-            emoji=discord.PartialEmoji(name="\U00000033\U0000FE0F\U000020E3"),
-            style=1
-        )
-
-    @property
-    def buttons(self) -> interaction.ActionRow:
-        return interaction.ActionRow(components=[
-            self.normal_stats_button,
-            self.ranked_stats_button,
-            self.matches_stats_button,
-            self.favorite_stats_button,
-            self.update_stats_button
-        ])
-
     async def response_component(
             self,
             component_context: interaction.ComponentsContext | None = None,
@@ -105,70 +56,20 @@ class Stats(FavoriteBasic):
             attachments: list[discord.File] = discord.utils.MISSING,
             **kwargs
     ):
-        if component_context is None:
-            await self.context.edit(
-                content=content,
-                embeds=[],
-                attachments=attachments,
-                components=[self.buttons]
-            )
-        else:
-            await component_context.edit(
-                content=content,
-                embeds=[],
-                attachments=attachments,
-                components=[self.buttons]
-            )
-
-        try:
-            context: interaction.ComponentsContext = await self.client.wait_for_global_component(
-                check=lambda x: x.custom_id in [t.custom_id for t in self.buttons.components],
-                timeout=300
-            )
-        except asyncio.TimeoutError:
-            await self.cancel_component(component_context, content, **kwargs)
-            return
-
-        await context.defer_update()
-
+        context = await super(Stats, self).response_component(component_context, content, attachments, **kwargs)
         match context.custom_id:
             case self.normal_stats_button.custom_id:
                 await self.normal_stats(context)
             case self.ranked_stats_button.custom_id:
                 await self.ranked_stats(context)
+            case self.matches_stats_button.custom_id:
+                pass
             case self.favorite_stats_button.custom_id:
                 await self.update_favorite()
                 await self.before_func(component_context)
             case self.update_stats_button.custom_id:
                 await self.update_data(self.before_type, update=True)
                 await self.before_func(component_context)
-        return
-
-    async def cancel_component(
-            self,
-            component_context: interaction.ComponentsContext | None = None,
-            content: str = None,
-            **kwargs
-    ):
-        component = copy.copy(self.buttons)
-        for index, _ in enumerate(self.buttons.components):
-            component.components[index].disabled = True
-            component.components[index].style = 2
-
-        if component_context is not None:
-            await component_context.edit(
-                content=content,
-                embeds=[],
-                components=[component],
-                **kwargs
-            )
-        else:
-            await self.context.edit(
-                content=content,
-                embeds=[],
-                components=[component],
-                **kwargs
-            )
         return
 
     @staticmethod

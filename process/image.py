@@ -5,14 +5,19 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
+from config.config import get_config
 from models import database
+from module import pubgpy
 from module.statsType import StatsPlayType
 from utils.directory import directory
 from utils.location import comment
+from utils.time_to_string import time_to_string
+
+map_setting = get_config('map_setting')
 
 
 class ImageProcess:
-    def __init__(self, player_info: database.Player, language: str):
+    def __init__(self, player_info: pubgpy.Player, language: str):
         self.background_canvas = Image.open(
             fp=os.path.join(directory, "assets", "background", "background_1.png")
         )
@@ -44,6 +49,15 @@ class ImageProcess:
             size=16
         )
 
+        self.matches_team_title_font = ImageFont.truetype(
+            os.path.join(directory, "assets", "fonts", "TmoneyRoundWindExtraBold.otf"),
+            size=16
+        )
+        self.matches_team_value_font = ImageFont.truetype(
+            os.path.join(directory, "assets", "fonts", "TmoneyRoundWindExtraBold.otf"),
+            size=18
+        )
+
         self.play_time_font = ImageFont.truetype(
             os.path.join(directory, "assets", "fonts", "TmoneyRoundWindExtraBold.otf"),
             size=16
@@ -63,9 +77,7 @@ class ImageProcess:
     def base_canvas(
             self,
             layout: Image,
-            stats: dict[StatsPlayType, database.NormalStats | database.RankedStats | None],
-            canvas_size: tuple[int, int],
-            update_location: tuple[int, int]
+            canvas_size: tuple[int, int]
     ):
         canvas = Image.new('RGBA', canvas_size)
 
@@ -82,7 +94,14 @@ class ImageProcess:
             font=self.player_name_font,
             fill="#f1ca09"
         )
+        return canvas, draw_canvas
 
+    def update_date_text(
+            self,
+            stats: dict[StatsPlayType, database.NormalStats | database.RankedStats | None],
+            draw_canvas: ImageDraw,
+            update_location: tuple[int, int]
+    ):
         # Update Date Text
         temp_game_data = stats.get(StatsPlayType.SQUAD)
         update_data = temp_game_data.update_time.strftime("%Y년 %m월 %d일 %H:%M")
@@ -91,14 +110,14 @@ class ImageProcess:
             font=self.play_time_font,
             fill="#d4ddf4"
         )
-        return canvas, draw_canvas
 
     def normal_stats(self, stats: dict[StatsPlayType, database.NormalStats | None]) -> io.BytesIO:
         layout_canvas = Image.open(
             fp=os.path.join(directory, "assets", "layout", "normal_layout.png")
         )
         self.background_canvas = self.background_canvas.resize((768, 433))
-        canvas, draw_canvas = self.base_canvas(layout_canvas, stats, (768, 433), (30, 383))
+        canvas, draw_canvas = self.base_canvas(layout_canvas, (768, 433))
+        self.update_date_text(stats, draw_canvas, (30, 383))
 
         # Solo / Duo / Squad
         for category_position, game_type in enumerate([
@@ -153,15 +172,7 @@ class ImageProcess:
             draw_canvas.text((right_align - wtl_text_w, 182), wtl_text, font=self.normal_sub_description_font)
 
             # Played Time
-            play_time = str()
-            play_time_hours = game_data.playtime // 3600
-            play_time_minutes = game_data.playtime % 3600 // 60
-            play_time_seconds = game_data.playtime % 3600 % 60
-            if play_time_hours != 0:
-                play_time += "{}시간".format(int(play_time_hours))
-            if play_time_hours != 0 or play_time_minutes != 0:
-                play_time += "{}분".format(int(play_time_minutes))
-            play_time += "{}초".format(int(play_time_seconds))
+            play_time = time_to_string(game_data.playtime)
 
             play_time_text_w, _ = draw_canvas.textsize(play_time, font=self.play_time_font)
             draw_canvas.text(
@@ -235,49 +246,53 @@ class ImageProcess:
             return f"{tier} {sub_tier}"
         return tier
 
+    def text_deployment(
+            self,
+            draw_canvas: ImageDraw,
+            sections: str,
+            deployment: dict[str, str],
+            section_box: tuple[int, int, int, int],
+            title_font: ImageFont.FreeTypeFont,
+            description_font: ImageFont.FreeTypeFont,
+            title_color: str | None = None,
+            description_color: str | None = None,
+            title_font_padding: int = 15
+    ):
+        section_box_min_w, section_box_min_h, section_box_max_w, section_box_max_h = section_box
+        section_box_span_w = section_box_max_w - section_box_min_w
+        section_box_span_h = section_box_max_h - section_box_min_h
+        for index, (key, value) in enumerate(deployment.items()):
+            title_text_w, title_text_h = draw_canvas.textsize(
+                comment(sections, key, self.language), font=title_font
+            )
+            description_text_w, description_text_h = draw_canvas.textsize(value, font=description_font)
+            draw_canvas.text(
+                (
+                    section_box_min_w + section_box_span_w // 8 * (2 * index + 1) - title_text_w // 2,
+                    section_box_min_h + title_font_padding
+                ), comment(sections, key, self.language), font=title_font, fill=title_color
+            )
+            draw_canvas.text(
+                (
+                    section_box_min_w + section_box_span_w // 8 * (2 * index + 1) - description_text_w // 2,
+                    section_box_min_h + title_font_padding + (section_box_span_h - title_font_padding) // 2
+                ), value, font=description_font, fill=description_color
+            )
+            pass
+        return
+
     def ranked_stats(self, stats: dict[StatsPlayType, database.RankedStats]) -> io.BytesIO:
         layout_canvas = Image.open(
             fp=os.path.join(directory, "assets", "layout", "ranked_layout.png")
         )
         self.background_canvas = self.background_canvas.resize((768, 433))
-        canvas, draw_canvas = self.base_canvas(layout_canvas, stats, (768, 384), (20, 343))
+        canvas, draw_canvas = self.base_canvas(layout_canvas, (768, 384))
+        self.update_date_text(stats, draw_canvas, (20, 343))
 
         game_data = stats[StatsPlayType.SQUAD]
 
         deaths = game_data.deaths if game_data.deaths > 0 else 1
         played = game_data.played if game_data.played > 0 else 1
-
-        def text_deployment(
-                deployment: dict[str, str],
-                section_box: tuple[int, int, int, int],
-                title_font: ImageFont.FreeTypeFont,
-                description_font: ImageFont.FreeTypeFont,
-                title_color: str | None = None,
-                description_color: str | None = None,
-                title_font_padding: int = 15
-        ):
-            section_box_min_w, section_box_min_h, section_box_max_w, section_box_max_h = section_box
-            section_box_span_w = section_box_max_w - section_box_min_w
-            section_box_span_h = section_box_max_h - section_box_min_h
-            for index, (key, value) in enumerate(deployment.items()):
-                title_text_w, title_text_h = draw_canvas.textsize(
-                    comment('ranked_stats', key, self.language), font=title_font
-                )
-                description_text_w, description_text_h = draw_canvas.textsize(value, font=description_font)
-                draw_canvas.text(
-                    (
-                        section_box_min_w + section_box_span_w // 8 * (2 * index + 1) - title_text_w // 2,
-                        section_box_min_h + title_font_padding
-                    ), comment('ranked_stats', key, self.language), font=title_font, fill=title_color
-                )
-                draw_canvas.text(
-                    (
-                        section_box_min_w + section_box_span_w // 8 * (2 * index + 1) - description_text_w // 2,
-                        section_box_min_h + title_font_padding + (section_box_span_h - title_font_padding) // 2
-                    ), value, font=description_font, fill=description_color
-                )
-                pass
-            return
 
         # section1 (KDA/Win Ratio/Average Deals/Average Rank)
         section_deployment = {
@@ -286,7 +301,9 @@ class ImageProcess:
             "average_deals": "{}".format(round(game_data.deals / played, 1)),
             "average_rank": "{}위".format(round(game_data.average_rank, 1))
         }
-        text_deployment(
+        self.text_deployment(
+            draw_canvas,
+            "ranked_stats",
             section_deployment,
             (10, 100, 531, 260),
             self.ranked_sub_title_font,
@@ -297,12 +314,14 @@ class ImageProcess:
 
         # section2 (Best/WTL/DBNOs/KD)
         section_deployment = {
-            "best_rank": "{}".format(game_data.best_tier),
+            "best_rank": "{}".format(self._rank(game_data.best_tier, game_data.best_sub_tier)),
             "wtl": "{}승 {}탑 {}패".format(game_data.wins, game_data.top10s, game_data.deaths),
             "dbnos": "{}".format(game_data.dbnos),
             "kd": "{}점".format(round(game_data.kills / deaths, 1))
         }
-        text_deployment(
+        self.text_deployment(
+            draw_canvas,
+            "ranked_stats",
             section_deployment,
             (10, 270, 531, 340),
             self.ranked_sub_description2_font,
@@ -344,6 +363,106 @@ class ImageProcess:
             "{}점".format(game_data.current_point),
             font=self.point_font, fill="#d4ddf4"
         )
+
+        buffer = io.BytesIO()
+        canvas.save(buffer, format='png')
+        buffer.seek(0)
+        return buffer
+
+    async def matches_stats(
+            self,
+            matches_info: pubgpy.Matches,
+            map_file: Image
+    ):
+        mask_image = Image.new('RGBA', (303, 303))
+        mask_image_draw = ImageDraw.Draw(mask_image)
+        mask_image_draw.rounded_rectangle((0, 0, 303, 303), fill="black", radius=20)
+
+        layout_canvas = Image.open(
+            fp=os.path.join(directory, "assets", "layout", "matches_layout.png")
+        )
+        self.background_canvas = self.background_canvas.resize((768, 433))
+        canvas, draw_canvas = self.base_canvas(layout_canvas, (768, 433))
+
+        map_file = map_file.resize((303, 303))
+        canvas.paste(map_file, (20, 110), mask=mask_image)
+
+        play_info: pubgpy.Participant = matches_info.get_player_id(self.player.id)
+        teams: pubgpy.Roster | None = matches_info.get_team(play_info.id)
+        team_members: list[pubgpy.Participant] = [
+            matches_info.filter(filter_id=i, base_model=pubgpy.Participant)
+            for i in teams.teams
+        ]
+
+        # Section 2
+        section_deployment = {
+            "rank": "{}등".format(teams.rank),
+            "map": map_setting.get("MapName", str(matches_info.map.value), fallback="Unknown"),
+            "survived_time": time_to_string(play_info.time_survived),
+            "distance": "{}m".format(
+                round(play_info.ride_distance + play_info.swim_distance + play_info.walk_distance, 1)
+            )
+        }
+        self.text_deployment(
+            draw_canvas,
+            "matches_stats",
+            section_deployment,
+            (343, 110, 748, 241),
+            self.ranked_sub_description2_font,
+            self.ranked_sub_description2_font,
+            "#f1ca09", "#ccd4eb",
+            title_font_padding=5
+        )
+
+        # Section 3
+        # kill / assets? / head (273)
+        height_size_sum = 0
+        for index, key in enumerate(["kills", "assists", "headshots"]):
+            team_title_w, title_draw_h = draw_canvas.textsize(
+                comment("matches_stats", key, self.language),
+                font=self.matches_team_title_font
+            )
+            draw_canvas.text(
+                (343 + 140 + 265 // 4 * (index + 1) - team_title_w // 2, 266),
+                comment("matches_stats", key, self.language),
+                font=self.matches_team_title_font,
+                fill="#f1ca09"
+            )
+            height_size_sum += title_draw_h
+
+        while len(team_members) < 4:
+            team_members.append(
+                pubgpy.Participant({"attributes": {"stats": {"name": "-"}}})
+            )
+
+        average_height_size_sum = height_size_sum // 3
+        for index, value in enumerate(team_members):
+            team_player_w, team_player_h = draw_canvas.textsize(
+                value.name,
+                font=self.matches_team_title_font
+            )
+            height = 271 + average_height_size_sum + (147 - average_height_size_sum) // 8 * (2 * index + 1)
+            draw_canvas.text(
+                (
+                    413 - team_player_w // 2,
+                    height - team_player_h // 2
+                ),
+                value.name,
+                font=self.matches_team_title_font,
+                fill="#f1ca09"
+            )
+
+            for j_index, player_value in enumerate([value.kills, value.assists, value.headshot_kills]):
+                player_value_w, player_value_h = draw_canvas.textsize(
+                    str(player_value),
+                    font=self.matches_team_value_font
+                )
+                draw_canvas.text(
+                    (343 + 140 + 265 // 4 * (j_index + 1) - player_value_w // 2, height - player_value_h // 2),
+                    str(player_value),
+                    font=self.matches_team_value_font,
+                    fill="white"
+                )
 
         buffer = io.BytesIO()
         canvas.save(buffer, format='png')

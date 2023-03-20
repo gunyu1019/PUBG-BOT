@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 """
 import asyncio
+import datetime
 from typing import Optional, NamedTuple
 
 import discord
@@ -47,6 +48,7 @@ stadia = discord.PartialEmoji(name="Stadia", id=718482205575348264)
 class PlatformSelection(NamedTuple):
     player: pubgpy.Player
     platform: pubgpy.Platforms
+    is_new_data: bool
 
 
 class Player:
@@ -77,15 +79,27 @@ class Player:
             player_data = self.pubg_client.player_id(player_info.account_id)
             player_data.name = player_info.name
             player_data.client.platform(player_info.platform)
-            return PlatformSelection(player_data, player_info.platform)
+            return PlatformSelection(player_data, player_info.platform, False)
         else:
             platform_selection = await self.player_platform(nickname=nickname)
+            # Player Data
             query = database.Player(**{
                 "name": platform_selection.player.name,
                 "account_id": platform_selection.player.id,
                 "platform": platform_selection.platform.value
             })
             self.database.add(query)
+
+            # Matches Data
+            if len(platform_selection.player.matches) > 0:
+                queries = [database.MatchesPlayer(**{
+                    "account_id_with_match_id": "{}_{}".format(platform_selection.player.id, match_id),
+                    "account_id": platform_selection.player.id,
+                    "match_id": match_id,
+                    "match_index": index,
+                    "last_update": datetime.datetime.now()
+                }) for index, match_id in enumerate(platform_selection.player.matches)]
+                self.database.add_all(queries)
             await self.database.commit()
             return platform_selection
 
@@ -165,4 +179,4 @@ class Player:
             )
             await self.ctx.edit(embed=embed)
             return
-        return PlatformSelection(player_info, platform_data)
+        return PlatformSelection(player_info, platform_data, True)

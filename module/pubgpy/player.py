@@ -80,8 +80,9 @@ class Player(PUBGModel):
         self.rank = self.data.get("attributes", {}).get("rank")
 
         # relationships
-        self.assets = self.data.get("relationships", {}).get("assets", {}).get('data')
-        self.matches = [_.get('id') for _ in self.data.get("relationships", {}).get("matches", {}).get('data', [])]
+        relationships = self.data.get("relationships", {})
+        self.assets = relationships.get("assets", {}).get('data')
+        self.matches = [_.get('id') for _ in relationships.get("matches", {}).get('data', [])]
 
     def __dict__(self):
         return self.data
@@ -91,6 +92,11 @@ class Player(PUBGModel):
 
     def __str__(self):
         return self.name
+
+    async def update(self):
+        response_data = (await self.client.players(ids=[self.id]))[0]
+        self.__init__(self.client, response_data.data)
+        return self
 
     async def season_stats(self, season: Union[Season, str] = None):
         """

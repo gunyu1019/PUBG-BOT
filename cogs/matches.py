@@ -19,9 +19,12 @@ along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 
 from discord.ext import interaction
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.config import get_config
 from module import pubgpy
+from process.matches import MatchesProcess
+from process.player import Player
 
 parser = get_config()
 
@@ -36,6 +39,40 @@ class Matches:
         self.warning_color = int(parser.get("Color", "warning"), 16)
 
         self.pubgpy = pubgpy.Client(token=parser.get("Default", "pubg_token"))
+
+    @interaction.command(name="매치")
+    @interaction.option(name='닉네임', description='플레이어의 닉네임을 입력해주세요.', required=True)
+    @interaction.option(name='매치_순서', description='조회할 매치 순서를 입력해주세요.', required=False)
+    async def match(
+            self,
+            ctx: interaction.ApplicationContext,
+            player: str,
+            matches_index: int = None
+    ):
+        session: AsyncSession = self.factory.__call__()
+        await ctx.defer()
+
+        _player = Player(ctx, self.client, self.pubgpy, session, ctx.locale)
+
+        # 배틀그라운드 플레이어 정보 불러오기
+        player_info = await _player.player(player)
+        if player_info is None:
+            return
+
+        matches_process = MatchesProcess(
+            ctx=ctx,
+            client=self.client,
+            factory=self.factory,
+            player=player_info.player
+        )
+        # await matches_process.load_matches_id(session)
+        matches_id = await matches_process.match_selection(session)
+        await session.close()
+        if matches_id is None:
+            return
+
+        await matches_process.match_info(matches_id=matches_id)
+        return
 
 
 def setup(client: interaction.Client, factory: sessionmaker):

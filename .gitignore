@@ -137,3 +137,4 @@ config/config.ini
 # CP
 assets/background/*
 assets/fonts/*
+assets/maps/*
