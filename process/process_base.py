@@ -63,14 +63,14 @@ class ProcessBase(FavoriteBasic):
         **kwargs
     ) -> interaction.ComponentsContext | None:
         if component_context is None:
-            await self.context.edit(
+            message = await self.context.edit(
                 content=content,
                 embeds=[],
                 attachments=attachments,
                 components=[self.buttons],
             )
         else:
-            await component_context.edit(
+            message = await component_context.edit(
                 content=content,
                 embeds=[],
                 attachments=attachments,
@@ -80,8 +80,10 @@ class ProcessBase(FavoriteBasic):
         try:
             context: interaction.ComponentsContext = (
                 await self.client.wait_for_global_component(
-                    check=lambda x: x.custom_id
-                    in [t.custom_id for t in self.buttons.components],
+                    check=(
+                        lambda x: x.custom_id in [t.custom_id for t in self.buttons.components] and
+                        x.message.id == message.id and x.channel.id == self.context.channel.id
+                    ),
                     timeout=300,
                 )
             )

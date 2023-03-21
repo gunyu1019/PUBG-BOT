@@ -188,7 +188,7 @@ class MatchesProcess(ProcessBase):
                 )
             ]
         )
-        await self.context.edit(embed=embed, components=[components], attachments=[])
+        message = await self.context.edit(embed=embed, components=[components], attachments=[])
 
         try:
             components_response: interaction.ComponentsContext = (
@@ -197,6 +197,8 @@ class MatchesProcess(ProcessBase):
                         component.component_type == interaction.Selection.TYPE
                         and "matches_selection" == component.custom_id
                         and self.context.author.id == component.author.id
+                        and component.message.id == message.id
+                        and component.channel.id == self.context.channel.id
                     ),
                     timeout=300,
                 )
