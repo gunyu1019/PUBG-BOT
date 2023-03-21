@@ -151,7 +151,10 @@ class Stats:
             season_data: database.CurrentSeasonInfo = await session.scalar(query)
             season = season_data.season
         else:
-            season = season
+            if player_info.platform in [pubgpy.Platforms.STEAM, pubgpy.Platforms.KAKAO]:
+                season = "division.bro.official.pc-2018-{}".format(season)
+            elif player_info.platform in [pubgpy.Platforms.XBOX, pubgpy.Platforms.PLAYSTATION]:
+                season = "division.bro.official.console-{}".format(season)
 
         stats_session = StatsProcess(
             ctx, self.client, self.factory, player_info.player, season, fpp=False

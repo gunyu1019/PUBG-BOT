@@ -65,6 +65,8 @@ class Stats(ProcessBase):
         context = await super(Stats, self).response_component(
             component_context, content, attachments, **kwargs
         )
+        if context is None:
+            return
         match context.custom_id:
             case self.normal_stats_button.custom_id:
                 await self.normal_stats(context)

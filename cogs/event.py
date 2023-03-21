@@ -22,9 +22,13 @@ import logging
 import discord
 from discord.ext.interaction import ApplicationContext
 from discord.ext.interaction import Client
+from discord.ext.interaction import ComponentsContext
 from discord.ext.interaction import listener
 from sqlalchemy.orm import sessionmaker
 
+from config.config import get_config
+
+parser = get_config()
 logger = logging.getLogger(__name__)
 logger_command = logging.getLogger(__name__ + ".command")
 logger_guild = logging.getLogger(__name__ + ".guild")
@@ -33,6 +37,10 @@ logger_guild = logging.getLogger(__name__ + ".guild")
 class Events:
     def __init__(self, bot: Client):
         self.bot = bot
+
+        self.color = int(parser.get("Color", "default"), 16)
+        self.error_color = int(parser.get("Color", "error"), 16)
+        self.warning_color = int(parser.get("Color", "warning"), 16)
 
     @listener()
     async def on_ready(self):
@@ -87,6 +95,22 @@ class Events:
             )
         else:
             logger_command.info(f"(DM채널 | {ctx.author}) {ctx.content}")
+
+    @listener()
+    async def on_components_cancelled(self, ctx: ComponentsContext):
+        embed = discord.Embed(
+            title="\U000026A0 안내",
+            description="상호작용을 찾을 수 없습니다. 명령어로 기능을 통하여 다시 이용해 주시기 바랍니다.",
+            color=self.warning_color
+        )
+        embed.add_field(
+            name="왜 상호작용을 찾을 수 없나요?",
+            value="상호작용을 찾을 수 없는 대표적 이유는 `대기 시간초과(5분)`이 있습니다. "
+                  "이외에도 특정 서버에 전적, 매치 등의 동적 명령어를 과도하게 사용할 경우 최상위에 있던 메시지의 상호작용이 우선 종료됩니다.",
+            inline=False
+        )
+        await ctx.send(embed=embed, hidden=True)
+        return
 
 
 def setup(client: Client, factory: sessionmaker):

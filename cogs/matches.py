@@ -16,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 """
-
+import discord
 from discord.ext import interaction
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
@@ -28,6 +28,7 @@ from models import database
 from process.matches import MatchesProcess
 from process.player import Player
 from process.stats import Stats as StatsProcess
+from utils.location import comment
 
 parser = get_config()
 
@@ -45,7 +46,7 @@ class Matches:
 
     @interaction.command(name="매치")
     @interaction.option(name="닉네임", description="플레이어의 닉네임을 입력해주세요.", required=True)
-    @interaction.option(name="매치_순서", description="조회할 매치 순서를 입력해주세요.", required=False)
+    @interaction.option(name="매치_순서", description="조회할 매치 순서를 입력해주세요.", required=False, min_value=1)
     async def match(
         self,
         ctx: interaction.ApplicationContext,
@@ -81,7 +82,21 @@ class Matches:
         await matches_process.load_favorite(session)
 
         # await matches_process.load_matches_id(session)
-        matches_id = await matches_process.match_selection(session)
+        if matches_index is not None:
+            _matches_ids = await matches_process.load_matches_id(session)
+            if _matches_ids is None:
+                return
+            if len(_matches_ids) < matches_index + 1:
+                embed = discord.Embed(
+                    title=comment("matches_process", "title", ctx.locale),
+                    description=comment("matches_process", "matches_index_out_of_range", ctx.locale),
+                    color=self.warning_color,
+                )
+                await ctx.edit(embed=embed)
+                return
+            matches_id = _matches_ids[matches_index + 1]
+        else:
+            matches_id = await matches_process.match_selection(session)
         await session.close()
         if matches_id is None:
             return
