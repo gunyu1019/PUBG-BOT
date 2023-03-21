@@ -135,6 +135,7 @@ class Favorite:
         player_id = components_result.values[0]
         player = self.pubgpy.player_id(player_id)
         player.name = player_data[player_id]["name"]
+        player.client.platform(player_data[player_id]["platform"])
         query = select(database.CurrentSeasonInfo).where(
             database.CurrentSeasonInfo.platform == player_data[player_id]["platform"]
         )
