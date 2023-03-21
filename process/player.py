@@ -175,7 +175,7 @@ class Player:
             embed = discord.Embed(
                 title=comment("basic", "error", self.language),
                 description=comment(
-                    "platform", "player_not_found_description", self.language
+                    "result", "player_not_found_description", self.language
                 ),
                 color=error_color,
             )

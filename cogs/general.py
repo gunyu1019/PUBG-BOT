@@ -40,22 +40,22 @@ class General:
         datetime_now_for_read = datetime.datetime.now(tz=datetime.timezone.utc)
         response_ping_r = ctx.created_at - datetime_now_for_read
         response_ping_read = abs(
-            round((ctx.created_at - response_ping_r).total_seconds() * 1000)
+            round(response_ping_r.total_seconds() * 1000, 2)
         )
         first_latency = round(self.client.latency * 1000, 2)
         embed = discord.Embed(
             title="Pong!",
-            description=f"클라이언트 핑상태: {first_latency}ms\n응답속도(읽기): {round(response_ping_read * 1000, 2)}ms",
+            description=f"클라이언트 핑상태: {first_latency}ms\n응답속도(읽기): {round(response_ping_read, 2)}ms",
             color=self.color,
         )
         msg = await ctx.send(embed=embed)
         datetime_now_for_write = datetime.datetime.now(tz=datetime.timezone.utc)
         response_ping_w = datetime_now_for_write - msg.created_at
-        response_ping_write = abs(round(response_ping_w.total_seconds() * 1000))
+        response_ping_write = abs(round(response_ping_w.total_seconds() * 1000, 2))
         embed = discord.Embed(
             title="Pong!",
             description=f"클라이언트 핑상태: {first_latency}ms\n"
-            f"응답속도(읽기/쓰기): {round(response_ping_read * 1000, 2)}ms/{round(response_ping_write * 1000, 2)}ms",
+            f"응답속도(읽기/쓰기): {round(response_ping_read, 2)}ms/{round(response_ping_write, 2)}ms",
             color=self.color,
         )
         await msg.edit(embed=embed)
