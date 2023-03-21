@@ -36,16 +36,13 @@ class Admin:
     @interaction.listener()
     async def on_interaction_message(self, message: interaction.Message):
         prefixes = ("!", f"<@{self.client.user.id}>", f"<@!{self.client.user.id}>")
-        if (
-                not message.content.startswith(prefixes) or
-                not is_owner(message.author.id)
-        ):
+        if not message.content.startswith(prefixes) or not is_owner(message.author.id):
             return
 
         command = ""
         for prefix in prefixes:
             if message.content.startswith(prefix):
-                command = message.content[len(prefix):]
+                command = message.content[len(prefix) :]
                 break
 
         if command.startswith("debug"):
@@ -55,7 +52,9 @@ class Admin:
     async def debug(self, ctx):
         list_message = ctx.content.split()
         if len(list_message) < 1:
-            embed = discord.Embed(title="YBOT 도우미", description='사용하실 커맨드를 작성해주세요.', color=self.color)
+            embed = discord.Embed(
+                title="YBOT 도우미", description="사용하실 커맨드를 작성해주세요.", color=self.color
+            )
             await ctx.send(embed=embed)
             return
         cmd = " ".join(list_message[1:])
@@ -94,12 +93,24 @@ class Admin:
             exec(compile(parsed, filename="<ast>", mode="exec"), env)
             result = await eval(f"{fn_name}()", env)
             time2 = datetime.datetime.now()
-            microsecond = (round(float(f"0.{(time2 - time1).microseconds}"), 3))
+            microsecond = round(float(f"0.{(time2 - time1).microseconds}"), 3)
             second = (time2 - time1).seconds
             try:
-                embed.set_field_at(1, name="출력", value=f"```py\n{result}\n```", inline=False)
-                embed.set_field_at(2, name="출력(Type)", value=f"```py\n{type(result)}\n```", inline=False)
-                embed.set_field_at(3, name="소요시간", value=f"```\n{second + microsecond}초\n```", inline=False)
+                embed.set_field_at(
+                    1, name="출력", value=f"```py\n{result}\n```", inline=False
+                )
+                embed.set_field_at(
+                    2,
+                    name="출력(Type)",
+                    value=f"```py\n{type(result)}\n```",
+                    inline=False,
+                )
+                embed.set_field_at(
+                    3,
+                    name="소요시간",
+                    value=f"```\n{second + microsecond}초\n```",
+                    inline=False,
+                )
                 await msg.edit(embed=embed)
             except discord.errors.HTTPException:
                 with open("debug_result.txt", "w") as f:
@@ -108,15 +119,32 @@ class Admin:
                     index=1,
                     name="출력",
                     value="```length of result is over 1000. here is text file of result```",
-                    inline=False
+                    inline=False,
                 )
-                embed.set_field_at(2, name="출력(Type)", value=f"```py\n{type(result)}\n```", inline=False)
-                embed.set_field_at(3, name="소요시간", value=f"```\n{second + microsecond}초\n```", inline=False)
+                embed.set_field_at(
+                    2,
+                    name="출력(Type)",
+                    value=f"```py\n{type(result)}\n```",
+                    inline=False,
+                )
+                embed.set_field_at(
+                    3,
+                    name="소요시간",
+                    value=f"```\n{second + microsecond}초\n```",
+                    inline=False,
+                )
                 await msg.edit(embed=embed)
                 await ctx.send(file=discord.File("debug_result.txt"))
         except Exception as e:
-            embed.set_field_at(1, name="출력", value=f"```pytb\n{traceback.format_exc()}\n```", inline=False)
-            embed.set_field_at(2, name="출력(Type)", value=f"```py\n{type(e)}\n```", inline=False)
+            embed.set_field_at(
+                1,
+                name="출력",
+                value=f"```pytb\n{traceback.format_exc()}\n```",
+                inline=False,
+            )
+            embed.set_field_at(
+                2, name="출력(Type)", value=f"```py\n{type(e)}\n```", inline=False
+            )
             embed.set_field_at(3, name="소요시간", value=f"```\n동작 중단\n```", inline=False)
             await msg.edit(embed=embed)
         return

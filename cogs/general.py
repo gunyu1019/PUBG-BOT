@@ -35,16 +35,19 @@ class General:
         self.error_color = int(parser.get("Color", "error"), 16)
         self.warning_color = int(parser.get("Color", "warning"), 16)
 
-    @interaction.command(description='PUBG BOT의 핑(상태)을 확인합니다.')
+    @interaction.command(description="PUBG BOT의 핑(상태)을 확인합니다.")
     async def ping(self, ctx: interaction.ApplicationContext):
         datetime_now_for_read = datetime.datetime.now(tz=datetime.timezone.utc)
         response_ping_r = ctx.created_at - datetime_now_for_read
-        response_ping_read = abs(round((ctx.created_at - response_ping_r).total_seconds() * 1000))
+        response_ping_read = abs(
+            round((ctx.created_at - response_ping_r).total_seconds() * 1000)
+        )
         first_latency = round(self.client.latency * 1000, 2)
         embed = discord.Embed(
             title="Pong!",
             description=f"클라이언트 핑상태: {first_latency}ms\n응답속도(읽기): {round(response_ping_read * 1000, 2)}ms",
-            color=self.color)
+            color=self.color,
+        )
         msg = await ctx.send(embed=embed)
         datetime_now_for_write = datetime.datetime.now(tz=datetime.timezone.utc)
         response_ping_w = datetime_now_for_write - msg.created_at
@@ -52,30 +55,37 @@ class General:
         embed = discord.Embed(
             title="Pong!",
             description=f"클라이언트 핑상태: {first_latency}ms\n"
-                        f"응답속도(읽기/쓰기): {round(response_ping_read * 1000, 2)}ms/{round(response_ping_write * 1000, 2)}ms",
-            color=self.color)
+            f"응답속도(읽기/쓰기): {round(response_ping_read * 1000, 2)}ms/{round(response_ping_write * 1000, 2)}ms",
+            color=self.color,
+        )
         await msg.edit(embed=embed)
         return
 
-    @interaction.command(name='정보', description='PUBG BOT의 정보를 확인합니다.')
+    @interaction.command(name="정보", description="PUBG BOT의 정보를 확인합니다.")
     async def information(self, ctx: interaction.ApplicationContext):
         total = 0
         for i in self.client.guilds:
             total += i.member_count
-        embed = discord.Embed(title='PUBG BOT', color=self.color)
-        embed.add_field(name='개발', value='[건유1019#0001](https://discord.gg/mr6RpUeG96)', inline=True)
+        embed = discord.Embed(title="PUBG BOT", color=self.color)
         embed.add_field(
-            name='<:user:735138021850087476>서버수 / 유저수',
-            value=f'{format(len(self.client.guilds), ",")}서버/{format(total, ",")}명',
-            inline=True
+            name="개발", value="[건유1019#0001](https://discord.gg/mr6RpUeG96)", inline=True
         )
-        embed.add_field(name="이용 약관", value=f'[통합 이용약관](https://pubg.yhs.kr/term)', inline=True)
-        embed.add_field(name='PUBG BOT 버전', value=f'{parser.get("Default","version")}', inline=True)
+        embed.add_field(
+            name="<:user:735138021850087476>서버수 / 유저수",
+            value=f'{format(len(self.client.guilds), ",")}서버/{format(total, ",")}명',
+            inline=True,
+        )
+        embed.add_field(
+            name="이용 약관", value=f"[통합 이용약관](https://pubg.yhs.kr/term)", inline=True
+        )
+        embed.add_field(
+            name="PUBG BOT 버전", value=f'{parser.get("Default","version")}', inline=True
+        )
         if ctx.guild is not None and self.client.shard_count is not None:
             embed.add_field(
                 name="샤드 ID(샤드 갯수)",
-                value=f'#{ctx.guild.shard_id} ({self.client.shard_count}개)',
-                inline=True
+                value=f"#{ctx.guild.shard_id} ({self.client.shard_count}개)",
+                inline=True,
             )
         embed.set_thumbnail(url=self.client.user.avatar.url)
         await ctx.send(embed=embed)

@@ -61,7 +61,9 @@ class SeasonTask:
                         .values(season=current_season.id, last_update=date_today)
                     )
                     is_commit = True
-                    log.info(f"{platform.platform.value} 시즌 정보이 업데이트 되었습니다. ({current_season.id})")
+                    log.info(
+                        f"{platform.platform.value} 시즌 정보이 업데이트 되었습니다. ({current_season.id})"
+                    )
 
         if is_commit:
             await session.commit()

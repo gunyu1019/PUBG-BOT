@@ -28,7 +28,7 @@ from config.config import get_config
 from module import pubgpy
 from utils.location import comment
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 parser = get_config()
 
@@ -38,12 +38,12 @@ warning_color = int(parser.get("Color", "warning"), 16)
 
 
 async def request_loop(
-        context: interaction.ApplicationContext,
-        call: Callable[..., Coroutine[Any, Any, T]],
-        maximum_loop: int = 5,
-        language: str = None,
-        *args,
-        **kwargs,
+    context: interaction.ApplicationContext,
+    call: Callable[..., Coroutine[Any, Any, T]],
+    maximum_loop: int = 5,
+    language: str = None,
+    *args,
+    **kwargs,
 ) -> Optional[T]:
     if language is None:
         language = context.locale
@@ -54,7 +54,8 @@ async def request_loop(
             break
         except pubgpy.TooManyRequests as error:
             timer = (
-                    error.reset - datetime.datetime.now(tz=timezone('Asia/Seoul')).replace(tzinfo=None)
+                error.reset
+                - datetime.datetime.now(tz=timezone("Asia/Seoul")).replace(tzinfo=None)
             ).total_seconds()
             if timer < 0:
                 continue
@@ -64,9 +65,11 @@ async def request_loop(
 
             for count in range(v):
                 embed = discord.Embed(
-                    title=comment('request_loop', 'wait_list_title', language),
-                    description=comment('request_loop', 'wait_list_description', language).format((v - count) * 5),
-                    color=warning_color
+                    title=comment("request_loop", "wait_list_title", language),
+                    description=comment(
+                        "request_loop", "wait_list_description", language
+                    ).format((v - count) * 5),
+                    color=warning_color,
                 )
                 if index >= 1:
                     embed.description += " (재시도: {0}/5회)".format(index + 1)
@@ -74,9 +77,9 @@ async def request_loop(
                 await asyncio.sleep(5)
     else:
         embed = discord.Embed(
-            title=comment('basic', 'error', language),
-            description=comment('request_loop', 'wait_list_failed', language),
-            color=error_color
+            title=comment("basic", "error", language),
+            description=comment("request_loop", "wait_list_failed", language),
+            color=error_color,
         )
         await context.edit(embed=embed)
         return None

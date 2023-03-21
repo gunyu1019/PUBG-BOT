@@ -45,7 +45,9 @@ class Events:
 
         total = 0
         for index, guild in enumerate(self.bot.guilds):
-            answer += f"{index + 1}번째: {guild.name} ({guild.id}): {guild.member_count}명\n"
+            answer += (
+                f"{index + 1}번째: {guild.name} ({guild.id}): {guild.member_count}명\n"
+            )
             total += guild.member_count
         logger.info(f"방목록: \n{answer}\n방의 종합 멤버:{total}명")
 
@@ -57,7 +59,13 @@ class Events:
                 server_number = self.bot.guilds.index(i) + 1
         if server_number is not None:
             logger_guild.info(
-                guild.name + '에 가입이 확인되었습니다. 서버번호: ' + str(server_number) + '번, 서버멤버' + str(guild.member_count) + '명')
+                guild.name
+                + "에 가입이 확인되었습니다. 서버번호: "
+                + str(server_number)
+                + "번, 서버멤버"
+                + str(guild.member_count)
+                + "명"
+            )
 
         await (
             self.bot.get_guild(786153760824492062)
@@ -68,13 +76,15 @@ class Events:
 
     @listener()
     async def on_guild_remove(self, guild):
-        logger_guild.info(guild.name + '로 부터 추방 혹은 차단되었습니다.')
+        logger_guild.info(guild.name + "로 부터 추방 혹은 차단되었습니다.")
         return
 
     @listener()
     async def on_interaction_command(self, ctx: ApplicationContext):
         if ctx.guild is not None:
-            logger_command.info(f"({ctx.guild} | {ctx.channel} | {ctx.author}) {ctx.content}")
+            logger_command.info(
+                f"({ctx.guild} | {ctx.channel} | {ctx.author}) {ctx.content}"
+            )
         else:
             logger_command.info(f"(DM채널 | {ctx.author}) {ctx.content}")
 

@@ -36,15 +36,17 @@ class NormalStats(base):
 
     @classmethod
     def from_pubg(
-            cls,
-            player: str,
-            season: str,
-            stats: pubgNormalStats,
-            play_type: StatsPlayType,
-            fpp: bool,
-            update_time: datetime.datetime = datetime.datetime.now()
+        cls,
+        player: str,
+        season: str,
+        stats: pubgNormalStats,
+        play_type: StatsPlayType,
+        fpp: bool,
+        update_time: datetime.datetime = datetime.datetime.now(),
     ):
-        account_id_with_season = "{}_{}_{}{}".format(player, season, play_type.value, "_fpp" if fpp else "")
+        account_id_with_season = "{}_{}_{}{}".format(
+            player, season, play_type.value, "_fpp" if fpp else ""
+        )
         return cls(
             account_id_with_season=account_id_with_season,
             account_id=player,
@@ -61,5 +63,5 @@ class NormalStats(base):
             losses=stats.losses,
             played=stats.rounds_played,
             wins=stats.wins,
-            playtime=stats.time_survived
+            playtime=stats.time_survived,
         )

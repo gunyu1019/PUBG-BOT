@@ -14,10 +14,10 @@ from module import pubgpy
 
 class FavoriteBasic:
     def __init__(
-            self,
-            ctx: interaction.ApplicationContext,
-            factory: sessionmaker,
-            player: pubgpy.Player
+        self,
+        ctx: interaction.ApplicationContext,
+        factory: sessionmaker,
+        player: pubgpy.Player,
     ):
         self.context = ctx
         self.player = player
@@ -33,8 +33,8 @@ class FavoriteBasic:
 
         query = select(
             exists(database.FavoritePlayer).where(
-                (database.FavoritePlayer.player_id == self.player.id) &
-                (database.FavoritePlayer.discord_id == self.context.author.id)
+                (database.FavoritePlayer.player_id == self.player.id)
+                & (database.FavoritePlayer.discord_id == self.context.author.id)
             )
         )
         data: AsyncResult = await session.execute(query)
@@ -60,13 +60,13 @@ class FavoriteBasic:
                 data = database.FavoritePlayer(
                     idx=int(datetime.datetime.now().timestamp() * 1000000),
                     player_id=self.player.id,
-                    discord_id=self.context.author.id
+                    discord_id=self.context.author.id,
                 )
                 session.add(data)
             case True:
                 query = delete(database.FavoritePlayer).where(
-                    (database.FavoritePlayer.discord_id == self.context.id) &
-                    (database.FavoritePlayer.player_id == self.player.id)
+                    (database.FavoritePlayer.discord_id == self.context.id)
+                    & (database.FavoritePlayer.player_id == self.player.id)
                 )
                 await session.execute(query)
         self.is_favorite = not self.is_favorite

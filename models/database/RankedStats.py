@@ -45,15 +45,17 @@ class RankedStats(base):
 
     @classmethod
     def from_pubg(
-            cls,
-            player: str,
-            season: str,
-            stats: pubgRankedStats,
-            play_type: StatsPlayType,
-            fpp: bool,
-            update_time: datetime.datetime = datetime.datetime.now()
+        cls,
+        player: str,
+        season: str,
+        stats: pubgRankedStats,
+        play_type: StatsPlayType,
+        fpp: bool,
+        update_time: datetime.datetime = datetime.datetime.now(),
     ):
-        account_id_with_season = "{}_{}_{}{}".format(player, season, play_type.value, "_fpp" if fpp else "")
+        account_id_with_season = "{}_{}_{}{}".format(
+            player, season, play_type.value, "_fpp" if fpp else ""
+        )
         return cls(
             account_id_with_season=account_id_with_season,
             account_id=player,
@@ -77,5 +79,5 @@ class RankedStats(base):
             kda_point=stats.kda,
             played=stats.rounds_played,
             wins=stats.wins,
-            win_point=stats.win_ratio
+            win_point=stats.win_ratio,
         )

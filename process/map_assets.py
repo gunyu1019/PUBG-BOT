@@ -20,7 +20,7 @@ from config.config import get_config
 from module import pubgpy
 from utils.directory import directory
 
-map_setting = get_config('map_setting')
+map_setting = get_config("map_setting")
 
 
 class MapAssets:
@@ -31,15 +31,19 @@ class MapAssets:
                 directory,
                 "assets",
                 "maps",
-                map_setting.get("MapName", str(self.map.value)) + "_Main_Low_Res.png"
+                map_setting.get("MapName", str(self.map.value)) + "_Main_Low_Res.png",
             )
         )
         self.data = data
         self.player_id = player_id
 
         self.default_map_size = 102000
-        self.map_size_x = self.default_map_size * map_setting.getint("MapSize", str(self.map.value), fallback=0)
-        self.map_size_y = self.default_map_size * map_setting.getint("MapSize", str(self.map.value), fallback=0)
+        self.map_size_x = self.default_map_size * map_setting.getint(
+            "MapSize", str(self.map.value), fallback=0
+        )
+        self.map_size_y = self.default_map_size * map_setting.getint(
+            "MapSize", str(self.map.value), fallback=0
+        )
 
         self.file_size_x = self.map_file.size[0]
         self.file_size_y = self.map_file.size[1]
@@ -55,7 +59,10 @@ class MapAssets:
 
     @staticmethod
     def _map(x, input_min, input_max, output_min, output_max) -> int:
-        return int((x - input_min) * (output_max - output_min) / (input_max - input_min) + output_min)
+        return int(
+            (x - input_min) * (output_max - output_min) / (input_max - input_min)
+            + output_min
+        )
 
     @staticmethod
     def _get_location(data: dict):
@@ -79,43 +86,77 @@ class MapAssets:
         player_position_route = []
         for data in self.data:
             if data.get("_T") == "LogPlayerKillV2" and options.get("kill", False):
-                killer = data.get("killer", {}) if data.get("killer", {}) is not None else {}
-                victim = data.get("victim", {}) if data.get("victim", {}) is not None else {}
+                killer = (
+                    data.get("killer", {}) if data.get("killer", {}) is not None else {}
+                )
+                victim = (
+                    data.get("victim", {}) if data.get("victim", {}) is not None else {}
+                )
                 if killer.get("accountId", "") == self.player_id:
                     position = self._get_location(killer.get("location"))
-                    _kill = Image.open(os.path.join(directory, "assets", "icons", "kill.png"))
+                    _kill = Image.open(
+                        os.path.join(directory, "assets", "icons", "kill.png")
+                    )
                     self.add_icon(_kill, position[0], position[1])
                 elif victim.get("accountId", "") == self.player_id:
                     position = self._get_location(victim.get("location"))
-                    death = Image.open(os.path.join(directory, "assets", "icons", "death.png"))
+                    death = Image.open(
+                        os.path.join(directory, "assets", "icons", "death.png")
+                    )
                     self.add_icon(death, position[0], position[1])
             elif data.get("_T") == "LogPlayerRevive" and options.get("revive", False):
-                reviver = data.get("reviver", {}) if data.get("reviver", {}) is not None else {}
-                if reviver.get("accountId", "") == self.player_id and options.get("revive", False):
+                reviver = (
+                    data.get("reviver", {})
+                    if data.get("reviver", {}) is not None
+                    else {}
+                )
+                if reviver.get("accountId", "") == self.player_id and options.get(
+                    "revive", False
+                ):
                     position = self._get_location(reviver.get("location"))
-                    _revive = Image.open(os.path.join(directory, "assets", "icons", "revive.png"))
+                    _revive = Image.open(
+                        os.path.join(directory, "assets", "icons", "revive.png")
+                    )
                     self.add_icon(_revive, position[0], position[1])
-            elif data.get("_T") == "LogItemPickupFromCarepackage" and options.get("care_package", False):
-                character = data.get("character", {}) if data.get("character", {}) is not None else {}
+            elif data.get("_T") == "LogItemPickupFromCarepackage" and options.get(
+                "care_package", False
+            ):
+                character = (
+                    data.get("character", {})
+                    if data.get("character", {}) is not None
+                    else {}
+                )
                 _care_package = data.get("carePackageUniqueId", -1)
-                if character.get("accountId", "") == self.player_id and _care_package not in care_package_unique:
+                if (
+                    character.get("accountId", "") == self.player_id
+                    and _care_package not in care_package_unique
+                ):
                     care_package_unique.append(_care_package)
                     position = self._get_location(character.get("location"))
-                    _cargo = Image.open(os.path.join(directory, "assets", "icons", "care_package.png"))
+                    _cargo = Image.open(
+                        os.path.join(directory, "assets", "icons", "care_package.png")
+                    )
                     self.add_icon(_cargo, position[0], position[1])
             elif data.get("_T") == "LogPlayerPosition" and options.get("route", False):
-                character = data.get("character", {}) if data.get("character", {}) is not None else {}
+                character = (
+                    data.get("character", {})
+                    if data.get("character", {}) is not None
+                    else {}
+                )
                 common = data.get("common", {})
-                if character.get("accountId", "") == self.player_id and float(common.get("isGame", 0.0)) > 0.2:
+                if (
+                    character.get("accountId", "") == self.player_id
+                    and float(common.get("isGame", 0.0)) > 0.2
+                ):
                     position = self._get_location(character.get("location"))
                     player_position_route.append(position)
         for index, position in enumerate(player_position_route[0:-1]):
             self.add_line(
                 position[0],
                 position[1],
-                player_position_route[index+1][0],
-                player_position_route[index+1][1],
-                color="#ee000080"
+                player_position_route[index + 1][0],
+                player_position_route[index + 1][1],
+                color="#ee000080",
             )
         return
 
@@ -125,6 +166,6 @@ class MapAssets:
 
     def save(self):
         buf = io.BytesIO()
-        self.file.save(buf, format='png')
+        self.file.save(buf, format="png")
         buf.seek(0)
         return buf

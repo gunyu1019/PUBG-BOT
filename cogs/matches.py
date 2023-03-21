@@ -44,13 +44,13 @@ class Matches:
         self.pubgpy = pubgpy.Client(token=parser.get("Default", "pubg_token"))
 
     @interaction.command(name="매치")
-    @interaction.option(name='닉네임', description='플레이어의 닉네임을 입력해주세요.', required=True)
-    @interaction.option(name='매치_순서', description='조회할 매치 순서를 입력해주세요.', required=False)
+    @interaction.option(name="닉네임", description="플레이어의 닉네임을 입력해주세요.", required=True)
+    @interaction.option(name="매치_순서", description="조회할 매치 순서를 입력해주세요.", required=False)
     async def match(
-            self,
-            ctx: interaction.ApplicationContext,
-            player: str,
-            matches_index: int = None
+        self,
+        ctx: interaction.ApplicationContext,
+        player: str,
+        matches_index: int = None,
     ):
         session: AsyncSession = self.factory.__call__()
         await ctx.defer()
@@ -62,16 +62,13 @@ class Matches:
         if player_info is None:
             return
 
-        query = (
-            select(database.CurrentSeasonInfo).where(database.CurrentSeasonInfo.platform == player_info.platform)
+        query = select(database.CurrentSeasonInfo).where(
+            database.CurrentSeasonInfo.platform == player_info.platform
         )
         season_data: database.CurrentSeasonInfo = await session.scalar(query)
         season = season_data.season
         matches_process = MatchesProcess(
-            ctx=ctx,
-            client=self.client,
-            factory=self.factory,
-            player=player_info.player
+            ctx=ctx, client=self.client, factory=self.factory, player=player_info.player
         )
         matches_process.stats_class = StatsProcess(
             ctx=matches_process.context,
@@ -79,7 +76,7 @@ class Matches:
             factory=matches_process.factory,
             player=matches_process.player,
             matches=matches_process,
-            season=season
+            season=season,
         )
         await matches_process.load_favorite(session)
 

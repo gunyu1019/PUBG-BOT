@@ -71,20 +71,22 @@ class Favorite:
         return
 
     async def favorite_base(
-            self,
-            ctx: interaction.ApplicationContext,
-            data_type: Type[database.RankedStats | database.NormalStats],
-            fpp: bool
+        self,
+        ctx: interaction.ApplicationContext,
+        data_type: Type[database.RankedStats | database.NormalStats],
+        fpp: bool,
     ):
         await ctx.defer()
         session: AsyncSession = self.factory.__call__()
-        query = select(database.FavoritePlayer).where(database.FavoritePlayer.discord_id == ctx.author.id)
+        query = select(database.FavoritePlayer).where(
+            database.FavoritePlayer.discord_id == ctx.author.id
+        )
         data = await session.scalars(query)
         result: list[database.FavoritePlayer] = data.all()
 
-        query = select(database.Player).where(database.Player.account_id.in_([
-            x.player_id for x in result
-        ]))
+        query = select(database.Player).where(
+            database.Player.account_id.in_([x.player_id for x in result])
+        )
         data = await session.scalars(query)
         result_player: list[database.Player] = data.all()
 
@@ -92,44 +94,49 @@ class Favorite:
         for player in result_player:
             player_data[player.account_id] = {
                 "name": player.name,
-                "platform": player.platform
+                "platform": player.platform,
             }
 
         embed = discord.Embed(
-            description=comment("favorite", "description", ctx.locale),
-            color=self.color
+            description=comment("favorite", "description", ctx.locale), color=self.color
         )
         embed.set_author(
             icon_url=self.client.user.avatar.url,
-            name=comment("favorite", "title", ctx.locale)
+            name=comment("favorite", "title", ctx.locale),
         )
-        components = interaction.ActionRow(components=[
-            interaction.Selection(
-                custom_id="favorite_player",
-                options=[
-                    interaction.Options(
-                        label=player_data.get(player.player_id, {}).get("name", "Unknown"),
-                        description=player.player_id,
-                        value=player.player_id
-                    )
-                    for player in result
-                ], min_values=1,
-                max_values=1
-            )
-        ])
+        components = interaction.ActionRow(
+            components=[
+                interaction.Selection(
+                    custom_id="favorite_player",
+                    options=[
+                        interaction.Options(
+                            label=player_data.get(player.player_id, {}).get(
+                                "name", "Unknown"
+                            ),
+                            description=player.player_id,
+                            value=player.player_id,
+                        )
+                        for player in result
+                    ],
+                    min_values=1,
+                    max_values=1,
+                )
+            ]
+        )
         response = await ctx.send(embed=embed, components=[components])
-        components_result: interaction.ComponentsContext = await self.client.wait_for_component(
-            custom_id="favorite_player",
-            check=lambda x: x.author.id == ctx.author.id and x.message.id == response.id
+        components_result: interaction.ComponentsContext = (
+            await self.client.wait_for_component(
+                custom_id="favorite_player",
+                check=lambda x: x.author.id == ctx.author.id
+                and x.message.id == response.id,
+            )
         )
         await components_result.defer_update()
         player_id = components_result.values[0]
         player = self.pubgpy.player_id(player_id)
-        player.name = player_data[player_id]['name']
-        query = (
-            select(database.CurrentSeasonInfo).where(
-                database.CurrentSeasonInfo.platform == player_data[player_id]['platform']
-            )
+        player.name = player_data[player_id]["name"]
+        query = select(database.CurrentSeasonInfo).where(
+            database.CurrentSeasonInfo.platform == player_data[player_id]["platform"]
         )
         season_data: database.CurrentSeasonInfo = await session.scalar(query)
         season = season_data.season
@@ -140,14 +147,14 @@ class Favorite:
             factory=self.factory,
             player=player,
             season=season,
-            fpp=fpp
+            fpp=fpp,
         )
         stats_process.matches_class = MatchesProcess(
             ctx=stats_process.context,
             client=stats_process.client,
             factory=stats_process.factory,
             player=stats_process.player,
-            stats=stats_process
+            stats=stats_process,
         )
         await stats_process.load_data(data_type, session)
         await stats_process.load_favorite(session)

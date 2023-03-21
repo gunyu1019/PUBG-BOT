@@ -10,16 +10,12 @@ from process.favorite import FavoriteBasic
 
 class ProcessBase(FavoriteBasic):
     def __init__(
-            self,
-            ctx: interaction.ApplicationContext,
-            factory: sessionmaker,
-            player: pubgpy.Player
+        self,
+        ctx: interaction.ApplicationContext,
+        factory: sessionmaker,
+        player: pubgpy.Player,
     ):
-        super(ProcessBase, self).__init__(
-            ctx=ctx,
-            factory=factory,
-            player=player
-        )
+        super(ProcessBase, self).__init__(ctx=ctx, factory=factory, player=player)
         self.normal_stats_button: interaction.Button | None = None
         self.ranked_stats_button: interaction.Button | None = None
         self.matches_stats_button: interaction.Button | None = None
@@ -31,17 +27,17 @@ class ProcessBase(FavoriteBasic):
         self.normal_stats_button = interaction.Button(
             custom_id="normal_stats_button",
             emoji=discord.PartialEmoji(name="\U00000031\U0000FE0F\U000020E3"),
-            style=1
+            style=1,
         )
         self.ranked_stats_button = interaction.Button(
             custom_id="ranked_stats_button",
             emoji=discord.PartialEmoji(name="\U00000032\U0000FE0F\U000020E3"),
-            style=1
+            style=1,
         )
         self.matches_stats_button = interaction.Button(
             custom_id="matches_stats_button",
             emoji=discord.PartialEmoji(name="\U00000033\U0000FE0F\U000020E3"),
-            style=1
+            style=1,
         )
         favorite = self.is_favorite
         if favorite is None:
@@ -49,43 +45,45 @@ class ProcessBase(FavoriteBasic):
         self.favorite_stats_button = interaction.Button(
             custom_id="favorite_stats_button",
             emoji=discord.PartialEmoji(
-                name="\U00002B50" if not favorite
-                else "\U0001F31F"
+                name="\U00002B50" if not favorite else "\U0001F31F"
             ),
-            style=1
+            style=1,
         )
         self.update_stats_button = interaction.Button(
             custom_id="update_stats_button",
             emoji=discord.PartialEmoji(id=868344053262061578, name="update"),
-            style=1
+            style=1,
         )
 
     async def response_component(
-            self,
-            component_context: interaction.ComponentsContext | None = None,
-            content: str = discord.utils.MISSING,
-            attachments: list[discord.File] = discord.utils.MISSING,
-            **kwargs
+        self,
+        component_context: interaction.ComponentsContext | None = None,
+        content: str = discord.utils.MISSING,
+        attachments: list[discord.File] = discord.utils.MISSING,
+        **kwargs
     ) -> interaction.ComponentsContext | None:
         if component_context is None:
             await self.context.edit(
                 content=content,
                 embeds=[],
                 attachments=attachments,
-                components=[self.buttons]
+                components=[self.buttons],
             )
         else:
             await component_context.edit(
                 content=content,
                 embeds=[],
                 attachments=attachments,
-                components=[self.buttons]
+                components=[self.buttons],
             )
 
         try:
-            context: interaction.ComponentsContext = await self.client.wait_for_global_component(
-                check=lambda x: x.custom_id in [t.custom_id for t in self.buttons.components],
-                timeout=300
+            context: interaction.ComponentsContext = (
+                await self.client.wait_for_global_component(
+                    check=lambda x: x.custom_id
+                    in [t.custom_id for t in self.buttons.components],
+                    timeout=300,
+                )
             )
         except asyncio.TimeoutError:
             await self.cancel_component(component_context, content, **kwargs)
@@ -96,19 +94,21 @@ class ProcessBase(FavoriteBasic):
 
     @property
     def buttons(self) -> interaction.ActionRow:
-        return interaction.ActionRow(components=[
-            self.normal_stats_button,
-            self.ranked_stats_button,
-            self.matches_stats_button,
-            self.favorite_stats_button,
-            self.update_stats_button
-        ])
+        return interaction.ActionRow(
+            components=[
+                self.normal_stats_button,
+                self.ranked_stats_button,
+                self.matches_stats_button,
+                self.favorite_stats_button,
+                self.update_stats_button,
+            ]
+        )
 
     async def cancel_component(
-            self,
-            component_context: interaction.ComponentsContext | None = None,
-            content: str = None,
-            **kwargs
+        self,
+        component_context: interaction.ComponentsContext | None = None,
+        content: str = None,
+        **kwargs
     ):
         component = copy.copy(self.buttons)
         for index, _ in enumerate(self.buttons.components):
@@ -117,16 +117,10 @@ class ProcessBase(FavoriteBasic):
 
         if component_context is not None:
             await component_context.edit(
-                content=content,
-                embeds=[],
-                components=[component],
-                **kwargs
+                content=content, embeds=[], components=[component], **kwargs
             )
         else:
             await self.context.edit(
-                content=content,
-                embeds=[],
-                components=[component],
-                **kwargs
+                content=content, embeds=[], components=[component], **kwargs
             )
         return

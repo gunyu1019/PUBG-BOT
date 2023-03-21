@@ -20,13 +20,13 @@ if __name__ == "__main__":
         bot = interaction.AutoShardedClient(
             intents=discord.Intents.default(),
             enable_debug_events=True,
-            global_sync_command=True
+            global_sync_command=True,
         )
     else:
         bot = interaction.Client(
             intents=discord.Intents.default(),
             enable_debug_events=True,
-            global_sync_command=True
+            global_sync_command=True,
         )
 
     # Database
@@ -36,14 +36,16 @@ if __name__ == "__main__":
         "host": parser.get(database_section, "host"),
         "password": parser.get(database_section, "pass"),
         "database": parser.get(database_section, "database"),
-        "port": parser.getint(database_section, "port", fallback=3306)
+        "port": parser.getint(database_section, "port", fallback=3306),
     }
     engine = create_async_engine(
-        "mysql+aiomysql://{username}:{password}@{host}:{port}/{database}".format(**database),
-        poolclass=NullPool
+        "mysql+aiomysql://{username}:{password}@{host}:{port}/{database}".format(
+            **database
+        ),
+        poolclass=NullPool,
     )
     factory = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-    bot.load_extensions('cogs', directory, factory=factory)
-    bot.load_extensions('tasks', directory, factory=factory)
+    bot.load_extensions("cogs", directory, factory=factory)
+    bot.load_extensions("tasks", directory, factory=factory)
     bot.run(parser.get("Default", "token"))

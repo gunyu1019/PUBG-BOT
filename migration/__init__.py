@@ -28,14 +28,14 @@ if __name__ == "__main__":
         "host": parser.get(database_section, "host"),
         "password": parser.get(database_section, "pass"),
         "database": parser.get(database_section, "database"),
-        "port": parser.getint(database_section, "port", fallback=3306)
+        "port": parser.getint(database_section, "port", fallback=3306),
     }
     database = pymysql.connect(
-        user=database_config['username'],
-        host=database_config['host'],
-        password=database_config['password'],
+        user=database_config["username"],
+        host=database_config["host"],
+        password=database_config["password"],
         database="PUBG_BOT",
-        port=database_config['port']
+        port=database_config["port"],
     )
     log.info("Connected at PUBG BOT Database.")
     cursor = database.cursor(pymysql.cursors.DictCursor)
@@ -57,7 +57,9 @@ if __name__ == "__main__":
 
     log.info("Connected at PUBG STATS Database.")
     engine = create_engine(
-        "mysql+pymysql://{username}:{password}@{host}:{port}/{database}".format(**database_config)
+        "mysql+pymysql://{username}:{password}@{host}:{port}/{database}".format(
+            **database_config
+        )
     )
     with Session(engine) as session:
         _player_data = []
@@ -69,17 +71,23 @@ if __name__ == "__main__":
             _player = db.Player(
                 name=player.nickname,
                 account_id=player.player_id,
-                platform=list(pubgpy.Platforms)[player.platform]
+                platform=list(pubgpy.Platforms)[player.platform],
             )
-            _player_update_time[player.player_id] = Update(**{
-                "matches": player.matches_date,
-                "ranked": player.ranked_date,
-                "normal": player.season_date
-            })
+            _player_update_time[player.player_id] = Update(
+                **{
+                    "matches": player.matches_date,
+                    "ranked": player.ranked_date,
+                    "normal": player.season_date,
+                }
+            )
             _player_data.append(_player)
 
             if len(player.match_ids) > 0:
-                log.info("Found {} {}s's matches.".format(len(player.match_ids), player.nickname))
+                log.info(
+                    "Found {} {}s's matches.".format(
+                        len(player.match_ids), player.nickname
+                    )
+                )
 
             detect_duplication_matches = []
             for index, match_id in enumerate(player.match_ids):
@@ -87,20 +95,28 @@ if __name__ == "__main__":
                     continue
                 detect_duplication_matches.append(match_id)
                 _matches_data.append(
-                    db.MatchesPlayer(**{
-                        "account_id_with_match_id": "{}_{}".format(player.player_id, match_id),
-                        "account_id": player.player_id,
-                        "match_id": match_id,
-                        "match_index": index,
-                        "last_update": getattr(
-                            _player_update_time[player.player_id],
-                            "matches",
-                            datetime.datetime.now()
-                        )
-                    })
+                    db.MatchesPlayer(
+                        **{
+                            "account_id_with_match_id": "{}_{}".format(
+                                player.player_id, match_id
+                            ),
+                            "account_id": player.player_id,
+                            "match_id": match_id,
+                            "match_index": index,
+                            "last_update": getattr(
+                                _player_update_time[player.player_id],
+                                "matches",
+                                datetime.datetime.now(),
+                            ),
+                        }
+                    )
                 )
             if len(detect_duplication_matches) > 0:
-                log.info("Found {}'s {} duplication matches.".format(player.nickname, len(detect_duplication_matches)))
+                log.info(
+                    "Found {}'s {} duplication matches.".format(
+                        player.nickname, len(detect_duplication_matches)
+                    )
+                )
         # session.add_all(_player_data)
         # session.commit()
         session.add_all(_matches_data)
@@ -111,18 +127,24 @@ if __name__ == "__main__":
         for season in normal_data:
             data = pubgpy.GameModeReceive(season.data, type_class=pubgpy.SeasonStats)
             for fpp in [False, True]:
-                for play_type in [StatsPlayType.SOLO, StatsPlayType.DUO, StatsPlayType.SQUAD]:
+                for play_type in [
+                    StatsPlayType.SOLO,
+                    StatsPlayType.DUO,
+                    StatsPlayType.SQUAD,
+                ]:
                     _season = db.NormalStats().from_pubg(
                         player=season.player_id,
                         season=season.season,
                         play_type=play_type,
-                        stats=getattr(data, str(play_type.value) + ("" if not fpp else "_fpp")),
+                        stats=getattr(
+                            data, str(play_type.value) + ("" if not fpp else "_fpp")
+                        ),
                         fpp=fpp,
                         update_time=getattr(
                             _player_update_time.get(season.player_id),
                             "normal",
-                            datetime.datetime.now()
-                        )
+                            datetime.datetime.now(),
+                        ),
                     )
                     if _season.account_id_with_season in detect_duplication_season:
                         continue
@@ -141,13 +163,15 @@ if __name__ == "__main__":
                         player=ranked.player_id,
                         season=ranked.season,
                         play_type=play_type,
-                        stats=getattr(data, str(play_type.value) + ("" if not fpp else "_fpp")),
+                        stats=getattr(
+                            data, str(play_type.value) + ("" if not fpp else "_fpp")
+                        ),
                         fpp=fpp,
                         update_time=getattr(
                             _player_update_time.get(ranked.player_id),
                             "ranked",
-                            datetime.datetime.now()
-                        )
+                            datetime.datetime.now(),
+                        ),
                     )
                     if _season.account_id_with_season in detect_duplication_ranked:
                         continue
