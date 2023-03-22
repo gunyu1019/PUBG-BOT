@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+
 import aiohttp
 import discord
 from discord.ext import interaction
@@ -11,9 +12,9 @@ from sqlalchemy.sql import select
 from config.config import get_config
 from models import database
 from module import pubgpy
-from process.process_base import ProcessBase
 from process.image import ImageProcess
 from process.map_assets import MapAssets
+from process.process_base import ProcessBase
 from utils.location import comment
 
 parser = get_config()
@@ -21,12 +22,12 @@ parser = get_config()
 
 class MatchesProcess(ProcessBase):
     def __init__(
-        self,
-        ctx: interaction.ApplicationContext,
-        client: interaction.Client,
-        factory: sessionmaker,
-        player: pubgpy.Player,
-        **kwargs,
+            self,
+            ctx: interaction.ApplicationContext,
+            client: interaction.Client,
+            factory: sessionmaker,
+            player: pubgpy.Player,
+            **kwargs,
     ):
         self.context = ctx
         self.client = client
@@ -52,11 +53,11 @@ class MatchesProcess(ProcessBase):
         return self._matches_id
 
     async def response_component(
-        self,
-        component_context: interaction.ComponentsContext | None = None,
-        content: str = discord.utils.MISSING,
-        attachments: list[discord.File] = discord.utils.MISSING,
-        **kwargs,
+            self,
+            component_context: interaction.ComponentsContext | None = None,
+            content: str = discord.utils.MISSING,
+            attachments: list[discord.File] = discord.utils.MISSING,
+            **kwargs,
     ):
         context = await super(MatchesProcess, self).response_component(
             component_context, content, attachments, **kwargs
@@ -194,11 +195,11 @@ class MatchesProcess(ProcessBase):
             components_response: interaction.ComponentsContext = (
                 await self.client.wait_for_global_component(
                     check=lambda component: (
-                        component.component_type == interaction.Selection.TYPE
-                        and "matches_selection" == component.custom_id
-                        and self.context.author.id == component.author.id
-                        and component.message.id == message.id
-                        and component.channel.id == self.context.channel.id
+                            component.component_type == interaction.Selection.TYPE
+                            and "matches_selection" == component.custom_id
+                            and self.context.author.id == component.author.id
+                            and component.message.id == message.id
+                            and component.channel.id == self.context.channel.id
                     ),
                     timeout=300,
                 )
@@ -234,11 +235,21 @@ class MatchesProcess(ProcessBase):
         return self.asset_data
 
     async def match_info(
-        self,
-        matches_id: str,
-        component_response: interaction.ComponentsContext | None = None,
+            self,
+            matches_id: str,
+            component_response: interaction.ComponentsContext | None = None,
     ):
-        data = await self.player.client.matches(matches_id)
+        try:
+            data = await self.player.client.matches(matches_id)
+        except pubgpy.NotFound:
+            embed = discord.Embed(
+                description=comment(
+                    "matches_process", "match_id_not_found", self.context.locale
+                ),
+                color=self.warning_color,
+            )
+            await self.response_component(component_response, embed=embed)
+            return
 
         assets_data = await self.get_assets(data)
         map_image = MapAssets(
