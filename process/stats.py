@@ -80,10 +80,10 @@ class Stats(ProcessBase):
                 await self.matches_class.match_info(matches_id=matches_id)
             case self.favorite_stats_button.custom_id:
                 await self.update_favorite()
-                await self.before_func(component_context)
+                await self.before_func(context)
             case self.update_stats_button.custom_id:
                 await self.update_data(self.before_type, update=True)
-                await self.before_func(component_context)
+                await self.before_func(context)
         return
 
     @staticmethod

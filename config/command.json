@@ -1,0 +1,125 @@
+{
+    "전적 관련 기능": [
+        {
+            "name": "전적",
+            "description": "검색된 사용자의 전적 정보를 불러옵니다.",
+            "interaction": true,
+            "inline": false,
+            "options": [
+                {
+                    "name": "유형",
+                    "required": true
+                }, {
+                    "name": "닉네임",
+                    "required": true
+                }, {
+                    "name": "시즌",
+                    "required": false
+                }
+            ]
+        }, {
+            "name": "전적솔로",
+            "description": "검색하시는 유저의 솔로 정보를 불러올 수 있습니다.",
+            "interaction": true,
+            "inline": false,
+            "options": [
+                {
+                    "name": "유형",
+                    "required": true
+                }, {
+                    "name": "닉네임",
+                    "required": true
+                }, {
+                    "name": "시즌",
+                    "required": false
+                }
+            ]
+        }, {
+            "name": "전적듀오",
+            "description": "검색하시는 유저의 듀오 정보를 불러올 수 있습니다.",
+            "interaction": true,
+            "inline": false,
+            "options": [
+                {
+                    "name": "유형",
+                    "required": true
+                }, {
+                    "name": "닉네임",
+                    "required": true
+                }, {
+                    "name": "시즌",
+                    "required": false
+                }
+            ]
+        }, {
+            "name": "전적스쿼드",
+            "description": "검색하시는 유저의 스쿼드 정보를 불러올 수 있습니다.",
+            "interaction": true,
+            "inline": false,
+            "options": [
+                {
+                    "name": "유형",
+                    "required": true
+                }, {
+                    "name": "닉네임",
+                    "required": true
+                }, {
+                    "name": "시즌",
+                    "required": false
+                }
+            ]
+        }, {
+            "name": "매치",
+            "description": "검색하시는 유저의 매치 전적을 불러옵니다.",
+            "interaction": true,
+            "inline": false,
+            "options": [
+                {
+                    "name": "닉네임",
+                    "required": true
+                }, {
+                    "name": "매치_순서",
+                    "required": false
+                }
+            ]
+        }, {
+            "name": "플랫폼변경",
+            "description": "등록하시는 유저의 플랫폼을 잘못 등록 하였을 경우 사용할 수 있는 기능입니다. 해당 명령어를 이용하여 사용자에 등록된 플랫폼 정보를 변경합니다.",
+            "interaction": true,
+            "inline": false,
+            "options": [
+                {
+                    "name": "닉네임",
+                    "required": true
+                }
+            ]
+        }
+    ],
+    "봇 관련 기능": [
+        {
+            "name": "상태",
+            "description": "배틀그라운드(스팀) 서버의 상태를 불러옵니다.",
+            "interaction": true,
+            "inline": true,
+            "options": []
+        }, {
+            "name": "도움말",
+            "description": "PUBG BOT의 사용 방법에 대하여 불러옵니다.",
+            "interaction": true,
+            "inline": true,
+            "options": []
+        }, {
+            "name": "ping",
+            "description": "PUBG BOT의 핑(상태)을 확인합니다.",
+            "interaction": true,
+            "inline": true,
+            "options": []
+        }, {
+            "name": "정보",
+            "description": "PUBG BOT의 정보을 확인합니다.",
+            "interaction": true,
+            "inline": true,
+            "options": []
+        }
+    ]
+}

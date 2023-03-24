@@ -18,12 +18,9 @@ along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import json
+
 import discord
-import asyncio
 from discord.ext import interaction
-from discord.ext.interaction.components import ActionRow, Button
-from discord.ext.interaction.interaction import ApplicationContext, ComponentsContext
-from discord.ext.interaction.message import Message
 
 from config.config import get_config
 from process.response_base import ResponseBase
@@ -35,7 +32,7 @@ with open(f"{directory}/data/command.json", "r", encoding='utf-8') as f:
 
 
 class Help(ResponseBase):
-    def __init__(self, ctx: ApplicationContext, client: interaction.Client):
+    def __init__(self, ctx: interaction.ApplicationContext, client: interaction.Client):
         super().__init__(ctx, client)
         self.ctx = ctx
         self.client = client
@@ -53,35 +50,29 @@ class Help(ResponseBase):
         self.warning_color = int(parser.get("Color", "warning"), 16)
 
     def init_button(self):
-        self.left_btn = Button(
+        self.left_btn = interaction.Button(
             style=1,
             emoji=discord.PartialEmoji(name="\U00002B05"),
             custom_id="left_page"
         )
-        self.cancel_btn = Button(
+        self.cancel_btn = interaction.Button(
             style=1,
             emoji=discord.PartialEmoji(name="\U0000274C"),
             custom_id="cancel"
         )
-        self.right_btn = Button(
+        self.right_btn = interaction.Button(
             style=1,
             emoji=discord.PartialEmoji(name="\U000027A1"),
             custom_id="right_page"
         )
 
     @property
-    def button(self):
+    def buttons(self):
         return [
             self.left_btn,
             self.cancel_btn,
             self.right_btn
         ]
-
-    @staticmethod
-    def check(ctx: Message):
-        def check_func(component: ComponentsContext):
-            return component.component_type == 2 and ctx.id == component.message.id
-        return check_func
 
     def current_button(self):
         self.init_button()
@@ -91,22 +82,30 @@ class Help(ResponseBase):
             self.right_btn.disabled = True
         return
 
-    async def response(self, b_msg: Message, custom_id: str):
-        if custom_id == "cancel":
+    async def response_component(
+            self,
+            component_context: interaction.ComponentsContext | None = None,
+            content: str = discord.utils.MISSING,
+            embeds: list[discord.Embed] = None,
+            attachments: list[discord.File] = discord.utils.MISSING,
+            **kwargs
+    ) -> interaction.ComponentsContext | None:
+        response = await super().response_component(component_context, content, embeds, attachments, **kwargs)
+        if response.custom_id == "cancel":
             return
         now_page = self.page
-        if custom_id == "left_page":
+        if response.custom_id == "left_page":
             now_page -= 1
-        elif custom_id == "right_page":
+        elif response.custom_id == "right_page":
             now_page += 1
 
         if now_page <= 0:
-            await self.first_page(b_msg=b_msg)
+            await self.first_page(component_context=response)
         else:
-            await self.main_page(page=now_page, b_msg=b_msg)
+            await self.main_page(page=now_page, component_context=response)
         return
 
-    async def first_page(self, b_msg: Message = None):
+    async def first_page(self, component_context: interaction.ComponentsContext | None = None):
         self.page = 0
         embed = discord.Embed(
             title="소개",
@@ -120,36 +119,13 @@ class Help(ResponseBase):
         embed.set_footer(text="{}/{} 페이지".format(1, len(self._commands) + 1))
         self.current_button()
 
-        if b_msg is None:
-            b_msg = await self.ctx.send(
-                embed=embed, components=[
-                    ActionRow(components=self.button)
-                ]
-            )
-        else:
-            await b_msg.edit(
-                embed=embed, components=[
-                    ActionRow(components=self.button)
-                ]
-            )
-
-        try:
-            resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
-        except asyncio.TimeoutError:
-            return
-
-        try:
-            await resp.defer_update()
-        except discord.NotFound:
-            pass
-        await self.response(b_msg=b_msg, custom_id=resp.custom_id)
+        await self.response_component(component_context=component_context, embeds=[embed])
         return
 
-    async def main_page(self, page: int = 1, b_msg: Message = None):
+    async def main_page(self, page: int = 1, component_context: interaction.ComponentsContext | None = None):
         self.page = page
         embed = discord.Embed(color=self.color)
         embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar.url)
-        embed.description = "† 붙은 명령어는 슬래시 명령어를 지원하지 않습니다."
         embed.set_footer(text="{}/{} 페이지".format(page + 1, len(self._commands) + 1))
 
         command_key = self._commands[page - 1]
@@ -158,7 +134,6 @@ class Help(ResponseBase):
         for _command in command:
             name = _command.get("name")
             description = _command.get("description")
-            interaction = _command.get("interaction", True)
             options = _command.get("options", [])
             inline = _command.get("inline", False)
             if options != [] and options is not None:
@@ -177,35 +152,13 @@ class Help(ResponseBase):
                 embed.add_field(name="/{} <{}>".format(
                     name, "> <".join(options_comment)
                 ), value="{}{}\n".format(
-                    description, "†" if not interaction else ""
+                    description,
                 ), inline=inline)
             else:
                 embed.add_field(name="/{}".format(name), value="{}{}\n".format(
-                    description, "†" if not interaction else ""
+                    description,
                 ), inline=inline)
         self.current_button()
 
-        if b_msg is None:
-            b_msg = await self.ctx.send(
-                embed=embed, components=[
-                    ActionRow(components=self.button)
-                ]
-            )
-        else:
-            await b_msg.edit(
-                embed=embed, components=[
-                    ActionRow(components=self.button)
-                ]
-            )
-
-        try:
-            resp: ComponentsContext = await self.client.wait_for_global_component(check=self.check(b_msg), timeout=300)
-        except asyncio.TimeoutError:
-            return
-
-        try:
-            await resp.defer_update()
-        except discord.NotFound:
-            pass
-        await self.response(b_msg=b_msg, custom_id=resp.custom_id)
+        await self.response_component(component_context=component_context, embeds=[embed])
         return
