@@ -91,6 +91,15 @@ class General:
         await ctx.send(embed=embed)
         return
 
+    @interaction.command(name="도움말", description='PUBG BOT의 사용 방법을 불러옵니다.')
+    async def help(self, ctx):
+        help_command = Help(
+                ctx=ctx,
+                client=self.client
+        )
+        await help_command.first_page()
+        return
+
 
 def setup(client: interaction.Client, factory: sessionmaker):
     return client.add_interaction_cog(General(client))
