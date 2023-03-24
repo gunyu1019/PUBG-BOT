@@ -43,7 +43,7 @@ class MatchesProcess(ProcessBase):
 
         self.stats_class = kwargs.get("stats")
 
-        super().__init__(self.context, self.factory, self.player)
+        super().__init__(self.context, self.client, self.factory, self.player)
         self._matches_id = None
 
     @property
@@ -56,11 +56,12 @@ class MatchesProcess(ProcessBase):
             self,
             component_context: interaction.ComponentsContext | None = None,
             content: str = discord.utils.MISSING,
+            embeds: list[discord.Embed] = None,
             attachments: list[discord.File] = discord.utils.MISSING,
             **kwargs,
     ):
         context = await super(MatchesProcess, self).response_component(
-            component_context, content, attachments, **kwargs
+            component_context, content, embeds, attachments, **kwargs
         )
         if context is None:
             return

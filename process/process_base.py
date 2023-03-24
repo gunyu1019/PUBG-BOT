@@ -1,21 +1,23 @@
-import asyncio
-import copy
+from abc import ABCMeta
+
 import discord
 from discord.ext import interaction
 from sqlalchemy.orm import sessionmaker
 
 from module import pubgpy
 from process.favorite import FavoriteBasic
+from process.response_base import ResponseBase
 
 
-class ProcessBase(FavoriteBasic):
+class ProcessBase(FavoriteBasic, ResponseBase, metaclass=ABCMeta):
     def __init__(
-        self,
-        ctx: interaction.ApplicationContext,
-        factory: sessionmaker,
-        player: pubgpy.Player,
+            self,
+            ctx: interaction.ApplicationContext,
+            client: interaction.Client,
+            factory: sessionmaker,
+            player: pubgpy.Player,
     ):
-        super(ProcessBase, self).__init__(ctx=ctx, factory=factory, player=player)
+        super(ProcessBase, self).__init__(ctx=ctx, client=client, factory=factory, player=player)
         self.normal_stats_button: interaction.Button | None = None
         self.ranked_stats_button: interaction.Button | None = None
         self.matches_stats_button: interaction.Button | None = None
@@ -55,45 +57,6 @@ class ProcessBase(FavoriteBasic):
             style=1,
         )
 
-    async def response_component(
-        self,
-        component_context: interaction.ComponentsContext | None = None,
-        content: str = discord.utils.MISSING,
-        attachments: list[discord.File] = discord.utils.MISSING,
-        **kwargs
-    ) -> interaction.ComponentsContext | None:
-        if component_context is None:
-            message = await self.context.edit(
-                content=content,
-                embeds=[],
-                attachments=attachments,
-                components=[self.buttons],
-            )
-        else:
-            message = await component_context.edit(
-                content=content,
-                embeds=[],
-                attachments=attachments,
-                components=[self.buttons],
-            )
-
-        try:
-            context: interaction.ComponentsContext = (
-                await self.client.wait_for_global_component(
-                    check=(
-                        lambda x: x.custom_id in [t.custom_id for t in self.buttons.components] and
-                        x.message.id == message.id and x.channel.id == self.context.channel.id
-                    ),
-                    timeout=300,
-                )
-            )
-        except asyncio.TimeoutError:
-            await self.cancel_component(component_context, content, **kwargs)
-            return
-
-        await context.defer_update()
-        return context
-
     @property
     def buttons(self) -> interaction.ActionRow:
         return interaction.ActionRow(
@@ -105,24 +68,3 @@ class ProcessBase(FavoriteBasic):
                 self.update_stats_button,
             ]
         )
-
-    async def cancel_component(
-        self,
-        component_context: interaction.ComponentsContext | None = None,
-        content: str = None,
-        **kwargs
-    ):
-        component = copy.copy(self.buttons)
-        for index, _ in enumerate(self.buttons.components):
-            component.components[index].disabled = True
-            component.components[index].style = 2
-
-        if component_context is not None:
-            await component_context.edit(
-                content=content, embeds=[], components=[component], **kwargs
-            )
-        else:
-            await self.context.edit(
-                content=content, embeds=[], components=[component], **kwargs
-            )
-        return

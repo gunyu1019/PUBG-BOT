@@ -38,7 +38,7 @@ class Stats(ProcessBase):
         self.fpp = fpp
 
         self.matches_class = kwargs.get("matches")
-        super().__init__(self.context, self.factory, self.player)
+        super().__init__(self.context, self.client, self.factory, self.player)
 
         self.data: dict[
             Type[database.NormalStats | database.RankedStats],
@@ -59,11 +59,12 @@ class Stats(ProcessBase):
         self,
         component_context: interaction.ComponentsContext | None = None,
         content: str = discord.utils.MISSING,
+        embeds: list[discord.Embed] = None,
         attachments: list[discord.File] = discord.utils.MISSING,
         **kwargs,
     ):
         context = await super(Stats, self).response_component(
-            component_context, content, attachments, **kwargs
+            component_context, content, embeds, attachments, **kwargs
         )
         if context is None:
             return

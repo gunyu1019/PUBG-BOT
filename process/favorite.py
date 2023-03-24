@@ -16,6 +16,7 @@ class FavoriteBasic:
     def __init__(
         self,
         ctx: interaction.ApplicationContext,
+        client: interaction.Client,
         factory: sessionmaker,
         player: pubgpy.Player,
     ):
@@ -24,6 +25,7 @@ class FavoriteBasic:
         self.factory = factory
 
         self.is_favorite = None
+        super().__init__(ctx, client)
 
     async def load_favorite(self, session: AsyncSession = None) -> bool:
         only_session = False

@@ -26,6 +26,7 @@ from discord.ext.interaction.interaction import ApplicationContext, ComponentsCo
 from discord.ext.interaction.message import Message
 
 from config.config import get_config
+from process.response_base import ResponseBase
 from utils.directory import directory
 
 parser = get_config()
@@ -33,12 +34,9 @@ with open(f"{directory}/data/command.json", "r", encoding='utf-8') as f:
     commands = json.load(f)
 
 
-class Help:
-    def __init__(
-            self,
-            ctx: ApplicationContext,
-            client: interaction.Client,
-    ):
+class Help(ResponseBase):
+    def __init__(self, ctx: ApplicationContext, client: interaction.Client):
+        super().__init__(ctx, client)
         self.ctx = ctx
         self.client = client
 

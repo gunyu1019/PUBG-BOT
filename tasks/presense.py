@@ -78,5 +78,5 @@ class PresenceTask:
         await self.client.wait_until_ready()
 
 
-def setup(client):
+def setup(client, factory):
     client.add_interaction_cog(PresenceTask(client))
