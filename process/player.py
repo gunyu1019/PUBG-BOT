@@ -79,33 +79,39 @@ class Player:
             return PlatformSelection(player_data, player_info.platform, False)
         else:
             platform_selection = await self.player_platform(nickname=nickname)
-            # Player Data
-            query = database.Player(
+            query = select(exists(database.Player).where(database.Player.account_id == platform_selection.player.id))
+            data: AsyncResult = await self.database.execute(query)
+            duplicated_account_id = data.scalar_one_or_none()
+            player_data = database.Player(
                 **{
                     "name": platform_selection.player.name,
                     "account_id": platform_selection.player.id,
                     "platform": platform_selection.platform.value,
                 }
             )
-            self.database.add(query)
+            if not duplicated_account_id:
+                # Player Data
+                self.database.add(player_data)
 
-            # Matches Data
-            if len(platform_selection.player.matches) > 0:
-                queries = [
-                    database.MatchesPlayer(
-                        **{
-                            "account_id_with_match_id": "{}_{}".format(
-                                platform_selection.player.id, match_id
-                            ),
-                            "account_id": platform_selection.player.id,
-                            "match_id": match_id,
-                            "match_index": index,
-                            "last_update": datetime.datetime.now(),
-                        }
-                    )
-                    for index, match_id in enumerate(platform_selection.player.matches)
-                ]
-                self.database.add_all(queries)
+                # Matches Data
+                if len(platform_selection.player.matches) > 0:
+                    queries = [
+                        database.MatchesPlayer(
+                            **{
+                                "account_id_with_match_id": "{}_{}".format(
+                                    platform_selection.player.id, match_id
+                                ),
+                                "account_id": platform_selection.player.id,
+                                "match_id": match_id,
+                                "match_index": index,
+                                "last_update": datetime.datetime.now(),
+                            }
+                        )
+                        for index, match_id in enumerate(platform_selection.player.matches)
+                    ]
+                    self.database.add_all(queries)
+            else:
+                await self.database.merge(player_data)
             await self.database.commit()
             return platform_selection
 
