@@ -16,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with PUBG BOT.  If not, see <http://www.gnu.org/licenses/>.
 """
-
+import copy
 import json
 
 import discord
@@ -24,11 +24,10 @@ from discord.ext import interaction
 
 from config.config import get_config
 from process.response_base import ResponseBase
-from utils.directory import directory
+from utils.location import comment
 
 parser = get_config()
-with open(f"{directory}/data/command.json", "r", encoding='utf-8') as f:
-    commands = json.load(f)
+help_parser = get_config('help_config')
 
 
 class Help(ResponseBase):
@@ -38,7 +37,7 @@ class Help(ResponseBase):
         self.client = client
 
         self.page = None
-        self._commands = list(commands.keys())
+        self._commands = [x for x in help_parser.sections() if x.endswith("Command")]
 
         self.left_btn = None
         self.cancel_btn = None
@@ -68,11 +67,11 @@ class Help(ResponseBase):
 
     @property
     def buttons(self):
-        return [
+        return interaction.ActionRow(components=[
             self.left_btn,
             self.cancel_btn,
             self.right_btn
-        ]
+        ])
 
     def current_button(self):
         self.init_button()
@@ -92,6 +91,7 @@ class Help(ResponseBase):
     ) -> interaction.ComponentsContext | None:
         response = await super().response_component(component_context, content, embeds, attachments, **kwargs)
         if response.custom_id == "cancel":
+            await self.cancel_component(component_context, content, embeds, attachments, **kwargs)
             return
         now_page = self.page
         if response.custom_id == "left_page":
@@ -108,15 +108,18 @@ class Help(ResponseBase):
     async def first_page(self, component_context: interaction.ComponentsContext | None = None):
         self.page = 0
         embed = discord.Embed(
-            title="소개",
-            description="PUBG BOT을 이용해주셔서 감사합니다. PUBG BOT은 {}서버와 함께 발전해나가며, "
-                        "배틀그라운드 게임 정보를 제공하는 봇입니다.\n"
-                        "PUBG BOT은 오픈 소스로 제작되었으며 [링크](https://github.com/gunyu1019/PUBG-BOT)를 클릭하여 "
-                        "소스코드를 확인하실 수 있습니다.\n\n "
-                        "아래의 버튼을 클릭하여 명령어를 알아보세요!".format(len(self.client.guilds)),
-            color=self.color)
-        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar.url)
-        embed.set_footer(text="{}/{} 페이지".format(1, len(self._commands) + 1))
+            title=comment("help_process", "main_title", self.ctx.locale),
+            description=comment("help_process", "main_description", self.ctx.locale).format(
+                guild_count=len(self.client.guilds)
+            ), color=self.color
+        )
+        embed.set_author(name=comment("help_process", "title", self.ctx.locale), icon_url=self.client.user.avatar.url)
+        embed.set_footer(
+            text=comment("help_process", "footer", self.ctx.locale).format(
+                current_page=1,
+                max_page=len(self._commands) + 1
+            )
+        )
         self.current_button()
 
         await self.response_component(component_context=component_context, embeds=[embed])
@@ -125,39 +128,60 @@ class Help(ResponseBase):
     async def main_page(self, page: int = 1, component_context: interaction.ComponentsContext | None = None):
         self.page = page
         embed = discord.Embed(color=self.color)
-        embed.set_author(name="PUBG BOT 도우미", icon_url=self.client.user.avatar.url)
-        embed.set_footer(text="{}/{} 페이지".format(page + 1, len(self._commands) + 1))
+        embed.set_author(name=comment("help_process", "title", self.ctx.locale), icon_url=self.client.user.avatar.url)
+        embed.set_footer(
+            text=comment("help_process", "footer", self.ctx.locale).format(
+                current_page=page + 1,
+                max_page=len(self._commands) + 1
+            )
+        )
 
-        command_key = self._commands[page - 1]
-        command = commands.get(command_key, {})
-        embed.title = command_key
-        for _command in command:
-            name = _command.get("name")
-            description = _command.get("description")
-            options = _command.get("options", [])
-            inline = _command.get("inline", False)
-            if options != [] and options is not None:
-                options_comment = []
-                for option in options:
-                    option_name = option.get("name")
-                    choices = option.get("choices")
-                    if choices is not None:
-                        option_comment = "|".join(choices)
-                    else:
-                        option_comment = option_name
+        command_section = self._commands[page - 1]
+        embed.title = comment(
+            'help_process',
+            help_parser.get(command_section, 'title', fallback='도움말'),
+            self.ctx.locale
+        )
 
-                    if not option.get("required", False):
-                        option_comment += "(선택)"
-                    options_comment.append(option_comment)
-                embed.add_field(name="/{} <{}>".format(
-                    name, "> <".join(options_comment)
-                ), value="{}{}\n".format(
-                    description,
-                ), inline=inline)
+        commands = json.loads(help_parser.get(command_section, 'commands', fallback='[]'))
+        application_commands_info: dict[str, interaction.Command | interaction.SubCommand] = {}
+        for command in self.client.get_interaction():
+            if command.func.__name__ not in commands or command.type != interaction.ApplicationCommandType.CHAT_INPUT:
+                continue
+            command: interaction.Command  # Type hint
+            if command.is_subcommand:
+                for option in command.options:
+                    if isinstance(option, interaction.SubCommandGroup):
+                        for _option in option.options:
+                            application_commands_info["{m_command} {g_command} {sub_command}".format(
+                                m_command=command.name,
+                                g_command=option.name,
+                                sub_command=_option.name
+                            )] = _option
+                        continue
+                    application_commands_info["{m_command} {sub_command}".format(
+                        m_command=command.name,
+                        sub_command=option.name
+                    )] = option
             else:
-                embed.add_field(name="/{}".format(name), value="{}{}\n".format(
-                    description,
-                ), inline=inline)
+                application_commands_info[command.name] = command
+
+        for command_name, application_command in application_commands_info.items():
+            opt: interaction.CommandOption
+            options = [
+                "[{name}{optional}]".format(
+                    name=opt.name,
+                    optional=" (선택)" if not opt.required else ""
+                ) for opt in application_command.options
+            ]
+            embed.add_field(
+                name="/{command_name} {options}".format(
+                    command_name=command_name,
+                    options=" ".join(options)
+                ),
+                value=application_command.description,
+                inline=False
+            )
         self.current_button()
 
         await self.response_component(component_context=component_context, embeds=[embed])

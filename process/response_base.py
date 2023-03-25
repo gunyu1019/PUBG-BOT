@@ -59,7 +59,7 @@ class ResponseBase(metaclass=ABCMeta):
                 )
             )
         except asyncio.TimeoutError:
-            await self.cancel_component(component_context, content, **kwargs)
+            await self.cancel_component(component_context, content, embeds, attachments, **kwargs)
             return
 
         await context.defer_update()
@@ -74,6 +74,8 @@ class ResponseBase(metaclass=ABCMeta):
         self,
         component_context: interaction.ComponentsContext | None = None,
         content: str = None,
+        embeds: list[discord.Embed] = discord.utils.MISSING,
+        attachments: list[discord.File] = discord.utils.MISSING,
         **kwargs
     ):
         component = copy.copy(self.buttons)
@@ -83,10 +85,10 @@ class ResponseBase(metaclass=ABCMeta):
 
         if component_context is not None:
             await component_context.edit(
-                content=content, embeds=[], components=[component], **kwargs
+                content=content, embeds=embeds, attachments=attachments, components=[component], **kwargs
             )
         else:
             await self.context.edit(
-                content=content, embeds=[], components=[component], **kwargs
+                content=content, embeds=embeds, attachments=attachments, components=[component], **kwargs
             )
         return
