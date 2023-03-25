@@ -8,11 +8,7 @@ from discord.ext import interaction
 
 
 class ResponseBase(metaclass=ABCMeta):
-    def __init__(
-        self,
-        ctx: interaction.ApplicationContext,
-        client: interaction.Client
-    ):
+    def __init__(self, ctx: interaction.ApplicationContext, client: interaction.Client):
         self.context = ctx
         self.client = client
         self.init_button()
@@ -52,14 +48,18 @@ class ResponseBase(metaclass=ABCMeta):
             context: interaction.ComponentsContext = (
                 await self.client.wait_for_global_component(
                     check=(
-                        lambda x: x.custom_id in [t.custom_id for t in self.buttons.components] and
-                        x.message.id == message.id and x.channel.id == self.context.channel.id
+                        lambda x: x.custom_id
+                        in [t.custom_id for t in self.buttons.components]
+                        and x.message.id == message.id
+                        and x.channel.id == self.context.channel.id
                     ),
                     timeout=300,
                 )
             )
         except asyncio.TimeoutError:
-            await self.cancel_component(component_context, content, embeds, attachments, **kwargs)
+            await self.cancel_component(
+                component_context, content, embeds, attachments, **kwargs
+            )
             return
 
         await context.defer_update()
@@ -85,10 +85,18 @@ class ResponseBase(metaclass=ABCMeta):
 
         if component_context is not None:
             await component_context.edit(
-                content=content, embeds=embeds, attachments=attachments, components=[component], **kwargs
+                content=content,
+                embeds=embeds,
+                attachments=attachments,
+                components=[component],
+                **kwargs
             )
         else:
             await self.context.edit(
-                content=content, embeds=embeds, attachments=attachments, components=[component], **kwargs
+                content=content,
+                embeds=embeds,
+                attachments=attachments,
+                components=[component],
+                **kwargs
             )
         return

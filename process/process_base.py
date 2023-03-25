@@ -11,13 +11,15 @@ from process.response_base import ResponseBase
 
 class ProcessBase(FavoriteBasic, ResponseBase, metaclass=ABCMeta):
     def __init__(
-            self,
-            ctx: interaction.ApplicationContext,
-            client: interaction.Client,
-            factory: sessionmaker,
-            player: pubgpy.Player,
+        self,
+        ctx: interaction.ApplicationContext,
+        client: interaction.Client,
+        factory: sessionmaker,
+        player: pubgpy.Player,
     ):
-        super(ProcessBase, self).__init__(ctx=ctx, client=client, factory=factory, player=player)
+        super(ProcessBase, self).__init__(
+            ctx=ctx, client=client, factory=factory, player=player
+        )
         self.normal_stats_button: interaction.Button | None = None
         self.ranked_stats_button: interaction.Button | None = None
         self.matches_stats_button: interaction.Button | None = None

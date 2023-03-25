@@ -1,5 +1,3 @@
-
-
 def time_to_string(time: float) -> str:
     play_time = str()
     play_time_hours = time // 3600

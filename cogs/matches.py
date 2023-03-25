@@ -44,9 +44,11 @@ class Matches:
 
         self.pubgpy = pubgpy.Client(token=parser.get("Default", "pubg_token"))
 
-    @interaction.command(name="매치", description='검색된 사용자의 플레이 내역를 불러옵니다.')
+    @interaction.command(name="매치", description="검색된 사용자의 플레이 내역를 불러옵니다.")
     @interaction.option(name="닉네임", description="플레이어의 닉네임을 입력해주세요.", required=True)
-    @interaction.option(name="매치_순서", description="조회할 매치 순서를 입력해주세요.", required=False, min_value=1)
+    @interaction.option(
+        name="매치_순서", description="조회할 매치 순서를 입력해주세요.", required=False, min_value=1
+    )
     async def match(
         self,
         ctx: interaction.ApplicationContext,
@@ -89,7 +91,9 @@ class Matches:
             if len(_matches_ids) < matches_index + 1:
                 embed = discord.Embed(
                     title=comment("matches_process", "title", ctx.locale),
-                    description=comment("matches_process", "matches_index_out_of_range", ctx.locale),
+                    description=comment(
+                        "matches_process", "matches_index_out_of_range", ctx.locale
+                    ),
                     color=self.warning_color,
                 )
                 await ctx.edit(embed=embed)

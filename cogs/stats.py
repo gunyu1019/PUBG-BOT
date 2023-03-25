@@ -153,7 +153,10 @@ class Stats:
         else:
             if player_info.platform in [pubgpy.Platforms.STEAM, pubgpy.Platforms.KAKAO]:
                 season = "division.bro.official.pc-2018-{}".format(season)
-            elif player_info.platform in [pubgpy.Platforms.XBOX, pubgpy.Platforms.PLAYSTATION]:
+            elif player_info.platform in [
+                pubgpy.Platforms.XBOX,
+                pubgpy.Platforms.PLAYSTATION,
+            ]:
                 season = "division.bro.official.console-{}".format(season)
 
         stats_session = StatsProcess(

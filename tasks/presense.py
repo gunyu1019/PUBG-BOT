@@ -34,11 +34,12 @@ class PresenceTask:
     async def presence(self):
         await self.client.change_presence(
             status=discord.Status.online,
-            activity=discord.Game("/도움말을 이용하여, 명령어를 알아보세요!"))
+            activity=discord.Game("/도움말을 이용하여, 명령어를 알아보세요!"),
+        )
         await asyncio.sleep(3.0)
         await self.client.change_presence(
             status=discord.Status.online,
-            activity=discord.Game(f"활동중인 서버갯수: {len(self.client.guilds)}개")
+            activity=discord.Game(f"활동중인 서버갯수: {len(self.client.guilds)}개"),
         )
 
         await asyncio.sleep(3.0)
@@ -46,30 +47,32 @@ class PresenceTask:
         if shard is not None:
             await self.client.change_presence(
                 status=discord.Status.online,
-                activity=discord.Game(f"활동중인 서버 갯수: {len(self.client.guilds)}개, 샤드 갯수: {shard}개")
+                activity=discord.Game(
+                    f"활동중인 서버 갯수: {len(self.client.guilds)}개, 샤드 갯수: {shard}개"
+                ),
             )
         else:
             await self.client.change_presence(
                 status=discord.Status.online,
-                activity=discord.Game(f"활동중인 서버 갯수: {len(self.client.guilds)}개")
+                activity=discord.Game(f"활동중인 서버 갯수: {len(self.client.guilds)}개"),
             )
         await asyncio.sleep(6.0)
 
         await self.client.change_presence(
             status=discord.Status.online,
-            activity=discord.Game("버그/피드백 등은 Developer Space 커뮤니티로 문의해주세요.")
+            activity=discord.Game("버그/피드백 등은 Developer Space 커뮤니티로 문의해주세요."),
         )
         await asyncio.sleep(3.0)
 
         await self.client.change_presence(
             status=discord.Status.online,
-            activity=discord.Game("배틀그라운드 공식 커뮤니티! https://discord.gg/pubgkorea")
+            activity=discord.Game("배틀그라운드 공식 커뮤니티! https://discord.gg/pubgkorea"),
         )
         await asyncio.sleep(3.0)
 
         await self.client.change_presence(
             status=discord.Status.online,
-            activity=discord.Game("PUBG BOT 하트와 스타 많이 해주세요 :)")
+            activity=discord.Game("PUBG BOT 하트와 스타 많이 해주세요 :)"),
         )
         await asyncio.sleep(3.0)
 

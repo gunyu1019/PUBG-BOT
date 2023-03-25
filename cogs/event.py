@@ -101,13 +101,13 @@ class Events:
         embed = discord.Embed(
             title="\U000026A0 안내",
             description="상호작용을 찾을 수 없습니다. 명령어로 기능을 통하여 다시 이용해 주시기 바랍니다.",
-            color=self.warning_color
+            color=self.warning_color,
         )
         embed.add_field(
             name="왜 상호작용을 찾을 수 없나요?",
             value="상호작용을 찾을 수 없는 대표적 이유는 `대기 시간초과(5분)`이 있습니다. "
-                  "이외에도 특정 서버에 전적, 매치 등의 동적 명령어를 과도하게 사용할 경우 최상위에 있던 메시지의 상호작용이 우선 종료됩니다.",
-            inline=False
+            "이외에도 특정 서버에 전적, 매치 등의 동적 명령어를 과도하게 사용할 경우 최상위에 있던 메시지의 상호작용이 우선 종료됩니다.",
+            inline=False,
         )
         await ctx.send(embed=embed, hidden=True)
         return

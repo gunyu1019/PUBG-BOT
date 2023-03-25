@@ -24,14 +24,14 @@ from utils.directory import directory
 
 
 languages = {}
-comment_files = os.listdir(
-    os.path.join(directory, 'config', 'comment')
-)
+comment_files = os.listdir(os.path.join(directory, "config", "comment"))
 for lng in comment_files:
-    lng_file_without_ini = lng.strip('.ini')
-    languages[lng_file_without_ini.lstrip('language_')] = get_config(lng_file_without_ini, path=["comment"])
+    lng_file_without_ini = lng.strip(".ini")
+    languages[lng_file_without_ini.lstrip("language_")] = get_config(
+        lng_file_without_ini, path=["comment"]
+    )
 
 
 def comment(command_group: str, comment_id: str, language: str):
     parser = languages[language]
-    return parser.get(command_group, comment_id).replace('\\n', '\n')
+    return parser.get(command_group, comment_id).replace("\\n", "\n")

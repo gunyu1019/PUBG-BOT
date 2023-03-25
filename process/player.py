@@ -79,7 +79,11 @@ class Player:
             return PlatformSelection(player_data, player_info.platform, False)
         else:
             platform_selection = await self.player_platform(nickname=nickname)
-            query = select(exists(database.Player).where(database.Player.account_id == platform_selection.player.id))
+            query = select(
+                exists(database.Player).where(
+                    database.Player.account_id == platform_selection.player.id
+                )
+            )
             data: AsyncResult = await self.database.execute(query)
             duplicated_account_id = data.scalar_one_or_none()
             player_data = database.Player(
@@ -107,7 +111,9 @@ class Player:
                                 "last_update": datetime.datetime.now(),
                             }
                         )
-                        for index, match_id in enumerate(platform_selection.player.matches)
+                        for index, match_id in enumerate(
+                            platform_selection.player.matches
+                        )
                     ]
                     self.database.add_all(queries)
             else:

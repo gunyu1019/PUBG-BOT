@@ -40,9 +40,7 @@ class General:
     async def ping(self, ctx: interaction.ApplicationContext):
         datetime_now_for_read = datetime.datetime.now(tz=datetime.timezone.utc)
         response_ping_r = ctx.created_at - datetime_now_for_read
-        response_ping_read = abs(
-            round(response_ping_r.total_seconds() * 1000, 2)
-        )
+        response_ping_read = abs(round(response_ping_r.total_seconds() * 1000, 2))
         first_latency = round(self.client.latency * 1000, 2)
         embed = discord.Embed(
             title="Pong!",
@@ -92,13 +90,10 @@ class General:
         await ctx.send(embed=embed)
         return
 
-    @interaction.command(name="도움말", description='PUBG BOT의 사용 방법을 불러옵니다.')
+    @interaction.command(name="도움말", description="PUBG BOT의 사용 방법을 불러옵니다.")
     async def help(self, ctx: interaction.ApplicationContext):
         await ctx.defer()
-        help_command = Help(
-            ctx=ctx,
-            client=self.client
-        )
+        help_command = Help(ctx=ctx, client=self.client)
         await help_command.first_page()
         return
 
