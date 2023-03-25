@@ -91,7 +91,9 @@ class Player:
         data: AsyncResult = await self.database.execute(query)
         return data.scalar_one_or_none()
 
-    async def player(self, nickname: str, platform_info: str | None = None) -> Optional[PlatformSelection]:
+    async def player(
+        self, nickname: str, platform_info: str | None = None
+    ) -> Optional[PlatformSelection]:
         result = await self.exist_player(nickname)
         if result:
             player_data = await self.search_player(nickname)
@@ -104,7 +106,9 @@ class Player:
             _platform = await self.get_platform(platform_info)
             if _platform is None:
                 return
-            platform_selection = await self.insert_player(nickname=nickname, platform=_platform)
+            platform_selection = await self.insert_player(
+                nickname=nickname, platform=_platform
+            )
             if platform_selection is None:
                 return
 
@@ -198,9 +202,7 @@ class Player:
 
         embed = discord.Embed(
             title=comment("platform", "platform_selection_title", self.language),
-            description=comment(
-                "platform", "player_search_description", self.language
-            ),
+            description=comment("platform", "player_search_description", self.language),
             color=color,
         )
         await result.update(embed=embed, components=components)

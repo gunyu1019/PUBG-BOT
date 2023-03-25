@@ -131,9 +131,7 @@ class Stats:
     @interaction.command(name="플랫폼변경", description="사용자에 등록된 플랫폼 정보를 수정합니다.")
     @stats_option_nickname()
     async def stats_platform_selection(
-        self,
-        ctx: interaction.ApplicationContext,
-        player: str
+        self, ctx: interaction.ApplicationContext, player: str
     ):
         session: AsyncSession = self.factory.__call__()
         await ctx.defer()
