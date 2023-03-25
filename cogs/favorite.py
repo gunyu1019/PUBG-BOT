@@ -50,22 +50,22 @@ class Favorite:
     async def fav_command(self):
         pass
 
-    @fav_command.subcommand(name="일반")
+    @fav_command.subcommand(name="일반", description="즐겨찾기한 사용자 중에서 일반 전적 정보를 불러옵니다.")
     async def favorite_normal_stats(self, ctx: interaction.ApplicationContext):
         await self.favorite_base(ctx, database.NormalStats, False)
         return
 
-    @fav_command.subcommand(name="랭크")
+    @fav_command.subcommand(name="랭크", description="즐겨찾기한 사용자 중에서 랭크 전적 정보를 불러옵니다.")
     async def favorite_ranked_stats(self, ctx: interaction.ApplicationContext):
         await self.favorite_base(ctx, database.RankedStats, False)
         return
 
-    @fav_command.subcommand(name="1인칭_일반")
+    @fav_command.subcommand(name="1인칭_일반", description="즐겨찾기한 사용자 중에서 일반 전적 정보를 불러옵니다.")
     async def favorite_normal_1st_stats(self, ctx: interaction.ApplicationContext):
         await self.favorite_base(ctx, database.NormalStats, True)
         return
 
-    @fav_command.subcommand(name="1인칭_랭크")
+    @fav_command.subcommand(name="1인칭_랭크", description="즐겨찾기한 사용자 중에서 랭크 전적 정보를 불러옵니다.")
     async def favorite_ranked_1st_stats(self, ctx: interaction.ApplicationContext):
         await self.favorite_base(ctx, database.RankedStats, True)
         return

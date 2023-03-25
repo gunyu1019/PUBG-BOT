@@ -44,7 +44,7 @@ class Matches:
 
         self.pubgpy = pubgpy.Client(token=parser.get("Default", "pubg_token"))
 
-    @interaction.command(name="매치")
+    @interaction.command(name="매치", description='검색된 사용자의 플레이 내역를 불러옵니다.')
     @interaction.option(name="닉네임", description="플레이어의 닉네임을 입력해주세요.", required=True)
     @interaction.option(name="매치_순서", description="조회할 매치 순서를 입력해주세요.", required=False, min_value=1)
     async def match(
