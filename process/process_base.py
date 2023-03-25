@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from module import pubgpy
 from process.favorite import FavoriteBasic
 from process.response_base import ResponseBase
+from utils.location import comment
 
 
 class ProcessBase(FavoriteBasic, ResponseBase, metaclass=ABCMeta):
@@ -30,17 +31,17 @@ class ProcessBase(FavoriteBasic, ResponseBase, metaclass=ABCMeta):
     def init_button(self):
         self.normal_stats_button = interaction.Button(
             custom_id="normal_stats_button",
-            emoji=discord.PartialEmoji(name="\U00000031\U0000FE0F\U000020E3"),
+            label=comment("process_base", "normal_stats", self.context.locale),
             style=1,
         )
         self.ranked_stats_button = interaction.Button(
             custom_id="ranked_stats_button",
-            emoji=discord.PartialEmoji(name="\U00000032\U0000FE0F\U000020E3"),
+            label=comment("process_base", "ranked_stats", self.context.locale),
             style=1,
         )
         self.matches_stats_button = interaction.Button(
             custom_id="matches_stats_button",
-            emoji=discord.PartialEmoji(name="\U00000033\U0000FE0F\U000020E3"),
+            label=comment("process_base", "matches_stats", self.context.locale),
             style=1,
         )
         favorite = self.is_favorite
