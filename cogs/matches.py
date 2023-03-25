@@ -63,6 +63,7 @@ class Matches:
         # 배틀그라운드 플레이어 정보 불러오기
         player_info = await _player.player(player)
         if player_info is None:
+            await session.close()
             return
 
         query = select(database.CurrentSeasonInfo).where(
@@ -87,7 +88,9 @@ class Matches:
         if matches_index is not None:
             _matches_ids = await matches_process.load_matches_id(session)
             if _matches_ids is None:
+                await session.close()
                 return
+
             if len(_matches_ids) < matches_index + 1:
                 embed = discord.Embed(
                     title=comment("matches_process", "title", ctx.locale),
@@ -97,6 +100,7 @@ class Matches:
                     color=self.warning_color,
                 )
                 await ctx.edit(embed=embed)
+                await session.close()
                 return
             matches_id = _matches_ids[matches_index + 1]
         else:

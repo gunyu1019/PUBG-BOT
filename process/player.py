@@ -18,7 +18,7 @@ along with PUBG BOT.  If not, see <https://www.gnu.org/licenses/>.
 """
 import asyncio
 import datetime
-from typing import Optional, NamedTuple
+from typing import Optional, NamedTuple, Any, Coroutine
 
 import discord
 from discord.ext import interaction
@@ -66,21 +66,48 @@ class Player:
         self.database = session
         self.language = language
 
-    async def player(self, nickname: str) -> Optional[PlatformSelection]:
+    async def get_platform(self, platform_info: str) -> pubgpy.Platforms | None:
+        _platform = pubgpy.get_enum(pubgpy.Platforms, platform_info)
+        if _platform is None:
+            embed = discord.Embed(
+                title=comment("basic", "error", self.language),
+                description=comment("platform", "platform_wrong", self.language),
+                color=error_color,
+            )
+            await self.ctx.edit(embed=embed)
+            return
+        return _platform
+
+    async def search_player(self, nickname: str) -> PlatformSelection:
+        query = select(database.Player).where(database.Player.name == nickname)
+        player_info: database.Player = await self.database.scalar(query)
+        player_data = self.pubg_client.player_id(player_info.account_id)
+        player_data.name = player_info.name
+        player_data.client.platform(player_info.platform)
+        return PlatformSelection(player_data, player_info.platform, False)
+
+    async def exist_player(self, nickname: str) -> Coroutine[Any, Any, bool | None]:
         query = select(exists(database.Player).where(database.Player.name == nickname))
         data: AsyncResult = await self.database.execute(query)
-        result = data.scalar_one_or_none()
+        return data.scalar_one_or_none()
+
+    async def player(self, nickname: str, platform_info: str | None = None) -> Optional[PlatformSelection]:
+        result = await self.exist_player(nickname)
         if result:
-            query = select(database.Player).where(database.Player.name == nickname)
-            player_info: database.Player = await self.database.scalar(query)
-            player_data = self.pubg_client.player_id(player_info.account_id)
-            player_data.name = player_info.name
-            player_data.client.platform(player_info.platform)
-            return PlatformSelection(player_data, player_info.platform, False)
+            player_data = await self.search_player(nickname)
+            return player_data
         else:
-            platform_selection = await self.player_platform(nickname=nickname)
+            if platform_info is None:
+                platform_info = await self.player_platform()
+                if platform_info is None:
+                    return
+            _platform = await self.get_platform(platform_info)
+            if _platform is None:
+                return
+            platform_selection = await self.insert_player(nickname=nickname, platform=_platform)
             if platform_selection is None:
                 return
+
             query = select(
                 exists(database.Player).where(
                     database.Player.account_id == platform_selection.player.id
@@ -88,6 +115,7 @@ class Player:
             )
             data: AsyncResult = await self.database.execute(query)
             duplicated_account_id = data.scalar_one_or_none()
+
             player_data = database.Player(
                 **{
                     "name": platform_selection.player.name,
@@ -123,7 +151,7 @@ class Player:
             await self.database.commit()
             return platform_selection
 
-    async def player_platform(self, nickname: str) -> Optional[PlatformSelection]:
+    async def player_platform(self) -> Optional[str]:
         embed = discord.Embed(
             title=comment("platform", "platform_selection_title", self.language),
             description=comment(
@@ -141,7 +169,7 @@ class Player:
                 ]
             )
         ]
-        await self.ctx.edit(embed=embed, components=components)
+        message = await self.ctx.edit(embed=embed, components=components)
 
         try:
             result: interaction.ComponentsContext = (
@@ -150,6 +178,7 @@ class Player:
                         x.custom_id in ["steam", "kakao", "xbox", "psn"]
                         and x.component_type == 2
                         and x.author.id == self.ctx.author.id
+                        and message.id == x.message.id
                     ),
                     timeout=300,
                 )
@@ -164,23 +193,22 @@ class Player:
             await self.ctx.edit(embed=embed, components=components)
             return
 
-        embed.description = comment(
-            "platform", "player_search_description", self.language
-        )
         for index, _ in enumerate(components[0].components):
             components[0].components[index].disabled = True
+
+        embed = discord.Embed(
+            title=comment("platform", "platform_selection_title", self.language),
+            description=comment(
+                "platform", "player_search_description", self.language
+            ),
+            color=color,
+        )
         await result.update(embed=embed, components=components)
 
-        platform_data = pubgpy.get_enum(pubgpy.Platforms, result.custom_id)
-        if platform_data is None or platform_data == result.custom_id:
-            embed = discord.Embed(
-                title=comment("basic", "error", self.language),
-                description=comment("platform", "platform_wrong", self.language),
-                color=error_color,
-            )
-            await self.ctx.edit(embed=embed)
-            return
-        self.pubg_client.platform(platform_data)
+        return result.custom_id
+
+    async def insert_player(self, nickname: str, platform: pubgpy.Platforms):
+        self.pubg_client.platform(platform)
         try:
             player_info = await request_loop(
                 self.ctx, self.pubg_client.player, nickname=nickname
@@ -195,4 +223,4 @@ class Player:
             )
             await self.ctx.edit(embed=embed)
             return
-        return PlatformSelection(player_info, platform_data, True)
+        return PlatformSelection(player_info, platform, True)

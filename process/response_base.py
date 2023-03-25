@@ -58,7 +58,7 @@ class ResponseBase(metaclass=ABCMeta):
             )
         except asyncio.TimeoutError:
             await self.cancel_component(
-                component_context, content, embeds, attachments, **kwargs
+                component_context, content=content, embeds=embeds, **kwargs
             )
             return
 

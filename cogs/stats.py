@@ -22,6 +22,8 @@ from discord.ext import interaction
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import select
+from sqlalchemy.sql import exists
+from sqlalchemy.ext.asyncio import AsyncResult
 
 from config.config import get_config
 from models import database
@@ -30,6 +32,7 @@ from module import pubgpy
 from process.player import Player
 from process.stats import Stats as StatsProcess
 from process.matches import MatchesProcess
+from utils.location import comment
 
 
 parser = get_config()
@@ -71,8 +74,8 @@ class Stats:
         self.factory = factory
 
         self.color = int(parser.get("Color", "default"), 16)
-        self.error_color = int(parser.get("Color", "error"), 16)
         self.warning_color = int(parser.get("Color", "warning"), 16)
+        self.error_color = int(parser.get("Color", "error"), 16)
 
         self.pubgpy = pubgpy.Client(token=parser.get("Default", "pubg_token"))
 
@@ -125,6 +128,50 @@ class Stats:
             ctx, StatsType.Ranked_3rd, player, season, platform
         )
 
+    @interaction.command(name="플랫폼변경", description="사용자에 등록된 플랫폼 정보를 수정합니다.")
+    @stats_option_nickname()
+    async def stats_platform_selection(
+        self,
+        ctx: interaction.ApplicationContext,
+        player: str
+    ):
+        session: AsyncSession = self.factory.__call__()
+        await ctx.defer()
+
+        _player = Player(ctx, self.client, self.pubgpy, session, ctx.locale)
+        result = await _player.exist_player(nickname=player)
+        if not result:
+            await session.close()
+            return
+        origin_player_data = await _player.search_player(nickname=player)
+        platform_info = await _player.player_platform()
+        if platform_info is None:
+            await session.close()
+            return
+        _platform = await _player.get_platform(platform_info)
+        if _platform is None:
+            await session.close()
+            return
+
+        player_data = database.Player(
+            **{
+                "name": origin_player_data.player.name,
+                "account_id": origin_player_data.player.id,
+                "platform": _platform,
+            }
+        )
+
+        embed = discord.Embed(
+            title=comment("platform", "platform_selection_title", ctx.locale),
+            description=comment("platform", "platform_change_success", ctx.locale),
+            color=self.color,
+        )
+        await ctx.edit(embed=embed)
+        await session.merge(player_data)
+        await session.commit()
+        await session.close()
+        return
+
     async def _stats_base(
         self,
         ctx: interaction.ApplicationContext,
@@ -139,8 +186,9 @@ class Stats:
         _player = Player(ctx, self.client, self.pubgpy, session, ctx.locale)
 
         # 배틀그라운드 플레이어 정보 불러오기
-        player_info = await _player.player(player)
+        player_info = await _player.player(player, platform)
         if player_info is None:
+            await session.close()
             return
 
         # 최신 시즌 정보 불러오기
