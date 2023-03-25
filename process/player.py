@@ -66,7 +66,7 @@ class Player:
         self.database = session
         self.language = language
 
-    async def player(self, nickname: str) -> PlatformSelection:
+    async def player(self, nickname: str) -> Optional[PlatformSelection]:
         query = select(exists(database.Player).where(database.Player.name == nickname))
         data: AsyncResult = await self.database.execute(query)
         result = data.scalar_one_or_none()
@@ -79,6 +79,8 @@ class Player:
             return PlatformSelection(player_data, player_info.platform, False)
         else:
             platform_selection = await self.player_platform(nickname=nickname)
+            if platform_selection is None:
+                return
             query = select(
                 exists(database.Player).where(
                     database.Player.account_id == platform_selection.player.id
