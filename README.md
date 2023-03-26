@@ -53,8 +53,8 @@
             <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Development)</td>
         </tr>
         <tr>
-            <td>Raspbian</td>
-            <td>Raspbian GNU/Linux 10</td>
+            <td>Ubuntul</td>
+            <td>Ubuntu 20.04.6 LTS</td>
             <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Production)</td>
         </tr>
         <tr>
