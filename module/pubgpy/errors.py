@@ -24,36 +24,43 @@ import datetime
 
 
 class APIException(Exception):
-    """ Exception occurred while communicating with API."""
+    """Exception occurred while communicating with API."""
+
     def __init__(self, response, message):
         self.response = response
         if isinstance(message, dict):
-            self.text = message.get('title', '')
+            self.text = message.get("title", "")
         else:
             self.text = message
-        if self.text != '':
-            super().__init__("{} (Status Code: {}): ".format(self.text, response.status))
+        if self.text != "":
+            super().__init__(
+                "{} (Status Code: {}): ".format(self.text, response.status)
+            )
         else:
             super().__init__("(Status Code: {})".format(response.status))
 
 
 class Unauthorized(APIException):
-    """ Unauthorized"""
+    """Unauthorized"""
+
     pass
 
 
 class NotFound(APIException):
-    """ Not Found"""
+    """Not Found"""
+
     pass
 
 
 class UnsupportedMediaType(APIException):
-    """ Unsupported Media Type"""
+    """Unsupported Media Type"""
+
     pass
 
 
 class TooManyRequests(APIException):
-    """ Too Many Requests"""
+    """Too Many Requests"""
+
     def __init__(self, response, message):
         super(TooManyRequests, self).__init__(response, message)
         header = response.headers

@@ -27,7 +27,7 @@ from .player import Player
 
 
 class Leaderboards(PUBGModel):
-    """ Leaderboard objects show the current rank of the top 500 players for a game mode.
+    """Leaderboard objects show the current rank of the top 500 players for a game mode.
 
     Attributes
     ----------
@@ -50,6 +50,7 @@ class Leaderboards(PUBGModel):
     players : list of Player
         Players' information is stored. (Sorted by rank)
     """
+
     def __init__(self, client, data, included):
         self.data = data
         self.client = client
@@ -81,7 +82,8 @@ class Leaderboards(PUBGModel):
 
     def __repr__(self):
         return "Leaderboards(id='{}' type='{}' shard='{}' gamemode='{}' season='{}' players='{}')".format(
-            self.id, self.type, self.shard, self.gamemode, self.season, self.players)
-        
+            self.id, self.type, self.shard, self.gamemode, self.season, self.players
+        )
+
     def __str__(self):
         return self.__repr__()

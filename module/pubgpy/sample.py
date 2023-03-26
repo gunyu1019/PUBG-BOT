@@ -26,7 +26,7 @@ from .enums import Platforms, get_enum
 
 
 class Sample(PUBGModel):
-    """ Sample objects contain the ID of a match.
+    """Sample objects contain the ID of a match.
 
     Attributes
     ----------
@@ -47,6 +47,7 @@ class Sample(PUBGModel):
     matches : list
         Sample Imported Match Data
     """
+
     def __init__(self, client, data):
         self.data = data
         self.client = client
@@ -61,7 +62,9 @@ class Sample(PUBGModel):
         self.shard: Platforms = get_enum(Platforms, attributes.get("shardId"))
 
         relationships = self.data.get("relationships")
-        self.matches = [i.get("id") for i in relationships.get("matches", {}).get("data", [])]
+        self.matches = [
+            i.get("id") for i in relationships.get("matches", {}).get("data", [])
+        ]
 
     async def match(self, position: int = 0):
         """

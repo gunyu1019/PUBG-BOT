@@ -9,6 +9,6 @@ class StatsType(Enum):
 
 
 class StatsPlayType(Enum):
-    SOLO = 'solo'
-    DUO = 'duo'
-    SQUAD = 'squad'
+    SOLO = "solo"
+    DUO = "duo"
+    SQUAD = "squad"

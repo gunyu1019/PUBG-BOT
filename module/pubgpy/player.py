@@ -30,7 +30,7 @@ from typing import Union, Type
 
 
 class Player(PUBGModel):
-    """ Player objects contain information about a player and a list of their recent matches (up to 14 days old).
+    """Player objects contain information about a player and a list of their recent matches (up to 14 days old).
 
     Notes
     -----
@@ -63,6 +63,7 @@ class Player(PUBGModel):
     matches : list
         A list of match ids.
     """
+
     def __init__(self, client, data):
         self.data = data
         self.client = client
@@ -81,14 +82,18 @@ class Player(PUBGModel):
 
         # relationships
         relationships = self.data.get("relationships", {})
-        self.assets = relationships.get("assets", {}).get('data')
-        self.matches = [_.get('id') for _ in relationships.get("matches", {}).get('data', [])]
+        self.assets = relationships.get("assets", {}).get("data")
+        self.matches = [
+            _.get("id") for _ in relationships.get("matches", {}).get("data", [])
+        ]
 
     def __dict__(self):
         return self.data
 
     def __repr__(self):
-        return "Player(id='{}', name='{}', type='{}')".format(self.id, self.name, self.type)
+        return "Player(id='{}', name='{}', type='{}')".format(
+            self.id, self.name, self.type
+        )
 
     def __str__(self):
         return self.name
@@ -119,7 +124,10 @@ class Player(PUBGModel):
             season = season.id
         path = "/players/{}/seasons/{}".format(self.id, season)
         resp = await self.client.requests.get(path=path)
-        return GameModeReceive(resp.get("data", {}).get("attributes", {}).get("gameModeStats", {}), SeasonStats)
+        return GameModeReceive(
+            resp.get("data", {}).get("attributes", {}).get("gameModeStats", {}),
+            SeasonStats,
+        )
 
     async def ranked_stats(self, season: Union[Season, str] = None):
         """
@@ -142,7 +150,10 @@ class Player(PUBGModel):
             season = season.id
         path = "/players/{}/seasons/{}/ranked".format(self.id, season)
         resp = await self.client.requests.get(path=path)
-        return GameModeReceive(resp.get("data", {}).get("attributes", {}).get("rankedGameModeStats", {}), RankedStats)
+        return GameModeReceive(
+            resp.get("data", {}).get("attributes", {}).get("rankedGameModeStats", {}),
+            RankedStats,
+        )
 
     async def lifetime_stats(self):
         """
@@ -155,7 +166,10 @@ class Player(PUBGModel):
         """
         path = "/players/{}/seasons/lifetime".format(self.id)
         resp = await self.client.requests.get(path=path)
-        return GameModeReceive(resp.get("data", {}).get("attributes", {}).get("gameModeStats", {}), SeasonStats)
+        return GameModeReceive(
+            resp.get("data", {}).get("attributes", {}).get("gameModeStats", {}),
+            SeasonStats,
+        )
 
     async def match(self, position: int = 0):
         """
@@ -212,7 +226,7 @@ class Player(PUBGModel):
 
 
 class SeasonStats(BaseModel):
-    """ Game Mode stats objects contain a player's aggregated stats for a game mode in the context of a season.
+    """Game Mode stats objects contain a player's aggregated stats for a game mode in the context of a season.
 
     Attributes
     ----------
@@ -281,6 +295,7 @@ class SeasonStats(BaseModel):
     wins : int
         Number of matches won
     """
+
     def __init__(self, data: dict):
         super().__init__(data)
         self.data = data
@@ -318,25 +333,51 @@ class SeasonStats(BaseModel):
         self.wins: int = data.get("wins", 0)
 
     def __repr__(self):
-        return "SeasonStats(assists={}, boosts={}, dBNOs={} daily_kills={} daily_wins={} damage_dealt={} " \
-               "days={} headshot_kills={} heals={} kills={} longest_kill={} longest_time_survived={} " \
-               "losses={} max_kill_streaks={} revives={} ride_distance={} road_kills={}" \
-               "round_most_kills={} rounds_played={} suicides={} swim_distance={} team_kills={} " \
-               "time_survived={} top10s={} vehicle_destroys={} walk_distance={} weapons_acquired={} " \
-               "weekly_wins={} wins={})".format(
-                self.assists, self.boosts, self.dbnos, self.daily_kills, self.daily_wins, self.damage_dealt, self.days,
-                self.headshot_kills, self.heals, self.kills, self.longest_kill, self.longest_time_survived, self.losses,
-                self.max_kill_streaks, self.revives, self.ride_distance, self.road_kills, self.round_most_kills,
-                self.rounds_played, self.suicides, self.swim_distance, self.team_kills, self.time_survived, self.top10s,
-                self.vehicle_destroys, self.walk_distance, self.weapons_acquired,
-                self.weekly_wins, self.wins)
+        return (
+            "SeasonStats(assists={}, boosts={}, dBNOs={} daily_kills={} daily_wins={} damage_dealt={} "
+            "days={} headshot_kills={} heals={} kills={} longest_kill={} longest_time_survived={} "
+            "losses={} max_kill_streaks={} revives={} ride_distance={} road_kills={}"
+            "round_most_kills={} rounds_played={} suicides={} swim_distance={} team_kills={} "
+            "time_survived={} top10s={} vehicle_destroys={} walk_distance={} weapons_acquired={} "
+            "weekly_wins={} wins={})".format(
+                self.assists,
+                self.boosts,
+                self.dbnos,
+                self.daily_kills,
+                self.daily_wins,
+                self.damage_dealt,
+                self.days,
+                self.headshot_kills,
+                self.heals,
+                self.kills,
+                self.longest_kill,
+                self.longest_time_survived,
+                self.losses,
+                self.max_kill_streaks,
+                self.revives,
+                self.ride_distance,
+                self.road_kills,
+                self.round_most_kills,
+                self.rounds_played,
+                self.suicides,
+                self.swim_distance,
+                self.team_kills,
+                self.time_survived,
+                self.top10s,
+                self.vehicle_destroys,
+                self.walk_distance,
+                self.weapons_acquired,
+                self.weekly_wins,
+                self.wins,
+            )
+        )
 
     def __str__(self):
         return self.__repr__()
 
 
 class RankedStats(BaseModel):
-    """ Ranked Game Mode stats objects contain a player's aggregated
+    """Ranked Game Mode stats objects contain a player's aggregated
      ranked stats for a game mode in the context of a season.
 
     Attributes
@@ -370,11 +411,14 @@ class RankedStats(BaseModel):
     wins : int
         Number of matches won
     """
+
     def __init__(self, data: dict):
         super().__init__(data)
         self.data = data
 
-        self.current = Rank(tier=data.get("currentTier", {}), point=data.get("currentRankPoint"))
+        self.current = Rank(
+            tier=data.get("currentTier", {}), point=data.get("currentRankPoint")
+        )
         self.best = Rank(tier=data.get("bestTier", {}), point=data.get("bestRankPoint"))
 
         self.assists: int = data.get("assists", 0)
@@ -391,17 +435,30 @@ class RankedStats(BaseModel):
         self.wins: int = data.get("wins", 0)
 
     def __repr__(self):
-        return "RankedStats(assists={} avg_rank={} dbnos={} deaths={} damage_dealt={} kda={} kills={} " \
-               "rounds_played={} top10_ratio={} top10s={} win_ratio={} wins={})".format(
-                self.assists, self.avg_rank, self.dbnos, self.deaths, self.damage_dealt, self.kda, self.kills,
-                self.rounds_played, self.top10_ratio, self.top10s, self.win_ratio, self.wins)
+        return (
+            "RankedStats(assists={} avg_rank={} dbnos={} deaths={} damage_dealt={} kda={} kills={} "
+            "rounds_played={} top10_ratio={} top10s={} win_ratio={} wins={})".format(
+                self.assists,
+                self.avg_rank,
+                self.dbnos,
+                self.deaths,
+                self.damage_dealt,
+                self.kda,
+                self.kills,
+                self.rounds_played,
+                self.top10_ratio,
+                self.top10s,
+                self.win_ratio,
+                self.wins,
+            )
+        )
 
     def __str__(self):
         return self.__repr__()
 
 
 class Rank:
-    """ Scores earned in competition are included.
+    """Scores earned in competition are included.
 
     Attributes
     ----------
@@ -412,6 +469,7 @@ class Rank:
     point : int
         Returns the competition score.
     """
+
     def __init__(self, tier: dict, point):
         self.tier: str = tier.get("tier")
         self.subtier: str = tier.get("subTier")
@@ -436,7 +494,9 @@ class Rank:
         return self.__gt__(other) or self.__eq__(other)
 
     def __repr__(self):
-        return "Rank(tier='{}' subtier='{}' point={})".format(self.tier, self.subtier, self.point)
+        return "Rank(tier='{}' subtier='{}' point={})".format(
+            self.tier, self.subtier, self.point
+        )
 
     def __str__(self):
         if self.tier == "Unranked" or self.tier == "Master":
@@ -445,7 +505,7 @@ class Rank:
 
 
 class GameModeReceive(BaseModel):
-    """ If the information varies depending on the game mode, check it through the appropriate class.
+    """If the information varies depending on the game mode, check it through the appropriate class.
 
     Attributes
     ----------
@@ -466,17 +526,18 @@ class GameModeReceive(BaseModel):
     squad_fpp : type_class
         Squad(First person) Play Stats
     """
+
     def __init__(self, data, type_class: Type[Union[RankedStats, SeasonStats]]):
         super().__init__(data)
         self.type_class = type_class
 
-        self.solo = self.type_class(data=data.get('solo', {}))
-        self.solo_fpp = self.type_class(data=data.get('solo-fpp', {}))
-        self.squad = self.type_class(data=data.get('squad', {}))
-        self.squad_fpp = self.type_class(data=data.get('squad-fpp', {}))
+        self.solo = self.type_class(data=data.get("solo", {}))
+        self.solo_fpp = self.type_class(data=data.get("solo-fpp", {}))
+        self.squad = self.type_class(data=data.get("squad", {}))
+        self.squad_fpp = self.type_class(data=data.get("squad-fpp", {}))
         if self.type_class == SeasonStats:
-            self.duo = SeasonStats(data=data.get('duo', {}))
-            self.duo_fpp = SeasonStats(data=data.get('duo-fpp', {}))
+            self.duo = SeasonStats(data=data.get("duo", {}))
+            self.duo_fpp = SeasonStats(data=data.get("duo-fpp", {}))
         else:
             self.duo = None
             self.duo_fpp = None
@@ -489,7 +550,7 @@ class GameModeReceive(BaseModel):
 
 
 class Stats(BaseModel):
-    """ Total information returned by the player.
+    """Total information returned by the player.
     Currently, it can only be checked through :Attributes:`Player.stats` imported from the leaderboard.
 
     Attributes
@@ -511,6 +572,7 @@ class Stats(BaseModel):
     wins : int
         Win Count
     """
+
     def __init__(self, data):
         super().__init__(data)
         if data is not None:
@@ -524,9 +586,19 @@ class Stats(BaseModel):
             self.wins: int = data.get("wins", 0)
 
     def __repr__(self):
-        return "Stats(average_damage={} average_rank={} rounds_played={} tier={} kda={} kills={} " \
-               "wins={})".format(self.average_damage, self.average_rank, self.rounds_played, self.rounds_played,
-                                 self.tier, self.kda, self.kills, self.wins)
+        return (
+            "Stats(average_damage={} average_rank={} rounds_played={} tier={} kda={} kills={} "
+            "wins={})".format(
+                self.average_damage,
+                self.average_rank,
+                self.rounds_played,
+                self.rounds_played,
+                self.tier,
+                self.kda,
+                self.kills,
+                self.wins,
+            )
+        )
 
     def __str__(self):
         return self.__repr__()

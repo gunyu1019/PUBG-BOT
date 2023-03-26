@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-__title__ = 'PUBGpy'
-__author__ = 'gunyu1019'
-__license__ = 'MIT'
-__copyright__ = 'Copyright (c) 2021 gunyu1019'
-__version__ = '1.0.0'
+__title__ = "PUBGpy"
+__author__ = "gunyu1019"
+__license__ = "MIT"
+__copyright__ = "Copyright (c) 2021 gunyu1019"
+__version__ = "1.0.0"
 
 from .api import Api
 from .client import Client

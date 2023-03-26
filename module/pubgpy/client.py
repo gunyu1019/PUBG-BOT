@@ -40,7 +40,7 @@ log = logging.getLogger(__name__)
 
 
 class Client:
-    """ Indicates the client connection to the PUBG.
+    """Indicates the client connection to the PUBG.
      Save the platform type and token values through that class.
 
     Parameters
@@ -52,6 +52,7 @@ class Client:
         `Platforms` information to report with API by substituting the value of `Platform` or string.
         Sometimes the platform type is not required for some features that do not require it.
     """
+
     def __init__(self, token: str, platform: Union[str, Platforms] = None):
         self.token = token
         if isinstance(platform, Platforms):
@@ -78,7 +79,9 @@ class Client:
             Returns platform value set.
         """
         if platform is not None:
-            log.info("PUBGpy changed platform ({} -> {})".format(self.platform, platform))
+            log.info(
+                "PUBGpy changed platform ({} -> {})".format(self.platform, platform)
+            )
             if isinstance(platform, Platforms):
                 self._platform = platform.value
                 self.requests.platform = self._platform
@@ -107,9 +110,7 @@ class Client:
         Player :
             Class of randomly inserted players is returned.
         """
-        _data = {
-            "id": player_id
-        }
+        _data = {"id": player_id}
         return Player(client=self, data=_data)
 
     async def player(self, nickname: str) -> Player:
@@ -158,7 +159,7 @@ class Client:
             path += "filter[playerIds]={}".format(join_data)
 
         resp = await self.requests.get(path=path)
-        data = resp.get('data')
+        data = resp.get("data")
         return [Player(client=self, data=_) for _ in data]
 
     async def current_season(self):
@@ -194,7 +195,7 @@ class Client:
         """
         path = "/seasons"
         resp = await self.requests.get(path=path)
-        data = resp.get('data')
+        data = resp.get("data")
         return [Season(_) for _ in data]
 
     async def season_stats(self, player_id: str, season: (Season, str) = None):
@@ -311,8 +312,8 @@ class Client:
         """
         path = "/matches/{}".format(match_id)
         resp = await self.requests.get(path=path)
-        data = resp.get('data')
-        included = resp.get('included')
+        data = resp.get("data")
+        included = resp.get("included")
         return Matches(data=data, included=included)
 
     async def tournaments(self):
@@ -326,7 +327,7 @@ class Client:
         """
         path = "/tournaments"
         resp = await self.requests.get(path=path, ni_shards=False)
-        data = resp.get('data')
+        data = resp.get("data")
         return [Tournaments(self, x) for x in data]
 
     async def tournament_id(self, tournament_id: str):
@@ -350,7 +351,7 @@ class Client:
         """
         path = "/tournaments/{}".format(tournament_id)
         resp = await self.requests.get(path=path, ni_shards=False)
-        data = resp.get('data')
+        data = resp.get("data")
         return Tournaments(self, data)
 
     async def samples(self, create_at: (datetime.datetime, str) = None):
@@ -373,7 +374,7 @@ class Client:
                 create_at = create_at.strftime("%Y-%m-%dT%H:%M:%SZ")
             path += "?filter[createdAt-start]={}".format(create_at)
         resp = await self.requests.get(path=path)
-        data = resp.get('data')
+        data = resp.get("data")
         return Sample(self, data)
 
     async def status(self):
@@ -393,10 +394,10 @@ class Client:
         return True
 
     async def leaderboards(
-            self,
-            region: Union[str, Region],
-            game_mode: Union[str, GameMode],
-            season: Union[str, Season] = None
+        self,
+        region: Union[str, Region],
+        game_mode: Union[str, GameMode],
+        season: Union[str, Season] = None,
     ):
         """
         Get the leaderboard for a game mode.
@@ -441,10 +442,10 @@ class Client:
         if isinstance(region, Region):
             region = region.value
 
-        shard = '{}-{}'.format(type_platform, region)
+        shard = "{}-{}".format(type_platform, region)
         path = "/shards/{}/leaderboards/{}/{}".format(shard, season, game_mode)
         resp = await self.requests.get(path=path, ni_shards=False)
 
-        data = resp.get('data')
-        included = resp.get('included')
+        data = resp.get("data")
+        included = resp.get("included")
         return Leaderboards(self, data, included)

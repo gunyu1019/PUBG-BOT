@@ -44,7 +44,11 @@ def get_season(d_season: int, platform: Platforms):
     """
     if platform == Platforms.STEAM or platform == Platforms.KAKAO:
         f_season = "pc"
-    elif platform == Platforms.XBOX or platform == Platforms.PLAYSTATION or platform == Platforms.STADIA:
+    elif (
+        platform == Platforms.XBOX
+        or platform == Platforms.PLAYSTATION
+        or platform == Platforms.STADIA
+    ):
         f_season = "console"
     else:
         raise TypeError(
@@ -55,14 +59,16 @@ def get_season(d_season: int, platform: Platforms):
         d_season = str(d_season)
     d_season = d_season.zfill(2)
 
-    return Season({
-        "id": "division.bro.official.{}-2018-{}".format(f_season, d_season),
-        "type": "season"
-    })
+    return Season(
+        {
+            "id": "division.bro.official.{}-2018-{}".format(f_season, d_season),
+            "type": "season",
+        }
+    )
 
 
 class Season(PUBGModel):
-    """ Season objects each contain the ID of a season, which can be used to lookup season information for a player.
+    """Season objects each contain the ID of a season, which can be used to lookup season information for a player.
 
     Attributes
     ----------
@@ -77,6 +83,7 @@ class Season(PUBGModel):
     off_season : bool
         Indicates if the season is not active
     """
+
     def __init__(self, data: dict):
         self.data = data
 
@@ -88,7 +95,9 @@ class Season(PUBGModel):
         self.off_season: bool = self.data.get("attributes", {}).get("isOffseason")
 
     def __repr__(self):
-        return "Season(id='{}', current='{}', type='{}')".format(self.id, self.current, self.type)
+        return "Season(id='{}', current='{}', type='{}')".format(
+            self.id, self.current, self.type
+        )
 
     def __str__(self):
         return self.id

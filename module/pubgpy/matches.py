@@ -23,11 +23,20 @@ SOFTWARE.
 
 from .models import BaseModel
 from datetime import datetime
-from .enums import MatchType, MapName, SeasonStats, get_enum, DeathType, GameMode, Platforms
+from .enums import (
+    MatchType,
+    MapName,
+    SeasonStats,
+    get_enum,
+    DeathType,
+    GameMode,
+    Platforms,
+)
 
 
 class MatchesBaseModel(BaseModel):
     """Base model for match data."""
+
     def __init__(self, match_class):
         self.id: str = match_class.id
         self.type: str = match_class.type
@@ -43,7 +52,7 @@ class MatchesBaseModel(BaseModel):
 
 
 class Roster(MatchesBaseModel):
-    """ Rosters track the scores of each opposing group of participants. Rosters can have one or many participants
+    """Rosters track the scores of each opposing group of participants. Rosters can have one or many participants
      depending on the game mode. Roster objects are only meaningful within the context of a match and are not exposed
       as a standalone resource.
 
@@ -66,6 +75,7 @@ class Roster(MatchesBaseModel):
     teams : list
         An array of references to participant objects that can be found in the included array
     """
+
     def __init__(self, data):
         self.data = data
 
@@ -74,27 +84,37 @@ class Roster(MatchesBaseModel):
 
         super().__init__(self)
 
-#       attributes
+        #       attributes
         attributes = data.get("attributes", {})
         self.shard: Platforms = get_enum(Platforms, attributes.get("shardId"))
         self.rank: int = attributes.get("stats", {}).get("rank")
         self.team_id: int = attributes.get("stats", {}).get("teamId")
         self.won: str = attributes.get("won")
 
-#       relationships
+        #       relationships
         self.relationships = data.get("relationships", {})
-        self.teams = [x.get("id") for x in self.relationships.get("participants", {}).get("data", [])]
+        self.teams = [
+            x.get("id")
+            for x in self.relationships.get("participants", {}).get("data", [])
+        ]
 
     def __repr__(self):
         return "Roster(id='{}' type='{}' shard='{}' rank={} team_id={} won='{}' teams='{}') ".format(
-                self.id, self.type, self.shard, self.rank, self.team_id, self.won, self.teams)
+            self.id,
+            self.type,
+            self.shard,
+            self.rank,
+            self.team_id,
+            self.won,
+            self.teams,
+        )
 
     def __str__(self):
         return self.__repr__()
 
 
 class Participant(MatchesBaseModel):
-    """ Asset objects contain a URL string that links to a telemetry.json file, which will contain an array
+    """Asset objects contain a URL string that links to a telemetry.json file, which will contain an array
      of event objects that provide further insignias into a match.
 
     Attributes
@@ -154,6 +174,7 @@ class Participant(MatchesBaseModel):
     win_place : int
         This player's placement in the match
     """
+
     def __init__(self, data):
         self.data = data
 
@@ -161,11 +182,11 @@ class Participant(MatchesBaseModel):
         self.id: str = data.get("id")
         super().__init__(self)
 
-#       attributes
+        #       attributes
         attributes = data.get("attributes", {})
         self.shard = get_enum(Platforms, attributes.get("shardId"))
 
-#       attributes(stats)
+        #       attributes(stats)
         stats = attributes.get("stats", {})
         self.dbnos: int = stats.get("DBNOs", 0)
         self.assists: int = stats.get("assists", 0)
@@ -192,23 +213,46 @@ class Participant(MatchesBaseModel):
         self.win_place: int = stats.get("winPlace", 0)
 
     def __repr__(self):
-        return "Participant(id='{}' type='{}' shard='{}' dbnos={} assists={} boosts={} damage_dealt={} " \
-               "death_type='{}' headshot_kills={} heals={} kill_place={} kill_streaks={} kills={} " \
-               "longest_kill={} name='{]' player_id='{}' revives={} ride_distance={} road_kills={} " \
-               "swim_distance={} team_kills={} time_survived={} vehicle_destroys={} walk_distance={} " \
-               "weapons_acquired={} win_place={})".format(
-                self.id, self.type, self.shard, self.dbnos, self.assists, self.damage_dealt, self.death_type,
-                self.headshot_kills, self.heals, self.kill_place, self.kill_streaks, self.kills, self.longest_kill,
-                self.name, self.player_id, self.revives, self.ride_distance, self.road_kills, self.swim_distance,
-                self.team_kills, self.time_survived, self.vehicle_destroys, self.walk_distance, self.weapons_acquired,
-                self.win_place)
+        return (
+            "Participant(id='{}' type='{}' shard='{}' dbnos={} assists={} boosts={} damage_dealt={} "
+            "death_type='{}' headshot_kills={} heals={} kill_place={} kill_streaks={} kills={} "
+            "longest_kill={} name='{]' player_id='{}' revives={} ride_distance={} road_kills={} "
+            "swim_distance={} team_kills={} time_survived={} vehicle_destroys={} walk_distance={} "
+            "weapons_acquired={} win_place={})".format(
+                self.id,
+                self.type,
+                self.shard,
+                self.dbnos,
+                self.assists,
+                self.damage_dealt,
+                self.death_type,
+                self.headshot_kills,
+                self.heals,
+                self.kill_place,
+                self.kill_streaks,
+                self.kills,
+                self.longest_kill,
+                self.name,
+                self.player_id,
+                self.revives,
+                self.ride_distance,
+                self.road_kills,
+                self.swim_distance,
+                self.team_kills,
+                self.time_survived,
+                self.vehicle_destroys,
+                self.walk_distance,
+                self.weapons_acquired,
+                self.win_place,
+            )
+        )
 
     def __str__(self):
         return self.name
 
 
 class Assets(MatchesBaseModel):
-    """ Asset objects contain a URL string that links to a telemetry.json file, which will contain an array
+    """Asset objects contain a URL string that links to a telemetry.json file, which will contain an array
      of event objects that provide further insignias into a match.
 
     Attributes
@@ -228,6 +272,7 @@ class Assets(MatchesBaseModel):
     name : str
         Telemetry
     """
+
     def __init__(self, data):
         self.data = data
 
@@ -236,24 +281,27 @@ class Assets(MatchesBaseModel):
 
         super().__init__(self)
 
-#       attributes
+        #       attributes
         attributes = data.get("attributes", {})
         self.shard: Platforms = get_enum(Platforms, attributes.get("shardId"))
         self.url: str = attributes.get("URL")
         created_at = attributes.get("createdAt")
-        self.created_at: datetime = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=None)
+        self.created_at: datetime = datetime.strptime(
+            created_at, "%Y-%m-%dT%H:%M:%SZ"
+        ).replace(tzinfo=None)
         self.name: str = attributes.get("name", "Telemetry")
 
     def __repr__(self):
         return "Assets(id='{}' type='{}' shard='{}' url='{}' created_at='{}' name='{}') ".format(
-                self.id, self.type, self.shard, self.url, self.created_at, self.name)
+            self.id, self.type, self.shard, self.url, self.created_at, self.name
+        )
 
     def __str__(self):
         return self.__repr__()
 
 
 class Matches(MatchesBaseModel):
-    """ Match objects contain information about a completed match such as the game mode played, duration,
+    """Match objects contain information about a completed match such as the game mode played, duration,
      and which players participated.
 
     Attributes
@@ -299,16 +347,17 @@ class Matches(MatchesBaseModel):
     asset : list of Asset
         A class containing asset data is included.
     """
+
     def __init__(self, data, included):
         self.data = data
         self.included = included
 
-#       data Information (general)
+        #       data Information (general)
         self.id: str = data.get("id")
         self.type: str = data.get("type", "matches")
         super().__init__(self)
 
-#       data Information (attributes)
+        #       data Information (attributes)
         attributes = data.get("attributes", {})
         self.gamemode: GameMode = get_enum(GameMode, attributes.get("gameMode"))
         self.title: str = attributes.get("titleId")
@@ -321,17 +370,23 @@ class Matches(MatchesBaseModel):
         self.state: SeasonStats = get_enum(SeasonStats, attributes.get("seasonState"))
 
         created_at = attributes.get("createdAt")
-        self.created_at = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=None)
+        self.created_at = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=None
+        )
         self.custom = attributes.get("isCustomMatch")
 
-#       data Information (relationships)
+        #       data Information (relationships)
         relationships = data.get("relationships", {})
-        self.rosters = [x.get("id") for x in relationships.get("rosters", {}).get("data", [])]
-        self.assets = [x.get("id") for x in relationships.get("assets", {}).get("data", [])]
-#       self.rounds = [x.get("id") for x in relationships.get("rounds", {}).get("data", [])]
-#       self.spectators = [x.get("id") for x in relationships.get("spectators", {}).get("data", [])]
+        self.rosters = [
+            x.get("id") for x in relationships.get("rosters", {}).get("data", [])
+        ]
+        self.assets = [
+            x.get("id") for x in relationships.get("assets", {}).get("data", [])
+        ]
+        #       self.rounds = [x.get("id") for x in relationships.get("rounds", {}).get("data", [])]
+        #       self.spectators = [x.get("id") for x in relationships.get("spectators", {}).get("data", [])]
 
-#       include Information
+        #       include Information
         self.participant = list()
         self.roster = list()
         self.asset = list()
@@ -344,10 +399,24 @@ class Matches(MatchesBaseModel):
                 self.asset.append(Assets(i))
 
     def __repr__(self):
-        return "Matches(id='{}' type='{}' gamemode='{}' title='{}' shard='{}' tags='{}' map_name='{}' " \
-               "match_type='{}' duration={} stats'{}' state='{}' created_at='{}' custom='{}') ".format(
-                self.id, self.type, self.gamemode, self.title, self.shard, self.tags, self.map, self.match_type,
-                self.duration, self.stats, self.state, self.created_at, self.custom)
+        return (
+            "Matches(id='{}' type='{}' gamemode='{}' title='{}' shard='{}' tags='{}' map_name='{}' "
+            "match_type='{}' duration={} stats'{}' state='{}' created_at='{}' custom='{}') ".format(
+                self.id,
+                self.type,
+                self.gamemode,
+                self.title,
+                self.shard,
+                self.tags,
+                self.map,
+                self.match_type,
+                self.duration,
+                self.stats,
+                self.state,
+                self.created_at,
+                self.custom,
+            )
+        )
 
     def __str__(self):
         return self.__repr__()

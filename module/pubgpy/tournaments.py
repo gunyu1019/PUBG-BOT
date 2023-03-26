@@ -28,7 +28,7 @@ from datetime import datetime
 
 
 class Tournaments(PUBGModel):
-    """ Tournament objects contain information about a tournament, mainly the IDs of its matches.
+    """Tournament objects contain information about a tournament, mainly the IDs of its matches.
 
     Attributes
     ----------
@@ -49,6 +49,7 @@ class Tournaments(PUBGModel):
     -----
     If the selected Attributes returns None, it needs to be loaded through :def:`load()`.
     """
+
     def __init__(self, client, data):
         self.data = data
         self.client = client
@@ -59,7 +60,9 @@ class Tournaments(PUBGModel):
 
         created_at = data.get("attributes", {}).get("createdAt")
         if created_at is not None:
-            self.created_at: datetime = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=None)
+            self.created_at: datetime = datetime.strptime(
+                created_at, "%Y-%m-%dT%H:%M:%SZ"
+            ).replace(tzinfo=None)
 
         relationships = data.get("relationships")
         self.matches = list()
@@ -100,8 +103,8 @@ class Tournaments(PUBGModel):
         match_id = self.matches[position]
         path = "/shards/{}/matches/{}".format("tournament", match_id)
         resp = await self.client.requests.get(path=path, ni_shards=False)
-        data = resp.get('data')
-        included = resp.get('included')
+        data = resp.get("data")
+        included = resp.get("included")
         return Matches(data=data, included=included)
 
     async def load(self):

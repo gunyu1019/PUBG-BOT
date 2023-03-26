@@ -25,7 +25,8 @@ from enum import Enum
 
 
 class Platforms(Enum):
-    """ Platforms supported"""
+    """Platforms supported"""
+
     STEAM = "steam"
     KAKAO = "kakao"
     XBOX = "xbox"
@@ -37,25 +38,27 @@ class Platforms(Enum):
 
 
 class Region(Enum):
-    """ Region supported"""
-    AS = 'as'
-    EU = 'eu'
-    KAKAO = 'kakao'
-    KRJP = 'krjp'
-    NA = 'na'
-    OC = 'oc'
-    SA = 'sa'
-    SEA = 'sea'
-    JP = 'jp'
-    RU = 'ru'
-    TOURNAMENT = 'pc-tournament'
+    """Region supported"""
+
+    AS = "as"
+    EU = "eu"
+    KAKAO = "kakao"
+    KRJP = "krjp"
+    NA = "na"
+    OC = "oc"
+    SA = "sa"
+    SEA = "sea"
+    JP = "jp"
+    RU = "ru"
+    TOURNAMENT = "pc-tournament"
 
     def __str__(self):
         return self.name
 
 
 class GameMode(Enum):
-    """ GameMode"""
+    """GameMode"""
+
     solo = "solo"
     duo = "duo"
     squad = "squad"
@@ -65,7 +68,8 @@ class GameMode(Enum):
 
 
 class MatchType(Enum):
-    """ Game Match Type"""
+    """Game Match Type"""
+
     arcade = "arcade"
     custom = "custom"
     event = "event"
@@ -74,7 +78,8 @@ class MatchType(Enum):
 
 
 class MapName(Enum):
-    """ Game Map Name"""
+    """Game Map Name"""
+
     erangel = "Baltic_Main"
     paramo = "Chimera_Main"
     miramar = "Desert_Main"
@@ -89,14 +94,16 @@ class MapName(Enum):
 
 
 class SeasonStats(Enum):
-    """ Season Status"""
+    """Season Status"""
+
     progress = "progress"
     prepare = "prepare"
     closed = "closed"
 
 
 class DeathType(Enum):
-    """ Death Type"""
+    """Death Type"""
+
     alive = "alive"
     kill = "byplayer"
     zone = "byzone"

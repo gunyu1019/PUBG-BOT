@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 
 class Api:
-    """ Used to report with the PUBG API.
+    """Used to report with the PUBG API.
 
     Parameters
     ----------
@@ -43,6 +43,7 @@ class Api:
          `Platforms` information to report with API by substituting the value of `Platform` or string.
         Sometimes the platform type is not required for some features that do not require it.
     """
+
     def __init__(self, token: str, platform: (str, Platforms) = None):
         self.token = token
 
@@ -88,14 +89,14 @@ class Api:
         """
         header = {
             "accept": "application/vnd.api+json",
-            "Authorization": "Bearer {}".format(self.token)
+            "Authorization": "Bearer {}".format(self.token),
         }
         header.update(**kwargs)
 
         if ni_shards:
-            url = "{}/shards/{}{}" .format(self.BASE_URL, self.platform, path)
+            url = "{}/shards/{}{}".format(self.BASE_URL, self.platform, path)
         else:
-            url = "{}{}" .format(self.BASE_URL, path)
+            url = "{}{}".format(self.BASE_URL, path)
 
         async with aiohttp.ClientSession() as session:
             async with session.request(method, url, headers=header) as resp:
@@ -113,19 +114,39 @@ class Api:
                     log.debug("Successfully received API results.")
                     return data
                 elif resp.status == 401:
-                    log.error("Failed to get response: Unauthorized (Status Code: {})".format(resp.status))
+                    log.error(
+                        "Failed to get response: Unauthorized (Status Code: {})".format(
+                            resp.status
+                        )
+                    )
                     raise errors.Unauthorized(resp, data)
                 elif resp.status == 404:
-                    log.error("Failed to get response: Not Found (Status Code: {})".format(resp.status))
+                    log.error(
+                        "Failed to get response: Not Found (Status Code: {})".format(
+                            resp.status
+                        )
+                    )
                     raise errors.NotFound(resp, data)
                 elif resp.status == 415:
-                    log.error("Failed to get response: Unsupported Media Type (Status Code: {})".format(resp.status))
+                    log.error(
+                        "Failed to get response: Unsupported Media Type (Status Code: {})".format(
+                            resp.status
+                        )
+                    )
                     raise errors.UnsupportedMediaType(resp, data)
                 elif resp.status == 429:
-                    log.error("Failed to get response: Too Many Requests (Status Code: {})".format(resp.status))
+                    log.error(
+                        "Failed to get response: Too Many Requests (Status Code: {})".format(
+                            resp.status
+                        )
+                    )
                     raise errors.TooManyRequests(resp, data)
                 else:
-                    log.error("Failed to get response: {} (Status Code: {})".format(resp.reason, resp.status))
+                    log.error(
+                        "Failed to get response: {} (Status Code: {})".format(
+                            resp.reason, resp.status
+                        )
+                    )
                     raise errors.APIException(resp, data)
 
     async def get(self, path, ni_shards: bool = True, **kwargs):
@@ -159,4 +180,6 @@ class Api:
         errors.TooManyRequests
             When requested too much, it is returned. By default, PUBG API can request up to 10 times per minute.
         """
-        return await self.requests(method="GET", path=path, ni_shards=ni_shards, **kwargs)
+        return await self.requests(
+            method="GET", path=path, ni_shards=ni_shards, **kwargs
+        )

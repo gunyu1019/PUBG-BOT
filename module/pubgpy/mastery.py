@@ -26,7 +26,7 @@ from .enums import Platforms, get_enum
 
 
 class Weapon(PUBGModel):
-    """ Weapon Mastery contains weapon summaries for the lifetime of a player
+    """Weapon Mastery contains weapon summaries for the lifetime of a player
 
     Attributes
     ----------
@@ -64,14 +64,15 @@ class Weapon(PUBGModel):
 
     def __repr__(self):
         return "Weapon(id='{}', type='{}', platform='{}', latest_match='{}')".format(
-            self.id, self.type, self.platform, self.latest_match)
+            self.id, self.type, self.platform, self.latest_match
+        )
 
     def __str__(self):
         return self.__repr__()
 
 
 class WeaponSummary(BaseModel):
-    """ Weapon summary for each weapon
+    """Weapon summary for each weapon
 
     Attributes
     ----------
@@ -139,19 +140,33 @@ class WeaponSummary(BaseModel):
             self.medal.append(Medal(i))
 
     def __repr__(self):
-        return "WeaponSummary(xp={}, level={}, tier={}, most_defeats={}, defeats={}, most_damage={}, damage={}, " \
-               "most_headshots={}, headshots={}, longest_defeat={}, kills={}, most_kills={}, groggies={}, " \
-               "most_groggies={}) ".format(self.xp, self.level, self.tier, self.most_defeats, self.defeats,
-                                           self.most_damage, self.damage, self.most_headshots, self.headshots,
-                                           self.longest_defeat, self.kills, self.most_kills, self.groggies,
-                                           self.most_groggies)
+        return (
+            "WeaponSummary(xp={}, level={}, tier={}, most_defeats={}, defeats={}, most_damage={}, damage={}, "
+            "most_headshots={}, headshots={}, longest_defeat={}, kills={}, most_kills={}, groggies={}, "
+            "most_groggies={}) ".format(
+                self.xp,
+                self.level,
+                self.tier,
+                self.most_defeats,
+                self.defeats,
+                self.most_damage,
+                self.damage,
+                self.most_headshots,
+                self.headshots,
+                self.longest_defeat,
+                self.kills,
+                self.most_kills,
+                self.groggies,
+                self.most_groggies,
+            )
+        )
 
     def __str__(self):
         return self.__repr__()
 
 
 class Medal(BaseModel):
-    """ All of the medals received for this weapon
+    """All of the medals received for this weapon
 
     Attributes
     ----------
@@ -178,7 +193,7 @@ class Medal(BaseModel):
 
 
 class Survival(PUBGModel):
-    """ Survival Mastery contains survival mastery data for a player
+    """Survival Mastery contains survival mastery data for a player
 
     Attributes
     ----------
@@ -263,14 +278,15 @@ class Survival(PUBGModel):
 
     def __repr__(self):
         return "Survival(id='{}', type='{}', xp={}, level={}, round_played='{}' last_match='{}'".format(
-                self.id, self.type, self.xp, self.level, self.round_played, self.last_match)
+            self.id, self.type, self.xp, self.level, self.round_played, self.last_match
+        )
 
     def __str__(self):
         return self.__repr__()
 
 
 class Stats(BaseModel):
-    """ Model for stats values from Survival Mastery.
+    """Model for stats values from Survival Mastery.
 
     Attributes
     ----------
@@ -297,7 +313,8 @@ class Stats(BaseModel):
 
     def __repr__(self):
         return "Stats(total={}, average={} career={} last_match={})".format(
-            self.total, self.average, self.career, self.last_match)
+            self.total, self.average, self.career, self.last_match
+        )
 
     def __str__(self):
         return self.__repr__()
