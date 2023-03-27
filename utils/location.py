@@ -33,5 +33,7 @@ for lng in comment_files:
 
 
 def comment(command_group: str, comment_id: str, language: str):
+    if language not in languages.keys():
+        language = "ko"
     parser = languages[language]
     return parser.get(command_group, comment_id).replace("\\n", "\n")
