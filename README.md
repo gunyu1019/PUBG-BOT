@@ -12,9 +12,9 @@
         <img src="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/main" alt="CodeFactor" >
     </a>
 <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT.svg?type=shield"/></a>
-    <img src="https://img.shields.io/badge/release_version-2.3.2-0080aa?style=flat" alt="Release" >
+    <img src="https://img.shields.io/badge/release_version-3.0.1-0080aa?style=flat" alt="Release" >
 </p>
-
+ㅈ
 # Introduce
 
 한국어 기반의 배틀그라운드 전적을 알려주는 디스코드 봇입니다. 사용자의 전적과 매치 로그를 확인할 수 있습니다.
@@ -127,7 +127,7 @@ PUBG BOT의 구성은 다음과 같습니다.
 
 아래의 파일들은 GNU(General Public License v3.0)가 적용됩니다.
 
-* [assets/_resource](assets/_resource)
+* [assets/layout](assets/layout)
 * [cogs/*](cogs)
 * [models/*](models)
 * [module/*](module)
