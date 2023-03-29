@@ -84,22 +84,21 @@
 * `v3.0` 버전 부터 `discord.extension.interaction`의 요구 사항이 `Python3.10` 이상인 것을 반영하여 `Python3.11` 에 따라 제작되었습니다.
 
 사용 전, 아래 과정을 거쳐주세요.
-#### 1. MySQL에 `setup.sql` 문을 실행시켜주세요.
-(데이터베이스 구성에 대한 내용은 아직 작성되지 않았습니다.)
-
-#### 2. requirements.txt 안에 있는 모듈을 모두 설치해 주세요.
-PUBG BOT이 정상적으로 구동되기 위해 필요한 파일입니다. 꼭 설치해 주세요.
-```commandline
-pip install -r requirements.txt
-```
-
-#### 3. config 파일을 설정해주세요.
+#### 1. config 파일을 설정해주세요.
 [config_example.ini](config/config_example.ini) 를 `config.ini`로 변경한 후, 파일 내에 설정을 해주세요.
 ```commandline
 cd PUBG_BOT
 mv config/config_example.ini config/config.ini
 ```
 
+#### 2. `setup.py`를 실행시켜주세요.
+데이터베이스 테이블 설정 작업이 진행됩니다.
+
+#### 2. requirements.txt 안에 있는 모듈을 모두 설치해 주세요.
+PUBG BOT이 정상적으로 구동되기 위해 필요한 파일입니다. 꼭 설치해 주세요.
+```commandline
+pip install -r requirements.txt
+```
 # Structure
 
 PUBG BOT의 구성은 다음과 같습니다.
