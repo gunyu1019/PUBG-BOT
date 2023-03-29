@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.config import get_config
 from config.log_config import log
+from utils.database_config import database_url
 
 parser = get_config()
 
@@ -30,18 +31,8 @@ if __name__ == "__main__":
         )
 
     # Database
-    database_section = parser.get("Default", "database")
-    database = {
-        "username": parser.get(database_section, "user"),
-        "host": parser.get(database_section, "host"),
-        "password": parser.get(database_section, "pass"),
-        "database": parser.get(database_section, "database"),
-        "port": parser.getint(database_section, "port", fallback=3306),
-    }
     engine = create_async_engine(
-        "mysql+aiomysql://{username}:{password}@{host}:{port}/{database}".format(
-            **database
-        ),
+        database_url,
         poolclass=NullPool,
     )
     factory = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)

@@ -1,6 +1,5 @@
 import datetime
 
-import pymysql
 import pymysql.cursors
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -15,6 +14,7 @@ from migration.player_data import PlayerData
 from migration.ranked_stats import RankedStats
 from migration.season_stats import SeasonStats
 from migration.update import Update
+from utils.database_config import database as database_config
 
 parser = get_config()
 
@@ -22,14 +22,6 @@ parser = get_config()
 if __name__ == "__main__":
     log.info("Starting Migration from PUBG BOT to PUBG STATS.")
     log.info("Please do not stop! It can run only once.")
-    database_section = parser.get("Default", "database")
-    database_config = {
-        "username": parser.get(database_section, "user"),
-        "host": parser.get(database_section, "host"),
-        "password": parser.get(database_section, "pass"),
-        "database": parser.get(database_section, "database"),
-        "port": parser.getint(database_section, "port", fallback=3306),
-    }
     database = pymysql.connect(
         user=database_config["username"],
         host=database_config["host"],
