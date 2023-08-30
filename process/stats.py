@@ -1,5 +1,4 @@
-import asyncio
-import copy
+import datetime
 from typing import Type
 
 import discord
@@ -134,6 +133,7 @@ class Stats(ProcessBase):
                 stats=_data,
                 play_type=game_mode,
                 fpp=self.fpp,
+                update_time=datetime.datetime.now()
             )
 
             if not update:
