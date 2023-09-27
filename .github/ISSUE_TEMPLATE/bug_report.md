@@ -18,8 +18,5 @@ What did you expect to happen?
 ## Actual Results<br/>
 What actually happened?
 
-## Device Info<br/>
-What device are you using?
-
 ## Additional context<br/>
 Add any other context about the problem here.
