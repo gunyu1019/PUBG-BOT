@@ -60,7 +60,7 @@ multidict==6.0.4
     #   aiohttp
     #   discord-extension-interaction
     #   yarl
-pillow==9.4.0
+pillow==10.0.1
     # via -r requirements.in
 pymysql==1.0.2
     # via
