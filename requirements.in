@@ -5,7 +5,7 @@ async-timeout==4.0.3
 asyncio==3.4.3
 attrs==23.2.0
 charset-normalizer==3.1.0
-Discord-Extension-Interaction==0.6.1
+Discord-Extension-Interaction==0.6.2
 discord.py==2.3.2
 frozenlist==1.4.1
 greenlet==3.0.3

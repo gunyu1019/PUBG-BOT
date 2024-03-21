@@ -31,7 +31,7 @@ attrs==23.2.0
     #   discord-extension-interaction
 charset-normalizer==3.1.0
     # via -r requirements.in
-discord-extension-interaction==0.6.1
+discord-extension-interaction==0.6.2
     # via -r requirements.in
 discord-py==2.3.2
     # via -r requirements.in
