@@ -251,7 +251,7 @@ class MatchesProcess(ProcessBase):
                 ),
                 color=self.warning_color,
             )
-            await self.response_component(component_response, embed=embed)
+            await self.response_component(component_response, embeds=[embed])
             return
 
         assets_data = await self.get_assets(data)
