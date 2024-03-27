@@ -109,7 +109,7 @@ class Favorite:
                 interaction.Selection(
                     custom_id="favorite_player",
                     options=[
-                        interaction.Options(
+                        interaction.SelectOption(
                             label=player_data.get(player.player_id, {}).get(
                                 "name", "Unknown"
                             ),

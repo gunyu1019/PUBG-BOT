@@ -156,7 +156,7 @@ class MatchesProcess(ProcessBase):
             color=self.warning_color,
         )
         components_options = [
-            interaction.Options(
+            interaction.SelectOption(
                 label="{}번째 매치 히스토리".format(index + 1),
                 description=match_id,
                 value=match_id,
@@ -165,7 +165,7 @@ class MatchesProcess(ProcessBase):
         ]
 
         components_options.append(
-            interaction.Options(
+            interaction.SelectOption(
                 label="업데이트",
                 value="update",
                 description="전적 정보를 업데이트 합니다.",
@@ -173,7 +173,7 @@ class MatchesProcess(ProcessBase):
             )
         )
         components_options.append(
-            interaction.Options(
+            interaction.SelectOption(
                 label="취소",
                 value="cancel",
                 description="선택을 취소합니다.",
