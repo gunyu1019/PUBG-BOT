@@ -10,5 +10,7 @@ class FavoritePlayer(base):
     __tablename__ = "favorite_player"
 
     idx = Column(Integer, primary_key=True)
-    player_id = Column(String)
-    discord_id = Column(String)
+    player_id = Column(String(41))
+    discord_id = Column(String(41))
+
+
