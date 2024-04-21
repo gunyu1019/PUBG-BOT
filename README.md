@@ -53,7 +53,7 @@
             <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Development)</td>
         </tr>
         <tr>
-            <td>Ubuntul</td>
+            <td>Ubuntu</td>
             <td>Ubuntu 20.04.6 LTS</td>
             <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Production)</td>
         </tr>
