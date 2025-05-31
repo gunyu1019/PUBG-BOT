@@ -13,5 +13,5 @@ class CurrentSeasonInfo(base):
     __tablename__ = "current_season_info"
 
     platform = Column(Enum(Platforms), primary_key=True)
-    season = Column(String)
+    season = Column(String(50))
     last_update = Column(Date)

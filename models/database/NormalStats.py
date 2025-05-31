@@ -17,11 +17,11 @@ base = declarative_base()
 class NormalStats(base):
     __tablename__ = "normal_stats"
 
-    account_id_with_season = Column(String, primary_key=True)
-    account_id = Column(String)
+    account_id_with_season = Column(String(92), primary_key=True)
+    account_id = Column(String(41))
     type = Column(Enum(StatsPlayType))
     fpp = Column(Boolean)
-    season = Column(String)
+    season = Column(String(50))
     update_time = Column(DateTime)
     deals = Column(Float, default=0.0)
     deaths = Column(Integer, default=0)

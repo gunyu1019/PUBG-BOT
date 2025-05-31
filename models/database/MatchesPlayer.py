@@ -10,8 +10,8 @@ base = declarative_base()
 class MatchesPlayer(base):
     __tablename__ = "matches_player"
 
-    account_id_with_match_id = Column(String, primary_key=True)
-    account_id = Column(String)
-    match_id = Column(String)
+    account_id_with_match_id = Column(String(80), primary_key=True)
+    account_id = Column(String(42))
+    match_id = Column(String(62))
     match_index = Column(Integer)
     last_update = Column(DateTime)

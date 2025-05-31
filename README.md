@@ -12,7 +12,7 @@
         <img src="https://www.codefactor.io/repository/github/gunyu1019/pubg-bot/badge/main" alt="CodeFactor" >
     </a>
 <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT.svg?type=shield"/></a>
-    <img src="https://img.shields.io/badge/release_version-3.0.1-0080aa?style=flat" alt="Release" >
+    <img src="https://img.shields.io/badge/release_version-3.1.0-0080aa?style=flat" alt="Release" >
 </p>
 ㅈ
 # Introduce
@@ -53,7 +53,7 @@
             <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Development)</td>
         </tr>
         <tr>
-            <td>Ubuntul</td>
+            <td>Ubuntu</td>
             <td>Ubuntu 20.04.6 LTS</td>
             <td><g-emoji class="g-emoji" alias="heavy_check_mark" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/2714.png">✔️</g-emoji> (Production)</td>
         </tr>
