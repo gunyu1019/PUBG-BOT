@@ -58,7 +58,7 @@ multidict==6.0.5
     #   yarl
 pillow==10.0.1
     # via -r requirements.in
-pymysql==1.1.0
+pymysql==1.1.1
     # via
     #   -r requirements.in
     #   aiomysql
