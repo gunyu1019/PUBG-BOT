@@ -14,7 +14,7 @@
 <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgunyu1019%2FPUBG-BOT.svg?type=shield"/></a>
     <img src="https://img.shields.io/badge/release_version-3.1.0-0080aa?style=flat" alt="Release" >
 </p>
-ㅈ
+
 # Introduce
 
 한국어 기반의 배틀그라운드 전적을 알려주는 디스코드 봇입니다. 사용자의 전적과 매치 로그를 확인할 수 있습니다.
