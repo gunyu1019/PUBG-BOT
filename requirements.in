@@ -9,7 +9,7 @@ Discord-Extension-Interaction==0.6.2
 discord.py==2.3.2
 frozenlist==1.4.1
 greenlet==3.0.3
-idna==3.6
+idna==3.7
 multidict==6.0.5
 Pillow==10.0.1
 PyMySQL==1.1.0
